@@ -8,14 +8,8 @@ using System.Threading.Tasks;
 
 namespace XylarJavaLauncher;
 
-/// <summary>
-/// Advanced LIQUID GLASS effects for Avalonia UI
-/// Authentic glassmorphism with multi-layer gradients, breathing animations,
-/// reflection effects, and fluid transitions
-/// </summary>
 public static class LiquidGlassEffects
 {
-    /// <summary>Primary colors for glass effects - monochrome palette</summary>
     public static class PrimaryColors
     {
         public const string Highlight = "#F2EFE9";
@@ -28,11 +22,9 @@ public static class LiquidGlassEffects
         public const string NavyBlack = "#121214";
     }
 
-    /// <summary>Apply complete liquid glass effect to a Border with gradient and border</summary>
     public static void ApplyLiquidGlassStyle(Border border, bool withAnimation = true)
         => ApplyLiquidGlassStyle(border, new CornerRadius(28), withAnimation);
 
-    /// <summary>Vertical sidebar navbar: softer radius, stronger glass read.</summary>
     public static void ApplySidebarLiquidGlass(Border border, bool withAnimation = true)
         => ApplyLiquidGlassStyle(border, new CornerRadius(18), withAnimation);
 
@@ -76,7 +68,6 @@ public static class LiquidGlassEffects
             AnimateBorderBreathe(border);
     }
 
-    /// <summary>Create shimmer overlay effect that simulates light reflection on glass</summary>
     public static Border CreateShimmerOverlay(double width = 200, double height = 50)
     {
         var shimmer = new Border
@@ -100,7 +91,6 @@ public static class LiquidGlassEffects
         return shimmer;
     }
 
-    /// <summary>Animate border with breathing effect - cycles through color palette every 2 seconds</summary>
     private static async void AnimateBorderBreathe(Border border)
     {
         if (border == null) return;
@@ -146,7 +136,6 @@ public static class LiquidGlassEffects
         }
     }
 
-    /// <summary>Create glow shadow effect around an element</summary>
     public static BoxShadow CreateGlowShadow(string color, double spread = 20)
     {
         var colorValue = Color.Parse(color);
@@ -160,7 +149,6 @@ public static class LiquidGlassEffects
         };
     }
 
-    /// <summary>Apply glass text style to a TextBlock</summary>
     public static void ApplyGlassTextStyle(TextBlock textBlock, bool isBold = false)
     {
         if (textBlock == null) return;
@@ -170,7 +158,77 @@ public static class LiquidGlassEffects
         textBlock.FontWeight = isBold ? FontWeight.Bold : FontWeight.SemiBold;
     }
 
-    /// <summary>Create a button with liquid glass effect</summary>
+    public static void ApplyExtremeSidebarLiquidGlass(Border border)
+    {
+        if (border == null) return;
+
+        var backgroundBrush = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+            {
+                new GradientStop { Color = Color.Parse("#C2FFFFFF"), Offset = 0.0 },
+                new GradientStop { Color = Color.Parse("#080808"), Offset = 0.20 },
+                new GradientStop { Color = Color.Parse("#121212"), Offset = 0.50 },
+                new GradientStop { Color = Color.Parse("#0A0A0A"), Offset = 0.80 },
+                new GradientStop { Color = Color.Parse("#D9FFFFFF"), Offset = 1.0 }
+            }
+        };
+
+        var borderBrush = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+            {
+                new GradientStop { Color = Color.Parse("#FFFFFF"), Offset = 0.0 },
+                new GradientStop { Color = Color.Parse("#A0A0A0"), Offset = 0.25 },
+                new GradientStop { Color = Color.Parse("#404040"), Offset = 0.50 },
+                new GradientStop { Color = Color.Parse("#B0B0B0"), Offset = 0.75 },
+                new GradientStop { Color = Color.Parse("#FFFFFF"), Offset = 1.0 }
+            }
+        };
+
+        border.Background = backgroundBrush;
+        border.BorderBrush = borderBrush;
+        border.BorderThickness = new Thickness(2.5);
+        border.CornerRadius = new CornerRadius(32);
+        border.Opacity = 0.76;
+
+        AnimateExtremeBorder(border);
+    }
+
+    private static async void AnimateExtremeBorder(Border border)
+    {
+        if (border == null) return;
+        try
+        {
+            var colors = new[] { "#FFFFFF", "#E0E0E0", "#C0C0C0", "#E0E0E0", "#FFFFFF" };
+            var index = 0;
+            while (true)
+            {
+                await Task.Delay(2000);
+                var brush = new LinearGradientBrush
+                {
+                    StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                    EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+                    GradientStops = new GradientStops
+                    {
+                        new GradientStop { Color = Color.Parse(colors[index % colors.Length]), Offset = 0.0 },
+                        new GradientStop { Color = Color.Parse("#808080"), Offset = 0.25 },
+                        new GradientStop { Color = Color.Parse("#404040"), Offset = 0.50 },
+                        new GradientStop { Color = Color.Parse("#A0A0A0"), Offset = 0.75 },
+                        new GradientStop { Color = Color.Parse(colors[(index + 1) % colors.Length]), Offset = 1.0 }
+                    }
+                };
+                border.BorderBrush = brush;
+                index++;
+            }
+        }
+        catch { }
+    }
+
     public static Button CreateLiquidGlassButton(string content, bool isPrimary = true)
     {
         var button = new Button

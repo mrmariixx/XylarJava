@@ -9,8 +9,10 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -27,56 +29,91 @@ namespace XylarJavaLauncher;
 
 public partial class MainWindow : Window
 {
+    private const string DefaultOfflineUsername = "OfflineUser";
+    private const string AccountModeOffline = "Offline";
+    private const string AccountModeMicrosoft = "Microsoft";
     private readonly MinecraftLauncher _launcher = null!;
     private readonly MinecraftPath _minecraftPath = null!;
     private readonly string _skinsFolder = string.Empty;
     private readonly string _skinSettingsFile = string.Empty;
     private readonly string _instancesFolder = string.Empty;
+    private readonly string _profileSettingsFile = string.Empty;
     private readonly HttpClient _httpClient = new();
     private CancellationTokenSource? _modpackLoadCts;
     private string _versionFilter = "Release";
     private List<ModpackItem> _modpacks = new();
     private readonly ObservableCollection<ModpackItem> _displayedModpacks = new();
+    private readonly ContentService? _contentService;
+    private readonly ObservableCollection<ContentItem> _contentItems = new();
+    private ContentFilter _contentFilter = new()
+    {
+        ContentType = ContentType.Mod,
+        SelectedSources = new() { ContentSource.Modrinth }
+    };
+    private CancellationTokenSource? _contentLoadCts;
+    private CancellationTokenSource? _contentThumbCts;
+    private CancellationTokenSource? _contentSearchDebounceCts;
+    private readonly Dictionary<string, Bitmap> _contentThumbnailCache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly SemaphoreSlim _thumbnailConcurrency = new(4, 4);
+    private int _contentPage = 1;
+    private const int ContentPageSize = 60;
+    private bool _contentHasMore;
     private readonly ObservableCollection<PlayProfile> _playProfiles = new();
     private PlayProfile _activePlayProfile = PlayProfile.Standard;
     private bool _suppressProfileReaction;
     private bool _isInitialized = false;
+    private readonly TaskCompletionSource<bool> _welcomeCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private ContentItem? _currentDetailsItem;
+    private List<ModrinthAPI.ModVersion> _currentInstallVersions = new();
+    private string _currentInstallTargetPath = string.Empty;
+    private string _currentInstallTargetLabel = "Standard profile (.minecraft)";
+    private bool _isRefreshingInstallSheet;
+    private LauncherProfile _launcherProfile = new();
 
 public MainWindow()
 {
     InitializeComponent();
 
+    _contentService = new ContentService(_httpClient);
+
     try
     {
+        if (!CheckJava21Oracle())
+        {
+            ShowJava21Popup();
+            return;
+        }
+
         _minecraftPath = new MinecraftPath();
         _launcher = new MinecraftLauncher(_minecraftPath);
 
         _skinsFolder = Path.Combine(AppContext.BaseDirectory, "skins");
         _skinSettingsFile = Path.Combine(_skinsFolder, "active_skin.json");
         _instancesFolder = Path.Combine(AppContext.BaseDirectory, "instances");
+        _profileSettingsFile = Path.Combine(AppContext.BaseDirectory, "launcher_profile.json");
 
         Directory.CreateDirectory(_skinsFolder);
         Directory.CreateDirectory(_instancesFolder);
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("XylarLauncher/0.2 (+https://modrinth.com)");
 
-        ModpackList.ItemsSource = _displayedModpacks;
-        ModpackList.SelectionChanged += ModpackList_SelectionChanged;
-        UsernameBox.Text ??= "Player";
+        UsernameBox.Text ??= DefaultOfflineUsername;
 
         if (ProfileTargetCombo != null)
             ProfileTargetCombo.ItemsSource = _playProfiles;
 
         _ = LoadVersionsAsync();
-        _ = LoadModpacks();
+        // Defer heavy catalog sync so Home opens faster.
 
         NavMain.IsChecked = true;
         MainSection.IsVisible = true;
         SkinSection.IsVisible = false;
+        OptionsSection.IsVisible = false;
         ModSection.IsVisible = false;
         CreditsSection.IsVisible = false;
         SetHeader("Home", "Profile, version, loader — then launch");
 
         _isInitialized = true;
+        SetHeader("Home", "Pick a version, choose a loader, and launch");
         
         // Register event handlers AFTER initialization
         LoaderCombo.SelectionChanged += LoaderCombo_SelectionChanged;
@@ -85,12 +122,16 @@ public MainWindow()
             ProfileTargetCombo.SelectionChanged += ProfileTargetCombo_SelectionChanged;
         UsernameBox.TextChanged += UsernameBox_TextChanged;
 
-        // Initialize Liquid Glass Effect on Navbar
-        ApplyLiquidGlassEffect();
+        ApplyExtremeLiquidGlassEffect();
         
         RefreshPlayProfiles();
+        UpdateContentBrowserCopy();
 
-        Opened += (_, _) => LoadEmbeddedBrandAssets();
+        Opened += async (_, _) =>
+        {
+            LoadEmbeddedBrandAssets();
+            await RunWelcomeIfNeededAsync();
+        };
 
         UpdateStatus("Ready to play.");
     }
@@ -100,10 +141,10 @@ public MainWindow()
     }
 }
 
-    private void ApplyLiquidGlassEffect()
+    private void ApplyExtremeLiquidGlassEffect()
     {
         if (NavGlassHost != null)
-            LiquidGlassEffects.ApplySidebarLiquidGlass(NavGlassHost);
+            LiquidGlassEffects.ApplyExtremeSidebarLiquidGlass(NavGlassHost);
     }
 
     private void UpdateStatus(string message)
@@ -116,17 +157,31 @@ public MainWindow()
     {
         if (!_isInitialized || VersionCombo == null || LoaderCombo == null || UsernameBox == null) return;
 
-        var player = string.IsNullOrWhiteSpace(UsernameBox.Text) ? "Player" : UsernameBox.Text.Trim();
+        var player = string.IsNullOrWhiteSpace(UsernameBox.Text) ? DefaultOfflineUsername : UsernameBox.Text.Trim();
         var version = VersionCombo.SelectedItem?.ToString();
         var versionText = string.IsNullOrWhiteSpace(version) ? "not selected" : version;
         var loader = GetSelectedLoader();
+        _launcherProfile.Username = player;
 
         if (HeroVersionText != null) HeroVersionText.Text = $"Version: {versionText}";
         if (HeroLoaderText != null) HeroLoaderText.Text = $"Loader: {loader}";
         if (CurrentVersionLabel != null) CurrentVersionLabel.Text = $"Version: {versionText}";
         if (CurrentLoaderLabel != null) CurrentLoaderLabel.Text = $"Loader: {loader}";
-        if (CurrentPlayerLabel != null) CurrentPlayerLabel.Text = $"Player: {player}";
+        if (CurrentPlayerLabel != null) CurrentPlayerLabel.Text = $"Launch name: {player}";
         if (SelectionSummaryText != null) SelectionSummaryText.Text = $"{loader} profile • {versionText} • {player}";
+        if (SettingsLaunchNameText != null) SettingsLaunchNameText.Text = $"Launch name: {player}";
+        if (SelectionSummaryText != null) SelectionSummaryText.Text = $"{loader} profile - {versionText} - {player}";
+        if (SelectionSummaryLabel != null)
+            SelectionSummaryLabel.Text = string.Equals(_launcherProfile.AccountMode, AccountModeMicrosoft, StringComparison.OrdinalIgnoreCase)
+                ? $"Account mode: Microsoft ({GetMicrosoftAccountLabel()})."
+                : "Account mode: Offline-ready local profile.";
+    }
+
+    private string GetMicrosoftAccountLabel()
+    {
+        return string.IsNullOrWhiteSpace(_launcherProfile.MicrosoftDisplayName)
+            ? "not connected"
+            : _launcherProfile.MicrosoftDisplayName!;
     }
 
     private string GetSelectedLoader()
@@ -139,9 +194,14 @@ public MainWindow()
     {
         if (!_isInitialized || LoaderWarning == null) return;
         var loader = GetSelectedLoader();
-        LoaderWarning.Text = string.Equals(loader, "Forge", StringComparison.OrdinalIgnoreCase)
-            ? "Forge: CmlLib installs the matching Forge profile for your Minecraft version."
-            : "Fabric: the official Fabric installer creates a fabric-loader profile under versions.";
+        LoaderWarning.Text = loader switch
+        {
+            "Forge" => "Forge: installs the matching Forge profile for the selected Minecraft version.",
+            "NeoForge" => "NeoForge: installs the matching NeoForge profile for the selected Minecraft version.",
+            "Quilt" => "Quilt: creates a quilt-loader profile under versions.",
+            "Vanilla" => "Vanilla: launches the base Minecraft version without a mod loader.",
+            _ => "Fabric: creates a fabric-loader profile under versions."
+        };
         UpdateSelectionSummary();
     }
 
@@ -207,7 +267,7 @@ public MainWindow()
         {
             var username = UsernameBox.Text?.Trim();
             if (string.IsNullOrWhiteSpace(username))
-                username = "Player";
+                username = DefaultOfflineUsername;
 
             var mcVersion = VersionCombo.SelectedItem?.ToString();
             if (string.IsNullOrWhiteSpace(mcVersion))
@@ -233,75 +293,174 @@ public MainWindow()
             UpdateStatus($"Preparing {loader}…");
             DownloadProgress.Value = 0;
 
-            var launchVersionId = mcVersion;
-            var forgeOpts = new ForgeInstallOptions { SkipIfAlreadyInstalled = true };
-            var neoOpts = new NeoForgeInstallOptions { SkipIfAlreadyInstalled = true };
+            var launchAttempt = 0;
+            const int maxAttempts = 3;
+            Exception? lastException = null;
 
-            if (!string.Equals(loader, "Vanilla", StringComparison.OrdinalIgnoreCase))
+            while (launchAttempt < maxAttempts)
             {
-                if (string.Equals(loader, "Forge", StringComparison.OrdinalIgnoreCase))
+                try
                 {
-                    var forgeInst = new ForgeInstaller(_launcher, _httpClient);
-                    launchVersionId = string.IsNullOrWhiteSpace(pinnedLoaderVersion)
-                        ? await forgeInst.Install(mcVersion, forgeOpts)
-                        : await forgeInst.Install(mcVersion, pinnedLoaderVersion, forgeOpts);
-                    if (LoaderWarning != null) LoaderWarning.Text = "Forge ready.";
-                }
-                else if (string.Equals(loader, "NeoForge", StringComparison.OrdinalIgnoreCase))
-                {
-                    var neoInst = new NeoForgeInstaller(_launcher);
-                    launchVersionId = string.IsNullOrWhiteSpace(pinnedLoaderVersion)
-                        ? await neoInst.Install(mcVersion, neoOpts)
-                        : await neoInst.Install(mcVersion, pinnedLoaderVersion, neoOpts);
-                    if (LoaderWarning != null) LoaderWarning.Text = "NeoForge ready.";
-                }
-                else if (string.Equals(loader, "Fabric", StringComparison.OrdinalIgnoreCase) ||
-                         string.Equals(loader, "Quilt", StringComparison.OrdinalIgnoreCase))
-                {
-                    var ok = await RunFabricQuiltInstallerAsync(mcVersion, loader, pinnedLoaderVersion);
-                    if (!ok)
+                    launchAttempt++;
+                    if (launchAttempt > 1)
+                        UpdateStatus($"Attempt {launchAttempt}/{maxAttempts}: Auto-recovery…");
+
+                    var launchVersionId = mcVersion;
+                    var forgeOpts = new ForgeInstallOptions { SkipIfAlreadyInstalled = true };
+                    var neoOpts = new NeoForgeInstallOptions { SkipIfAlreadyInstalled = true };
+
+                    if (!string.Equals(loader, "Vanilla", StringComparison.OrdinalIgnoreCase))
                     {
-                        UpdateStatus($"{loader} install failed — check Java in PATH and Loader message below.");
-                        return;
+                        if (string.Equals(loader, "Forge", StringComparison.OrdinalIgnoreCase))
+                        {
+                            UpdateStatus($"Installing Forge {mcVersion}…");
+                            var forgeInst = new ForgeInstaller(_launcher, _httpClient);
+                            try
+                            {
+                                launchVersionId = string.IsNullOrWhiteSpace(pinnedLoaderVersion)
+                                    ? await forgeInst.Install(mcVersion, forgeOpts)
+                                    : await forgeInst.Install(mcVersion, pinnedLoaderVersion, forgeOpts);
+                                if (LoaderWarning != null) LoaderWarning.Text = $"Forge {mcVersion} ready.";
+                            }
+                            catch (Exception forgeEx)
+                            {
+                                if (launchAttempt < maxAttempts)
+                                {
+                                    await CleanupForgeArtifacts(mcVersion);
+                                    UpdateStatus($"Forge error detected; cleaning cache and retrying…");
+                                    await Task.Delay(1000);
+                                    throw new Exception($"Forge install requires retry: {forgeEx.Message}", forgeEx);
+                                }
+                                throw;
+                            }
+                        }
+                        else if (string.Equals(loader, "NeoForge", StringComparison.OrdinalIgnoreCase))
+                        {
+                            UpdateStatus($"Installing NeoForge {mcVersion}…");
+                            var neoInst = new NeoForgeInstaller(_launcher);
+                            try
+                            {
+                                launchVersionId = string.IsNullOrWhiteSpace(pinnedLoaderVersion)
+                                    ? await neoInst.Install(mcVersion, neoOpts)
+                                    : await neoInst.Install(mcVersion, pinnedLoaderVersion, neoOpts);
+                                if (LoaderWarning != null) LoaderWarning.Text = $"NeoForge {mcVersion} ready.";
+                            }
+                            catch (Exception neoEx)
+                            {
+                                if (launchAttempt < maxAttempts)
+                                {
+                                    await CleanupNeoForgeArtifacts(mcVersion);
+                                    UpdateStatus($"NeoForge error detected; cleaning cache and retrying…");
+                                    await Task.Delay(1000);
+                                    throw new Exception($"NeoForge install requires retry: {neoEx.Message}", neoEx);
+                                }
+                                throw;
+                            }
+                        }
+                        else if (string.Equals(loader, "Fabric", StringComparison.OrdinalIgnoreCase) ||
+                                 string.Equals(loader, "Quilt", StringComparison.OrdinalIgnoreCase))
+                        {
+                            UpdateStatus($"Installing {loader} {mcVersion}…");
+                            var ok = await RunFabricQuiltInstallerAsync(mcVersion, loader, pinnedLoaderVersion, launchAttempt, maxAttempts);
+                            if (!ok)
+                            {
+                                if (launchAttempt < maxAttempts)
+                                {
+                                    await CleanupFabricQuiltArtifacts(mcVersion, loader);
+                                    UpdateStatus($"{loader} setup failed; cleaning artifacts and retrying…");
+                                    await Task.Delay(1500);
+                                    throw new Exception($"{loader} install requires retry.");
+                                }
+                                UpdateStatus($"{loader} install failed after {maxAttempts} attempts. Check Java PATH and system resources.");
+                                return;
+                            }
+
+                            launchVersionId = DiscoverFabricQuiltVersionId(loader, mcVersion);
+                            if (string.IsNullOrWhiteSpace(launchVersionId))
+                            {
+                                if (launchAttempt < maxAttempts)
+                                {
+                                    UpdateStatus($"{loader} profile not found; retrying discovery…");
+                                    await Task.Delay(500);
+                                    throw new Exception($"{loader} profile discovery requires retry.");
+                                }
+                                UpdateStatus($"{loader} installed but profile not found. Restart launcher and try again.");
+                                return;
+                            }
+
+                            if (LoaderWarning != null) LoaderWarning.Text = $"{loader} profile: {launchVersionId}";
+                        }
+                        else
+                        {
+                            UpdateStatus($"Loader \"{loader}\" is not supported.");
+                            return;
+                        }
                     }
 
-                    launchVersionId = DiscoverFabricQuiltVersionId(loader, mcVersion);
-                    if (string.IsNullOrWhiteSpace(launchVersionId))
-                    {
-                        UpdateStatus(
-                            $"{loader} installed but no matching version folder was found under versions\\. Try launching again after install finishes.");
-                        return;
-                    }
+                    UpdateStatus("Verifying game files…");
+                    await _launcher.InstallAsync(launchVersionId);
 
-                    if (LoaderWarning != null) LoaderWarning.Text = $"{loader} profile: {launchVersionId}";
-                }
-                else
-                {
-                    UpdateStatus($"Loader \"{loader}\" is not supported for launch yet.");
+                    var option = await CreateLaunchOptionAsync(username, gameDir);
+                    UpdateStatus("Launching game…");
+                    var process = await _launcher.BuildProcessAsync(launchVersionId, option);
+                    process.Start();
+
+                    UpdateStatus("Game launched successfully.");
+                    DownloadProgress.Value = 100;
                     return;
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                    if (launchAttempt < maxAttempts)
+                    {
+                        var msg = ex.Message.ToLower();
+                        if (msg.Contains("java") || msg.Contains("jvm"))
+                        {
+                            UpdateStatus($"Java issue detected; verifying environment (attempt {launchAttempt}/{maxAttempts})…");
+                            await ValidateJavaEnvironment();
+                        }
+                        else if (msg.Contains("version") || msg.Contains("manifest"))
+                        {
+                            UpdateStatus($"Version issue detected; clearing cache (attempt {launchAttempt}/{maxAttempts})…");
+                            await ClearVersionCache(mcVersion);
+                        }
+                        else if (msg.Contains("network") || msg.Contains("http"))
+                        {
+                            UpdateStatus($"Network issue detected; waiting before retry (attempt {launchAttempt}/{maxAttempts})…");
+                            await Task.Delay(3000);
+                        }
+                        else
+                        {
+                            UpdateStatus($"Launch issue detected; recovering (attempt {launchAttempt}/{maxAttempts})…");
+                            await CleanupLaunchEnvironment();
+                        }
+                        await Task.Delay(1000);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
 
-            UpdateStatus("Installing / verifying game files…");
-            await _launcher.InstallAsync(launchVersionId);
-
-            var option = CreateLaunchOption(username, gameDir);
-            UpdateStatus("Launching…");
-            var process = await _launcher.BuildProcessAsync(launchVersionId, option);
-            process.Start();
-
-            UpdateStatus("Game launched.");
-            DownloadProgress.Value = 100;
+            if (lastException != null)
+            {
+                var errorMsg = lastException.Message;
+                if (errorMsg.Length > 120)
+                    errorMsg = errorMsg.Substring(0, 120) + "…";
+                UpdateStatus($"Launch failed after {maxAttempts} attempts: {errorMsg}");
+            }
         }
         catch (Exception ex)
         {
-            UpdateStatus($"Launch failed: {ex.Message}");
+            UpdateStatus($"Fatal error: {ex.Message}");
         }
     }
 
-    private MLaunchOption CreateLaunchOption(string username, string? gameDirectory)
+    private async Task<MLaunchOption> CreateLaunchOptionAsync(string username, string? gameDirectory)
     {
-        var session = MSession.CreateOfflineSession(username);
+        var session = await ResolveLaunchSessionAsync(username);
         var option = new MLaunchOption { Session = session };
         if (!string.IsNullOrWhiteSpace(gameDirectory))
         {
@@ -319,6 +478,31 @@ public MainWindow()
         //     _skinsFolder,
         //     option);
         return option;
+    }
+
+    private async Task<MSession> ResolveLaunchSessionAsync(string offlineUsername)
+    {
+        if (!string.Equals(_launcherProfile.AccountMode, AccountModeMicrosoft, StringComparison.OrdinalIgnoreCase))
+            return MSession.CreateOfflineSession(offlineUsername);
+
+        UpdateStatus("Refreshing Microsoft session...");
+
+        var restored = await MicrosoftAuth.RestoreSessionAsync();
+        if (restored.Success && restored.Session != null)
+        {
+            PersistMicrosoftIdentity(restored);
+            return restored.Session;
+        }
+
+        UpdateStatus("Microsoft session expired. Sign in again...");
+        var interactive = await MicrosoftAuth.BeginSignInAsync();
+        if (interactive.Success && interactive.Session != null)
+        {
+            PersistMicrosoftIdentity(interactive);
+            return interactive.Session;
+        }
+
+        throw new InvalidOperationException(interactive.ErrorMessage ?? restored.ErrorMessage ?? "Microsoft sign-in is required before launch.");
     }
 
     private string? DiscoverFabricQuiltVersionId(string loader, string mcVersion)
@@ -347,7 +531,7 @@ public MainWindow()
         }
     }
 
-    private async Task<bool> RunFabricQuiltInstallerAsync(string version, string loader, string? loaderVersion)
+    private async Task<bool> RunFabricQuiltInstallerAsync(string version, string loader, string? loaderVersion, int attempt = 1, int maxAttempts = 3)
     {
         try
         {
@@ -361,27 +545,56 @@ public MainWindow()
 
             if (string.IsNullOrWhiteSpace(loaderUrl))
             {
-                if (LoaderWarning != null) LoaderWarning.Text = $"{loader} is not available for this version yet.";
+                UpdateStatus($"{loader} is not available for version {version}.");
                 return false;
             }
 
-            var installerPath = Path.Combine(AppContext.BaseDirectory, $"{loaderKey}-installer.jar");
+            var installerPath = Path.Combine(AppContext.BaseDirectory, $"{loaderKey}-installer-{Guid.NewGuid():N}.jar");
+            var maxRetries = 3;
+            var downloadRetry = 0;
 
-            UpdateStatus($"Downloading {loader}…");
-            using (var response = await _httpClient.GetAsync(loaderUrl))
+            while (downloadRetry < maxRetries)
             {
-                if (!response.IsSuccessStatusCode)
+                try
                 {
-                    if (LoaderWarning != null) LoaderWarning.Text = $"{loader} download failed: {response.StatusCode}";
+                    UpdateStatus($"Downloading {loader} installer…");
+                    using var response = await _httpClient.GetAsync(loaderUrl, HttpCompletionOption.ResponseHeadersRead);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        if (downloadRetry < maxRetries - 1)
+                        {
+                            downloadRetry++;
+                            await Task.Delay(2000);
+                            continue;
+                        }
+                        UpdateStatus($"{loader} download failed: HTTP {response.StatusCode}");
+                        return false;
+                    }
+
+                    await using var contentStream = await response.Content.ReadAsStreamAsync();
+                    await using var fileStream = File.Create(installerPath);
+                    await contentStream.CopyToAsync(fileStream);
+                    break;
+                }
+                catch when (downloadRetry < maxRetries - 1)
+                {
+                    downloadRetry++;
+                    await Task.Delay(2000);
+                }
+                catch (Exception dlEx)
+                {
+                    UpdateStatus($"{loader} download error: {dlEx.Message}");
                     return false;
                 }
-
-                await using var contentStream = await response.Content.ReadAsStreamAsync();
-                await using var fileStream = File.Create(installerPath);
-                await contentStream.CopyToAsync(fileStream);
             }
 
-            UpdateStatus($"Installing {loader}…");
+            if (!File.Exists(installerPath) || new FileInfo(installerPath).Length < 1024)
+            {
+                UpdateStatus($"{loader} installer download incomplete.");
+                return false;
+            }
+
+            UpdateStatus($"Installing {loader} {version}…");
 
             var loaderArg = string.IsNullOrWhiteSpace(loaderVersion) ? "" : $" -loader {loaderVersion}";
             var args = $"-jar \"{installerPath}\" client -mcversion {version} -downloadMinecraft{loaderArg}";
@@ -399,33 +612,192 @@ public MainWindow()
 
             using var proc = Process.Start(processInfo);
             if (proc == null)
-                return false;
-
-            await Task.Run(() => proc.WaitForExit());
-            var ok = proc.ExitCode == 0;
-            if (LoaderWarning != null)
             {
-                LoaderWarning.Text = ok
-                    ? $"{loader} installed successfully."
-                    : $"{loader} installer exit {proc.ExitCode}: {proc.StandardError.ReadToEnd()}";
+                UpdateStatus($"Failed to start {loader} installer.");
+                return false;
+            }
+
+            var completed = proc.WaitForExit(TimeSpan.FromMinutes(10));
+            if (!completed)
+            {
+                try { proc.Kill(); } catch { }
+                UpdateStatus($"{loader} installer timed out (>10 min).");
+                return false;
+            }
+
+            var ok = proc.ExitCode == 0;
+            if (!ok)
+            {
+                var errorOutput = proc.StandardError.ReadToEnd();
+                if (errorOutput.Length > 150)
+                    errorOutput = errorOutput.Substring(0, 150) + "…";
+                UpdateStatus($"{loader} exit code {proc.ExitCode}: {errorOutput}");
+            }
+            else
+            {
+                UpdateStatus($"{loader} {version} installed.");
             }
 
             try
             {
-                File.Delete(installerPath);
+                if (File.Exists(installerPath))
+                    File.Delete(installerPath);
             }
-            catch
-            {
-                // ignore
-            }
+            catch { }
 
             return ok;
         }
         catch (Exception ex)
         {
-            if (LoaderWarning != null) LoaderWarning.Text = $"{loader} install error: {ex.Message}";
+            var msg = ex.Message;
+            if (msg.Length > 100)
+                msg = msg.Substring(0, 100) + "…";
+            UpdateStatus($"{loader} error: {msg}");
             return false;
         }
+    }
+
+    private async Task ValidateJavaEnvironment()
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "java",
+                    Arguments = "-version",
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                };
+                using var proc = Process.Start(psi);
+                if (proc != null && !proc.WaitForExit(5000))
+                {
+                    try { proc.Kill(); } catch { }
+                }
+            }
+            catch { }
+        });
+    }
+
+    private async Task ClearVersionCache(string version)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                var versionDir = Path.Combine(_minecraftPath.BasePath, "versions", version);
+                if (Directory.Exists(versionDir))
+                {
+                    var jsonFile = Path.Combine(versionDir, $"{version}.json");
+                    if (File.Exists(jsonFile))
+                        File.Delete(jsonFile);
+                }
+            }
+            catch { }
+        });
+    }
+
+    private async Task CleanupForgeArtifacts(string version)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                var forgeVersions = Path.Combine(_minecraftPath.BasePath, "versions");
+                if (Directory.Exists(forgeVersions))
+                {
+                    foreach (var dir in Directory.GetDirectories(forgeVersions))
+                    {
+                        var name = Path.GetFileName(dir);
+                        if (name.Contains("forge", StringComparison.OrdinalIgnoreCase) && name.Contains(version))
+                        {
+                            try { Directory.Delete(dir, true); } catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+        });
+    }
+
+    private async Task CleanupNeoForgeArtifacts(string version)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                var neoVersions = Path.Combine(_minecraftPath.BasePath, "versions");
+                if (Directory.Exists(neoVersions))
+                {
+                    foreach (var dir in Directory.GetDirectories(neoVersions))
+                    {
+                        var name = Path.GetFileName(dir);
+                        if (name.Contains("neoforge", StringComparison.OrdinalIgnoreCase) && name.Contains(version))
+                        {
+                            try { Directory.Delete(dir, true); } catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+        });
+    }
+
+    private async Task CleanupFabricQuiltArtifacts(string version, string loader)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                var versionsDir = Path.Combine(_minecraftPath.BasePath, "versions");
+                if (Directory.Exists(versionsDir))
+                {
+                    var prefix = loader.Equals("Fabric", StringComparison.OrdinalIgnoreCase) ? "fabric-loader-" : "quilt-loader-";
+                    foreach (var dir in Directory.GetDirectories(versionsDir))
+                    {
+                        var name = Path.GetFileName(dir);
+                        if (name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && name.Contains(version))
+                        {
+                            try { Directory.Delete(dir, true); } catch { }
+                        }
+                    }
+                }
+                var libDir = Path.Combine(_minecraftPath.BasePath, "libraries");
+                if (Directory.Exists(libDir))
+                {
+                    try { Directory.Delete(libDir, true); } catch { }
+                }
+            }
+            catch { }
+        });
+    }
+
+    private async Task CleanupLaunchEnvironment()
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                var nativesDir = Path.Combine(_minecraftPath.BasePath, "versions");
+                if (Directory.Exists(nativesDir))
+                {
+                    foreach (var dir in Directory.GetDirectories(nativesDir))
+                    {
+                        try
+                        {
+                            var nativesSubdir = Path.Combine(dir, "natives");
+                            if (Directory.Exists(nativesSubdir))
+                                Directory.Delete(nativesSubdir, true);
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        });
     }
 
     private async Task<string?> GetFabricInstallerUrlAsync(string version)
@@ -609,9 +981,14 @@ public MainWindow()
     {
         if (string.IsNullOrWhiteSpace(loader))
             return "Fabric";
-        if (loader.Equals("NeoForge", StringComparison.OrdinalIgnoreCase) ||
-            loader.Equals("Forge", StringComparison.OrdinalIgnoreCase))
+        if (loader.Equals("NeoForge", StringComparison.OrdinalIgnoreCase))
+            return "NeoForge";
+        if (loader.Equals("Forge", StringComparison.OrdinalIgnoreCase))
             return "Forge";
+        if (loader.Equals("Quilt", StringComparison.OrdinalIgnoreCase))
+            return "Quilt";
+        if (loader.Equals("Vanilla", StringComparison.OrdinalIgnoreCase))
+            return "Vanilla";
         return "Fabric";
     }
 
@@ -633,8 +1010,6 @@ public MainWindow()
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 _displayedModpacks.Clear();
-                if (ModpackLoadProgressText != null)
-                    ModpackLoadProgressText.Text = "Starting catalog sync…";
             });
 
             const int limit = 100;
@@ -693,8 +1068,6 @@ public MainWindow()
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     AppendModpacksToView(batch);
-                    if (ModpackLoadProgressText != null)
-                        ModpackLoadProgressText.Text = $"Loaded {loaded:N0} modpacks (Modrinth reports {totalText} total).";
                 });
 
                 if (totalHits.HasValue && offset >= totalHits.Value)
@@ -710,8 +1083,6 @@ public MainWindow()
                     RefreshModpackInstallStates();
                     FilterModpacks();
                     UpdateStatus($"Catalog ready — {_modpacks.Count:N0} modpacks.");
-                    if (ModpackLoadProgressText != null)
-                        ModpackLoadProgressText.Text = $"Complete: {_modpacks.Count:N0} modpacks indexed locally.";
                     RefreshPlayProfiles();
                 });
             }
@@ -723,8 +1094,6 @@ public MainWindow()
                 RefreshModpackInstallStates();
                 FilterModpacks();
                 UpdateStatus("Catalog load stopped.");
-                if (ModpackLoadProgressText != null)
-                    ModpackLoadProgressText.Text = $"Stopped at {_modpacks.Count:N0} modpacks.";
             });
         }
         catch (Exception ex)
@@ -735,7 +1104,7 @@ public MainWindow()
 
     private void AppendModpacksToView(IEnumerable<ModpackItem> batch)
     {
-        var term = ModSearchBox?.Text?.Trim().ToLowerInvariant() ?? "";
+        var term = ContentSearchBox?.Text?.Trim().ToLowerInvariant() ?? "";
         if (string.IsNullOrEmpty(term))
         {
             foreach (var item in batch)
@@ -878,23 +1247,6 @@ public MainWindow()
 
     private void ModpackList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (ModpackList.SelectedItem is not ModpackItem pack)
-        {
-            if (ModpackTargetTitle != null) ModpackTargetTitle.Text = "Pick a row";
-            if (ModpackTargetSubtitle != null) ModpackTargetSubtitle.Text = string.Empty;
-            return;
-        }
-
-        if (ModpackTargetTitle != null) ModpackTargetTitle.Text = pack.Title;
-        if (ModpackTargetSubtitle != null)
-            ModpackTargetSubtitle.Text = string.IsNullOrWhiteSpace(pack.Description) ? pack.MetaLine : pack.Description;
-        if (ModpackTargetStatus != null)
-        {
-            var pathNote = pack.ShowOpenFolder && !string.IsNullOrWhiteSpace(pack.InstancePath)
-                ? $"\n{pack.InstancePath}"
-                : string.Empty;
-            ModpackTargetStatus.Text = $"Slug: {pack.Slug} · {pack.MetaLine}{pathNote}";
-        }
     }
 
     private void ModpackToggle_Checked(object? sender, RoutedEventArgs e)
@@ -936,47 +1288,116 @@ public MainWindow()
 
     private void LoadEmbeddedBrandAssets()
     {
-        var asm = Assembly.GetExecutingAssembly();
-        var name = asm.GetName().Name ?? "XylarJavaLauncher";
-
-        try
-        {
-            if (SidebarBrandImage != null)
-                SidebarBrandImage.Source = OpenBitmapAsset(name, "Assets/minecraft.png");
-        }
-        catch { /* optional asset */ }
+        var appDir = AppContext.BaseDirectory;
+        System.IO.File.AppendAllText("debug.log", $"Loading embedded brand assets from: {appDir}\n");
 
         try
         {
             if (AboutLogoXylarInc != null)
-                AboutLogoXylarInc.Source = OpenBitmapAsset(name, "Resources/logos/xylarinc.png");
+            {
+                var path = Path.Combine(appDir, "Resources", "logo", "xylarinc.png");
+                System.IO.File.AppendAllText("debug.log", $"Trying to load xylarinc from: {path}\n");
+                if (File.Exists(path))
+                {
+                    AboutLogoXylarInc.Source = new Bitmap(path);
+                    System.IO.File.AppendAllText("debug.log", "xylarinc.png loaded successfully\n");
+                }
+                else
+                    System.IO.File.AppendAllText("debug.log", $"File not found: {path}\n");
+            }
         }
-        catch { /* optional asset */ }
+        catch (Exception ex) { System.IO.File.AppendAllText("debug.log", $"Error loading xylarinc.png: {ex}\n"); }
 
         try
         {
             if (AboutLogoXylarSupport != null)
-                AboutLogoXylarSupport.Source = OpenBitmapAsset(name, "Resources/logos/xylarsupport.png");
+            {
+                var path = Path.Combine(appDir, "Resources", "logo", "xylarsupport.png");
+                System.IO.File.AppendAllText("debug.log", $"Trying to load xylarsupport from: {path}\n");
+                if (File.Exists(path))
+                {
+                    AboutLogoXylarSupport.Source = new Bitmap(path);
+                    System.IO.File.AppendAllText("debug.log", "xylarsupport.png loaded successfully\n");
+                }
+                else
+                    System.IO.File.AppendAllText("debug.log", $"File not found: {path}\n");
+            }
         }
-        catch { /* optional asset */ }
+        catch (Exception ex) { System.IO.File.AppendAllText("debug.log", $"Error loading xylarsupport.png: {ex}\n"); }
 
         try
         {
-            var uri = new Uri($"avares://{name}/Assets/minecraft.png");
-            using var s = AssetLoader.Open(uri);
-            Icon = new WindowIcon(s);
+            if (SidebarBrandImage != null)
+            {
+                var path = Path.Combine(appDir, "Assets", "minecraft.png");
+                if (File.Exists(path))
+                    SidebarBrandImage.Source = new Bitmap(path);
+            }
         }
-        catch { /* window icon optional */ }
+        catch (Exception ex) { System.IO.File.AppendAllText("debug.log", $"Error loading sidebar logo: {ex}\n"); }
+
+        try
+        {
+            if (ProfileAvatarImage != null)
+            {
+                UpdateProfileAvatar();
+            }
+        }
+        catch (Exception ex) { System.IO.File.AppendAllText("debug.log", $"Error loading profile avatar: {ex}\n"); }
+
+        try
+        {
+            var iconPath = Path.Combine(appDir, "minecraft.ico");
+            if (!File.Exists(iconPath))
+                iconPath = Path.Combine(appDir, "Assets", "minecraft.png");
+            if (File.Exists(iconPath))
+                Icon = new WindowIcon(iconPath);
+        }
+        catch (Exception ex) { System.IO.File.AppendAllText("debug.log", $"Error loading icon: {ex}\n"); }
     }
 
-    private static Bitmap OpenBitmapAsset(string assemblyName, string relativePath)
+    private static Bitmap? OpenBitmapAsset(string assemblyName, string relativePath)
     {
-        var uri = new Uri($"avares://{assemblyName}/{relativePath}");
-        using var input = AssetLoader.Open(uri);
-        using var ms = new MemoryStream();
-        input.CopyTo(ms);
-        ms.Position = 0;
-        return new Bitmap(ms);
+        try
+        {
+            var uri = new Uri($"avares://{assemblyName}/{relativePath}");
+            using var input = AssetLoader.Open(uri);
+            using var ms = new MemoryStream();
+            input.CopyTo(ms);
+            ms.Position = 0;
+            return new Bitmap(ms);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private void UpdateProfileAvatar()
+    {
+        try
+        {
+            if (ProfileAvatarImage == null) return;
+
+            string username = UsernameBox?.Text?.Trim() ?? DefaultOfflineUsername;
+            string skinPath = Path.Combine(_skinsFolder, $"{username}.png");
+
+            if (File.Exists(skinPath))
+            {
+                ProfileAvatarImage.Source = new Bitmap(skinPath);
+            }
+            else
+            {
+                // Fallback to steve.png
+                string stevePath = Path.Combine(AppContext.BaseDirectory, "Assets", "steve.png");
+                if (File.Exists(stevePath))
+                    ProfileAvatarImage.Source = new Bitmap(stevePath);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.IO.File.AppendAllText("debug.log", $"Error updating profile avatar: {ex}\n");
+        }
     }
 
     private void ModSearchBox_KeyUp(object? sender, Avalonia.Input.KeyEventArgs e)
@@ -984,7 +1405,7 @@ public MainWindow()
 
     private void FilterModpacks()
     {
-        var searchTerm = ModSearchBox?.Text?.ToLower() ?? "";
+        var searchTerm = ContentSearchBox?.Text?.ToLower() ?? "";
         var filtered = string.IsNullOrWhiteSpace(searchTerm)
             ? _modpacks
             : _modpacks.Where(m =>
@@ -1003,12 +1424,23 @@ public MainWindow()
     {
         if (sender is not ToggleButton btn) return;
 
+        if (btn == NavSkins && string.Equals(btn.Content?.ToString(), "Settings", StringComparison.Ordinal))
+        {
+            SetHeader("Settings", "Accounts, folders and launcher controls");
+            NavMain.IsChecked = false;
+            NavSkins.IsChecked = true;
+            NavMods.IsChecked = false;
+            NavCredits.IsChecked = false;
+            await AnimateSectionSwitchAsync(OptionsSection);
+            return;
+        }
+
         string content = btn.Content?.ToString() ?? "";
         Border? target = content switch
         {
             "Home"     => MainSection,
             "Skins"    => SkinSection,
-            "Modpacks" => ModSection,
+            "Mods"     => ModSection,
             "About"    => CreditsSection,
             _          => null
         };
@@ -1020,11 +1452,12 @@ public MainWindow()
                 RefreshPlayProfiles();
                 break;
             case "Skins":
-                SetHeader("Offline skins", "Fabric mod: OfflineSkins — setup guide");
+                SetHeader("Settings", "Accounts, folders and launcher controls");
                 break;
-            case "Modpacks":
-                SetHeader("Modpacks", "Full Modrinth catalog");
-                RefreshModpackInstallStates();
+            case "Mods":
+                SetHeader("Mods & Content", "Choose a supported version and install");
+                UpdateContentBrowserCopy();
+                _ = LoadContentBrowserAsync();
                 break;
             case "About":
                 SetHeader("About", "Credits and legal");
@@ -1033,15 +1466,19 @@ public MainWindow()
 
         NavMain.IsChecked    = content == "Home";
         NavSkins.IsChecked   = content == "Skins";
-        NavMods.IsChecked    = content == "Modpacks";
+        NavMods.IsChecked    = content == "Mods";
         NavCredits.IsChecked = content == "About";
+
+        if (content == "Home")
+            SetHeader("Home", "Pick a version, choose a loader, and launch");
 
         await AnimateSectionSwitchAsync(target);
     }
 
     private async Task AnimateSectionSwitchAsync(Border? target)
     {
-        var sections = new[] { MainSection, SkinSection, ModSection, CreditsSection };
+        var sections = new[] { MainSection, SkinSection, ModSection, OptionsSection, CreditsSection };
+        
         foreach (var s in sections)
         {
             if (s == null) continue;
@@ -1056,6 +1493,7 @@ public MainWindow()
 
         target.Opacity   = 0;
         target.IsVisible = true;
+        target.InvalidateMeasure();
         await Task.Delay(16);
         await Dispatcher.UIThread.InvokeAsync(() => { target.Opacity = 1; }, DispatcherPriority.Render);
     }
@@ -1086,10 +1524,1438 @@ public MainWindow()
         UpdateSelectionSummary();
     }
 
+    private void ContentTab_Click(object? sender, RoutedEventArgs e)
+    {
+        if (TabModpacks != null) TabModpacks.IsChecked = sender == TabModpacks;
+        if (TabMods != null) TabMods.IsChecked = sender == TabMods;
+        if (TabResourcePacks != null) TabResourcePacks.IsChecked = sender == TabResourcePacks;
+
+        _contentFilter.ContentType = sender == TabModpacks ? ContentType.Modpack :
+                                     sender == TabMods ? ContentType.Mod :
+                                     ContentType.ResourcePack;
+        _contentPage = 1;
+        UpdateContentBrowserCopy();
+        _ = LoadContentBrowserAsync(resetList: true);
+    }
+
+    private void UpdateContentBrowserCopy()
+    {
+        if (ContentSearchBox != null)
+        {
+            ContentSearchBox.Watermark = _contentFilter.ContentType switch
+            {
+                ContentType.Modpack => "Search modpacks, e.g. Better MC",
+                ContentType.ResourcePack => "Search resource packs, e.g. Faithful",
+                _ => "Search mods, e.g. Sodium"
+            };
+        }
+
+        if (ContentStatusText != null && string.IsNullOrWhiteSpace(ContentStatusText.Text))
+        {
+            ContentStatusText.Text = _contentFilter.ContentType switch
+            {
+                ContentType.Modpack => "Browse modpacks and pick a supported Minecraft version before install.",
+                ContentType.ResourcePack => "Browse resource packs and install them into a valid target.",
+                _ => "Browse mods and pick a supported loader before install."
+            };
+        }
+    }
+
+    private void ContentSearchBox_KeyUp(object? sender, KeyEventArgs e)
+    {
+        _contentSearchDebounceCts?.Cancel();
+        _contentSearchDebounceCts = new CancellationTokenSource();
+        var token = _contentSearchDebounceCts.Token;
+        _ = DebouncedSearchAsync(token);
+    }
+
+    private async Task DebouncedSearchAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(320, token);
+            _contentFilter.SearchQuery = ContentSearchBox?.Text ?? "";
+            _contentPage = 1;
+            await LoadContentBrowserAsync(resetList: true);
+        }
+        catch (OperationCanceledException)
+        {
+            // expected when user continues typing
+        }
+    }
+
+    private async Task LoadContentBrowserAsync(bool resetList = true)
+    {
+        _contentLoadCts?.Cancel();
+        _contentThumbCts?.Cancel();
+        _contentLoadCts = new CancellationTokenSource();
+        var token = _contentLoadCts.Token;
+
+        try
+        {
+            if (ContentLoadingBar == null) return;
+            ContentLoadingBar.IsVisible = true;
+            ContentLoadingBar.Value = 0;
+            UpdateStatus("Loading content browser...");
+            if (ContentStatusText != null)
+                ContentStatusText.Text = _contentFilter.ContentType switch
+                {
+                    ContentType.Modpack => "Loading modpacks from Modrinth...",
+                    ContentType.ResourcePack => "Loading resource packs from Modrinth...",
+                    _ => "Loading mods from Modrinth..."
+                };
+
+            var filter = _contentFilter;
+            var result = await _contentService!.SearchAsync(filter, _contentPage, ContentPageSize, token);
+            _contentHasMore = result.HasMorePages;
+            ContentLoadingBar.Value = 20;
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (ContentItemsControl != null)
+                {
+                    if (resetList)
+                        _contentItems.Clear();
+
+                    var existingKeys = new HashSet<string>(
+                        _contentItems.Select(item => $"{item.Source}:{item.Id}"),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    var count = Math.Max(1, result.Items.Count);
+                    for (var i = 0; i < result.Items.Count; i++)
+                    {
+                        var item = result.Items[i];
+                        var itemKey = $"{item.Source}:{item.Id}";
+                        if (!resetList && existingKeys.Contains(itemKey))
+                            continue;
+
+                        if (!string.IsNullOrWhiteSpace(item.IconUrl) &&
+                            _contentThumbnailCache.TryGetValue(item.IconUrl, out var cached))
+                            item.Thumbnail = cached;
+
+                        _contentItems.Add(item);
+                        existingKeys.Add(itemKey);
+                        // Bouncy progress phase starts from 20% and ends at 100%.
+                        ContentLoadingBar.Value = 20 + ((i + 1) * 80.0 / count);
+                    }
+                    ContentItemsControl.ItemsSource = _contentItems;
+                }
+                if (ContentStatusText != null)
+                    ContentStatusText.Text = _contentItems.Count == 0
+                        ? "No results yet. Try a different search term or switch category."
+                        : _contentHasMore
+                            ? $"{_contentItems.Count} items shown - load more to keep browsing."
+                            : $"{_contentItems.Count} items shown";
+                if (LoadMoreContentButton != null)
+                    LoadMoreContentButton.IsVisible = _contentHasMore;
+                ContentLoadingBar.IsVisible = false;
+                UpdateStatus($"Loaded {_contentItems.Count} items from {string.Join(" + ", filter.SelectedSources.Select(s => s.GetDisplayName()))}");
+            });
+
+            _contentThumbCts = new CancellationTokenSource();
+            _ = WarmThumbnailsAsync(result.Items, _contentThumbCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            if (ContentLoadingBar != null)
+                ContentLoadingBar.IsVisible = false;
+        }
+        catch (Exception ex)
+        {
+            if (ContentLoadingBar != null) ContentLoadingBar.IsVisible = false;
+            UpdateStatus($"Content load error: {ex.Message}");
+        }
+    }
+
+    private void RefreshContentButton_Click(object? sender, RoutedEventArgs e)
+    {
+        _contentPage = 1;
+        _ = LoadContentBrowserAsync(resetList: true);
+    }
+
+    private void StopContentLoad_Click(object? sender, RoutedEventArgs e)
+    {
+        _contentLoadCts?.Cancel();
+        _contentThumbCts?.Cancel();
+    }
+
+    // Details UI is now removed - simplified install flow
+    private void SourceFilter_Click(object? sender, RoutedEventArgs e)
+    {
+        _contentFilter.SelectedSources.Clear();
+        _contentFilter.SelectedSources.Add(ContentSource.Modrinth);
+        _contentPage = 1;
+        _ = LoadContentBrowserAsync(resetList: true);
+    }
+
+    private void ContentOpenPage_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: ContentItem item })
+            return;
+        if (string.IsNullOrWhiteSpace(item.PageUrl))
+            return;
+
+        Process.Start(new ProcessStartInfo { FileName = item.PageUrl, UseShellExecute = true });
+        UpdateStatus($"Opened {item.Title} in browser.");
+    }
+
+    private async void ContentViewDetails_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Control { DataContext: ContentItem item })
+            return;
+
+        await OpenInstallOverlayAsync(item);
+    }
+
+    private async Task OpenInstallOverlayAsync(ContentItem item)
+    {
+        var details = MergeContentDetails(item, await _contentService!.GetDetailsAsync(item.Id, item.Source));
+        _currentInstallVersions = details.Source == ContentSource.Modrinth
+            ? await ModrinthAPI.GetProjectVersions(details.Id) ?? new List<ModrinthAPI.ModVersion>()
+            : new List<ModrinthAPI.ModVersion>();
+        ShowDetailOverlay(details);
+        RefreshInstallSheet();
+    }
+
+    private static ContentItem MergeContentDetails(ContentItem summary, ContentItem? details)
+    {
+        if (details == null)
+            return summary;
+
+        if (string.IsNullOrWhiteSpace(details.Author) || string.Equals(details.Author, "Unknown", StringComparison.OrdinalIgnoreCase))
+            details.Author = summary.Author;
+        if (string.IsNullOrWhiteSpace(details.Description))
+            details.Description = summary.Description;
+        if (string.IsNullOrWhiteSpace(details.IconUrl))
+            details.IconUrl = summary.IconUrl;
+        if (details.Thumbnail == null)
+            details.Thumbnail = summary.Thumbnail;
+        if (details.LastUpdated == DateTime.MinValue)
+            details.LastUpdated = summary.LastUpdated;
+        if (!details.Categories.Any() && summary.Categories.Any())
+            details.Categories = new List<string>(summary.Categories);
+        if (!details.Loaders.Any() && summary.Loaders.Any())
+            details.Loaders = new List<ModLoader>(summary.Loaders);
+        if (!details.MinecraftVersions.Any() && summary.MinecraftVersions.Any())
+            details.MinecraftVersions = new List<string>(summary.MinecraftVersions);
+
+        return details;
+    }
+
+    private void ShowDetailOverlay(ContentItem item)
+    {
+        _currentDetailsItem = item;
+
+        if (DetailTitleText != null)
+            DetailTitleText.Text = $"Install {item.DisplayType}";
+        if (DetailItemTitle != null)
+            DetailItemTitle.Text = item.Title;
+        if (DetailItemDescription != null)
+            DetailItemDescription.Text = item.Description ?? "No description available.";
+        if (DetailItemDownloads != null)
+            DetailItemDownloads.Text = $"{item.DownloadCount:N0} downloads";
+        if (DetailSourceText != null)
+            DetailSourceText.Text = item.Source.GetDisplayName();
+        if (DetailBodyTitle != null)
+            DetailBodyTitle.Text = "Project summary";
+
+        if (DetailIconImage != null)
+            DetailIconImage.Source = item.Thumbnail;
+
+        if (DetailLinkProject != null)
+            DetailLinkProject.Text = $"Project page: {item.PageUrl}";
+
+        if (DetailVersionTags != null)
+        {
+            DetailVersionTags.Children.Clear();
+            foreach (var version in GetDisplayedVersions(item).Take(10))
+            {
+                DetailVersionTags.Children.Add(new Border
+                {
+                    Background = new SolidColorBrush(Color.Parse("#343949")),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(8, 4, 8, 4),
+                    Margin = new Thickness(0, 0, 6, 4),
+                    Child = new TextBlock { Text = version, FontSize = 12 }
+                });
+            }
+        }
+
+        if (DetailPlatformTags != null)
+        {
+            DetailPlatformTags.Children.Clear();
+            foreach (var loader in GetDisplayedLoaders(item))
+            {
+                DetailPlatformTags.Children.Add(new Border
+                {
+                    Background = new SolidColorBrush(Color.Parse("#343949")),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(8, 4, 8, 4),
+                    Margin = new Thickness(0, 0, 6, 4),
+                    Child = new TextBlock { Text = loader, FontSize = 12 }
+                });
+            }
+        }
+
+        if (DetailTagsPanel != null)
+        {
+            DetailTagsPanel.Children.Clear();
+            foreach (var cat in item.Categories.Take(12))
+            {
+                DetailTagsPanel.Children.Add(new Border
+                {
+                    Background = new SolidColorBrush(Color.Parse("#343949")),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(8, 4, 8, 4),
+                    Margin = new Thickness(0, 0, 6, 4),
+                    Child = new TextBlock { Text = cat, FontSize = 12 }
+                });
+            }
+        }
+
+        if (DetailBodyText != null)
+        {
+            DetailBodyText.Text = string.IsNullOrWhiteSpace(item.Description)
+                ? "No description available."
+                : item.Description;
+        }
+
+        if (DetailInstallStatus != null)
+            DetailInstallStatus.Text = "";
+        if (DetailInstallProgress != null)
+        {
+            DetailInstallProgress.IsVisible = false;
+            DetailInstallProgress.Value = 0;
+        }
+        if (DetailInstallButton != null)
+            DetailInstallButton.IsEnabled = true;
+        if (DetailLoaderPanel != null)
+            DetailLoaderPanel.IsVisible = item.ContentType != ContentType.ResourcePack;
+
+        if (DetailOverlay != null)
+            DetailOverlay.IsVisible = true;
+    }
+
+    private void DetailLinkProject_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (_currentDetailsItem != null && !string.IsNullOrWhiteSpace(_currentDetailsItem.PageUrl))
+        {
+            Process.Start(new ProcessStartInfo { FileName = _currentDetailsItem.PageUrl, UseShellExecute = true });
+        }
+    }
+
+    private List<string> GetDisplayedVersions(ContentItem item)
+    {
+        var versions = _currentInstallVersions
+            .SelectMany(version => version.GameVersions ?? new List<string>())
+            .Where(version => !string.IsNullOrWhiteSpace(version))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (versions.Count > 0)
+            return OrderMinecraftVersions(versions);
+
+        return item.MinecraftVersions.Any()
+            ? OrderMinecraftVersions(item.MinecraftVersions)
+            : new List<string>();
+    }
+
+    private List<string> GetDisplayedLoaders(ContentItem item)
+    {
+        var loaders = _currentInstallVersions
+            .SelectMany(version => version.Loaders ?? new List<string>())
+            .Where(loader => !string.IsNullOrWhiteSpace(loader))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(NormalizeLoaderDisplayName)
+            .ToList();
+
+        if (loaders.Count > 0)
+            return loaders;
+
+        if (item.ContentType == ContentType.ResourcePack)
+            return new List<string> { "Vanilla" };
+
+        return item.Loaders.Any()
+            ? item.Loaders.Select(loader => loader.GetDisplayName()).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            : new List<string> { "Vanilla" };
+    }
+
+    private void DetailVersionCombo_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_isRefreshingInstallSheet)
+            return;
+        RefreshInstallSheet();
+    }
+
+    private void DetailLoaderCombo_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_isRefreshingInstallSheet)
+            return;
+        RefreshInstallSheetStatus();
+    }
+
+    private void RefreshInstallSheet()
+    {
+        if (_currentDetailsItem == null || DetailVersionCombo == null)
+            return;
+
+        _isRefreshingInstallSheet = true;
+        try
+        {
+            var installedVersions = GetInstalledMinecraftVersions();
+            var compatibleVersions = GetDisplayedVersions(_currentDetailsItem)
+                .Where(installedVersions.Contains)
+                .ToList();
+
+            DetailVersionCombo.ItemsSource = compatibleVersions;
+            DetailVersionCombo.SelectedItem = compatibleVersions.FirstOrDefault();
+
+            if (DetailLoaderPanel != null)
+                DetailLoaderPanel.IsVisible = _currentDetailsItem.ContentType != ContentType.ResourcePack;
+
+            var selectedVersion = compatibleVersions.FirstOrDefault();
+            var loaders = GetCompatibleLoaders(_currentDetailsItem, selectedVersion);
+            if (DetailLoaderCombo != null)
+            {
+                DetailLoaderCombo.ItemsSource = loaders;
+                DetailLoaderCombo.SelectedItem = loaders.FirstOrDefault();
+            }
+
+            if (DetailRequirementText != null)
+            {
+                DetailRequirementText.Text = compatibleVersions.Count > 0
+                    ? "Pick one of the already-downloaded Minecraft versions below."
+                    : "No compatible Minecraft version is downloaded yet. Download a supported version from Home first.";
+            }
+        }
+        finally
+        {
+            _isRefreshingInstallSheet = false;
+        }
+
+        RefreshInstallSheetStatus();
+    }
+
+    private void RefreshInstallSheetStatus()
+    {
+        if (_currentDetailsItem == null)
+            return;
+
+        var selectedVersion = DetailVersionCombo?.SelectedItem?.ToString();
+        var selectedLoader = GetSelectedInstallLoader();
+        var hasVersion = !string.IsNullOrWhiteSpace(selectedVersion);
+        var selectedFile = hasVersion ? GetSelectedProjectVersion(_currentDetailsItem, selectedVersion!, selectedLoader) : null;
+        var target = hasVersion
+            ? ResolveInstallTarget(_currentDetailsItem, selectedVersion!, selectedLoader)
+            : (_minecraftPath.BasePath, "Standard profile (.minecraft)");
+
+        _currentInstallTargetPath = target.Item1;
+        _currentInstallTargetLabel = target.Item2;
+
+        if (DetailTargetText != null)
+            DetailTargetText.Text = $"Install target: {_currentInstallTargetLabel}";
+
+        if (DetailInstallStatus != null)
+        {
+            DetailInstallStatus.Text = !hasVersion
+                ? "Choose a downloaded Minecraft version first."
+                : selectedFile == null
+                    ? "No file is available for that version and loader."
+                    : $"Ready to install into {_currentInstallTargetLabel}.";
+        }
+
+        if (DetailInstallButton != null)
+            DetailInstallButton.IsEnabled = hasVersion && selectedFile != null;
+    }
+
+    private HashSet<string> GetInstalledMinecraftVersions()
+    {
+        var versionsDir = Path.Combine(_minecraftPath.BasePath, "versions");
+        if (!Directory.Exists(versionsDir))
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        return Directory.GetDirectories(versionsDir)
+            .Select(Path.GetFileName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private List<string> GetCompatibleLoaders(ContentItem item, string? selectedVersion)
+    {
+        if (item.ContentType == ContentType.ResourcePack)
+            return new List<string> { "Vanilla" };
+
+        IEnumerable<string> loaders = _currentInstallVersions
+            .Where(version => string.IsNullOrWhiteSpace(selectedVersion) || SupportsGameVersion(version, selectedVersion))
+            .SelectMany(version => version.Loaders ?? new List<string>())
+            .Where(loader => !string.IsNullOrWhiteSpace(loader))
+            .Select(NormalizeLoaderDisplayName)
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        var list = loaders.ToList();
+        if (list.Count > 0)
+            return list;
+
+        return GetDisplayedLoaders(item);
+    }
+
+    private static bool SupportsGameVersion(ModrinthAPI.ModVersion version, string? gameVersion)
+    {
+        if (string.IsNullOrWhiteSpace(gameVersion))
+            return true;
+
+        return version.GameVersions?.Any(v => string.Equals(v, gameVersion, StringComparison.OrdinalIgnoreCase)) == true;
+    }
+
+    private static string NormalizeLoaderDisplayName(string loader)
+    {
+        if (string.IsNullOrWhiteSpace(loader))
+            return "Vanilla";
+
+        return loader.Equals("neoforge", StringComparison.OrdinalIgnoreCase)
+            ? "NeoForge"
+            : loader.Equals("quilt", StringComparison.OrdinalIgnoreCase)
+                ? "Quilt"
+                : loader.Equals("forge", StringComparison.OrdinalIgnoreCase)
+                    ? "Forge"
+                    : loader.Equals("fabric", StringComparison.OrdinalIgnoreCase)
+                        ? "Fabric"
+                        : loader.Equals("vanilla", StringComparison.OrdinalIgnoreCase)
+                            ? "Vanilla"
+                            : loader;
+    }
+
+    private static string NormalizeLoaderKey(string? loader)
+    {
+        return string.IsNullOrWhiteSpace(loader) ? "vanilla" : loader.Trim().ToLowerInvariant();
+    }
+
+    private string GetSelectedInstallLoader()
+    {
+        if (_currentDetailsItem?.ContentType == ContentType.ResourcePack)
+            return "Vanilla";
+
+        return DetailLoaderCombo?.SelectedItem?.ToString() ?? "Vanilla";
+    }
+
+    private (string, string) ResolveInstallTarget(ContentItem item, string gameVersion, string loader)
+    {
+        if (item.ContentType == ContentType.Modpack)
+            return (Path.Combine(_instancesFolder, SanitizeFolderName(item.Title)), $"New instance: {item.Title}");
+
+        if (_activePlayProfile is { IsStandard: false, GameDirectory: not null } profile &&
+            string.Equals(profile.MinecraftVersion, gameVersion, StringComparison.OrdinalIgnoreCase))
+        {
+            if (item.ContentType == ContentType.ResourcePack ||
+                string.Equals(profile.Loader, loader, StringComparison.OrdinalIgnoreCase))
+            {
+                return (profile.GameDirectory, profile.Title);
+            }
+        }
+
+        return (_minecraftPath.BasePath, "Standard profile (.minecraft)");
+    }
+
+    private ModrinthAPI.ModVersion? GetSelectedProjectVersion(ContentItem item, string gameVersion, string loader)
+    {
+        var normalizedLoader = NormalizeLoaderKey(loader);
+
+        foreach (var version in _currentInstallVersions)
+        {
+            if (!SupportsGameVersion(version, gameVersion))
+                continue;
+
+            if (item.ContentType != ContentType.ResourcePack)
+            {
+                var versionLoaders = version.Loaders ?? new List<string>();
+                if (!versionLoaders.Any(l => NormalizeLoaderKey(l) == normalizedLoader))
+                    continue;
+            }
+
+            if (PickPrimaryFile(version) != null)
+                return version;
+        }
+
+        return null;
+    }
+
+    private static ModrinthAPI.ModFile? PickPrimaryFile(ModrinthAPI.ModVersion version)
+    {
+        var files = version.Files ?? new List<ModrinthAPI.ModFile>();
+        return files.FirstOrDefault(file => file.IsPrimary && !string.IsNullOrWhiteSpace(file.Url))
+            ?? files.FirstOrDefault(file => !string.IsNullOrWhiteSpace(file.Url));
+    }
+
+    private static List<string> OrderMinecraftVersions(IEnumerable<string> versions)
+    {
+        return versions
+            .Where(version => !string.IsNullOrWhiteSpace(version))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(version => version, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    // Details UI is disabled - using simplified install flow
+    /*
+    private void RenderContentDetails(ContentItem item)
+    {
+        _currentDetailsItem = item;
+        if (DetailsTitleText != null)
+            DetailsTitleText.Text = item.Title;
+        if (DetailsSummaryText != null)
+            DetailsSummaryText.Text = string.IsNullOrWhiteSpace(item.Description) ? "No description available." : item.Description;
+        if (DetailsDownloadsText != null)
+            DetailsDownloadsText.Text = $"{item.DownloadCount:N0} downloads";
+        if (DetailsCompatibilityText != null)
+        {
+            var versions = item.MinecraftVersions.Any() ? string.Join(", ", item.MinecraftVersions.Take(10)) : "N/A";
+            DetailsCompatibilityText.Text = $"Compatibility\nMinecraft: Java Edition\n{versions}";
+        }
+        if (DetailsPlatformsText != null)
+        {
+            var loaders = item.Loaders.Any() ? string.Join(", ", item.Loaders.Select(l => l.GetDisplayName())) : "Client and server";
+            DetailsPlatformsText.Text = $"Platforms\n{loaders}";
+        }
+        if (DetailsLinksText != null)
+            DetailsLinksText.Text = $"Links\nProject page: {item.PageUrl}";
+        if (DetailsTagsText != null)
+            DetailsTagsText.Text = $"Tags\n{(item.Categories.Any() ? string.Join(", ", item.Categories.Take(12)) : "No tags")}";
+        if (DetailsMetaText != null)
+        {
+            var updated = item.LastUpdated == DateTime.MinValue ? "Unknown" : item.LastUpdated.ToString("dd MMM yyyy");
+            DetailsMetaText.Text = $"Source: {item.Source.GetDisplayName()} · Updated: {updated}";
+        }
+        RenderDetailsBodyByTab();
+    }
+
+    private void DetailsTab_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DetailsTabDescription != null) DetailsTabDescription.IsChecked = sender == DetailsTabDescription;
+        if (DetailsTabChangelog != null) DetailsTabChangelog.IsChecked = sender == DetailsTabChangelog;
+        if (DetailsTabVersions != null) DetailsTabVersions.IsChecked = sender == DetailsTabVersions;
+        // DetailTabDesc and DetailTabVersions are now commented out in XAML
+        RenderDetailsBodyByTab();
+    }
+
+    private void RenderDetailsBodyByTab()
+    {
+        if (DetailsMainBodyText == null || _currentDetailsItem == null)
+            return;
+
+        if (DetailsTabChangelog?.IsChecked == true)
+        {
+            DetailsMainBodyText.Text = "Changelog details are not provided by all sources yet.\n\nTip: use Versions tab to check compatibility quickly.";
+            return;
+        }
+
+        if (DetailsTabVersions?.IsChecked == true)
+        {
+            var versions = _currentDetailsItem.MinecraftVersions.Any()
+                ? string.Join("\n", _currentDetailsItem.MinecraftVersions.Take(20).Select(v => $"• {v}"))
+                : "No version list available.";
+            DetailsMainBodyText.Text = versions;
+            return;
+        }
+
+        DetailsMainBodyText.Text = string.IsNullOrWhiteSpace(_currentDetailsItem.Description)
+            ? "No description available."
+            : _currentDetailsItem.Description;
+    }
+    */
+
+    private void LoadMoreContent_Click(object? sender, RoutedEventArgs e)
+    {
+        if (!_contentHasMore)
+            return;
+        _contentPage++;
+        _ = LoadContentBrowserAsync(resetList: false);
+    }
+
+    private async void SettingsMicrosoftSignIn_Click(object? sender, RoutedEventArgs e)
+    {
+        var launch = await StartMicrosoftSignInAsync();
+        if (!launch.Success)
+            return;
+
+        _launcherProfile = NormalizeLauncherProfile(LoadLauncherProfile());
+        _launcherProfile.AccountMode = AccountModeMicrosoft;
+        _launcherProfile.WelcomeCompleted = true;
+        _launcherProfile.MicrosoftSignInRequested = true;
+        _launcherProfile.MicrosoftDisplayName = launch.DisplayName ?? _launcherProfile.MicrosoftDisplayName;
+        SaveLauncherProfile(_launcherProfile);
+        ApplyLauncherProfile(_launcherProfile);
+        UpdateStatus(BuildMicrosoftLaunchStatus(launch));
+    }
+
+    private async void SettingsOfflineMode_Click(object? sender, RoutedEventArgs e)
+    {
+        await MicrosoftAuth.SignOutAsync();
+        _launcherProfile = NormalizeLauncherProfile(LoadLauncherProfile());
+        _launcherProfile.AccountMode = AccountModeOffline;
+        _launcherProfile.WelcomeCompleted = true;
+        _launcherProfile.MicrosoftSignInRequested = false;
+        _launcherProfile.MicrosoftDisplayName = string.Empty;
+        SaveLauncherProfile(_launcherProfile);
+        ApplyLauncherProfile(_launcherProfile);
+        UpdateStatus("Offline mode is active.");
+    }
+
+    private void OpenLauncherFolder_Click(object? sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo { FileName = AppContext.BaseDirectory, UseShellExecute = true });
+        UpdateStatus("Opened launcher folder.");
+    }
+
+    private void OpenInstancesFolder_Click(object? sender, RoutedEventArgs e)
+    {
+        Directory.CreateDirectory(_instancesFolder);
+        Process.Start(new ProcessStartInfo { FileName = _instancesFolder, UseShellExecute = true });
+        UpdateStatus("Opened instances folder.");
+    }
+
+    private void OpenMinecraftFolder_Click(object? sender, RoutedEventArgs e)
+    {
+        Directory.CreateDirectory(_minecraftPath.BasePath);
+        Process.Start(new ProcessStartInfo { FileName = _minecraftPath.BasePath, UseShellExecute = true });
+        UpdateStatus("Opened Minecraft folder.");
+    }
+
+    private void DetailCloseButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DetailOverlay != null)
+            DetailOverlay.IsVisible = false;
+    }
+
+    private async void DetailInstallButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_currentDetailsItem == null) return;
+
+        var gameVersion = DetailVersionCombo?.SelectedItem?.ToString();
+        if (string.IsNullOrWhiteSpace(gameVersion))
+        {
+            LogToOutput("Install blocked: no downloaded Minecraft version selected.");
+            return;
+        }
+
+        if (!GetInstalledMinecraftVersions().Contains(gameVersion))
+        {
+            LogToOutput($"Install blocked: Minecraft {gameVersion} is not downloaded yet.");
+            if (DetailInstallStatus != null)
+                DetailInstallStatus.Text = $"Download Minecraft {gameVersion} from Home first.";
+            return;
+        }
+
+        var loader = GetSelectedInstallLoader();
+        var selectedVersion = GetSelectedProjectVersion(_currentDetailsItem, gameVersion, loader);
+        if (selectedVersion == null)
+        {
+            LogToOutput($"Install blocked: no compatible file found for {gameVersion} / {loader}.");
+            if (DetailInstallStatus != null)
+                DetailInstallStatus.Text = "No compatible file is available for that choice.";
+            return;
+        }
+
+        try
+        {
+            if (DetailInstallButton != null) DetailInstallButton.IsEnabled = false;
+            if (DetailInstallProgress != null) DetailInstallProgress.IsVisible = true;
+            if (DetailInstallProgress != null) DetailInstallProgress.Value = 12;
+            if (DetailInstallStatus != null) DetailInstallStatus.Text = "Installing...";
+
+            LogToOutput($"Installing {_currentDetailsItem.Title}...");
+            LogToOutput($"  Version: {gameVersion}, Loader: {loader}");
+            LogToOutput($"  Target: {_currentInstallTargetLabel}");
+
+            Directory.CreateDirectory(_currentInstallTargetPath);
+            await DownloadContentAsync(_currentDetailsItem, _currentInstallTargetPath, gameVersion, loader, selectedVersion);
+
+            if (DetailInstallProgress != null) DetailInstallProgress.Value = 100;
+            if (DetailInstallStatus != null) DetailInstallStatus.Text = $"Installed in {_currentInstallTargetLabel}.";
+            LogToOutput($"Installation complete in {_currentInstallTargetLabel}.");
+
+            RefreshPlayProfiles();
+        }
+        catch (Exception ex)
+        {
+            LogToOutput($"Installation failed: {ex.Message}");
+            if (DetailInstallStatus != null) DetailInstallStatus.Text = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            if (DetailInstallButton != null) DetailInstallButton.IsEnabled = true;
+        }
+    }
+
+    private async Task DownloadContentAsync(ContentItem item, string targetPath, string gameVersion, string loader, ModrinthAPI.ModVersion selectedVersion)
+    {
+        if (item.ContentType == ContentType.Modpack)
+        {
+            await DownloadModpackAsync(item, selectedVersion);
+        }
+        else if (item.ContentType == ContentType.Mod)
+        {
+            await DownloadModAsync(item, targetPath, selectedVersion);
+        }
+        else if (item.ContentType == ContentType.ResourcePack)
+        {
+            await DownloadResourcePackAsync(item, targetPath, selectedVersion);
+        }
+    }
+
+    private async Task DownloadModpackAsync(ContentItem item, ModrinthAPI.ModVersion selectedVersion)
+    {
+        var selectedFile = PickPrimaryFile(selectedVersion);
+        if (string.IsNullOrWhiteSpace(selectedFile?.Url))
+            throw new Exception("No download file available");
+
+        var instancePath = Path.Combine(_instancesFolder, SanitizeFolderName(item.Title));
+        var tempFile = Path.Combine(Path.GetTempPath(), $"xylar-{Guid.NewGuid():N}.mrpack");
+        try
+        {
+            if (DetailInstallProgress != null) DetailInstallProgress.Value = 28;
+            await ModrinthModpackInstaller.DownloadFileAsync(_httpClient, selectedFile.Url!, tempFile, CancellationToken.None);
+            if (DetailInstallProgress != null) DetailInstallProgress.Value = 46;
+
+            ModrinthModpackInstaller.ExtractMrpackZip(tempFile, instancePath);
+            var packRoot = ModrinthModpackInstaller.FindPackRoot(instancePath) ?? instancePath;
+            if (DetailInstallProgress != null) DetailInstallProgress.Value = 62;
+
+            var progress = new Progress<(int done, int total, string relativePath)>(step =>
+            {
+                if (DetailInstallProgress != null && step.total > 0)
+                    DetailInstallProgress.Value = 62 + (38.0 * step.done / step.total);
+                if (DetailInstallStatus != null && step.total > 0)
+                    DetailInstallStatus.Text = $"Downloading pack files {step.done}/{step.total}...";
+            });
+
+            await ModrinthModpackInstaller.DownloadPackFilesFromIndexAsync(_httpClient, packRoot, progress, CancellationToken.None);
+            LogToOutput($"  Modpack installed: {item.Title}");
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    private async Task DownloadModAsync(ContentItem item, string targetPath, ModrinthAPI.ModVersion selectedVersion)
+    {
+        var selectedFile = PickPrimaryFile(selectedVersion);
+        if (string.IsNullOrWhiteSpace(selectedFile?.Url))
+            throw new Exception("No compatible file found for this version/loader");
+
+        var modsFolder = Path.Combine(targetPath, "mods");
+        Directory.CreateDirectory(modsFolder);
+
+        var fileName = string.IsNullOrWhiteSpace(selectedFile!.Filename)
+            ? $"{item.Id}.jar"
+            : selectedFile.Filename!;
+
+        var destFile = Path.Combine(modsFolder, fileName);
+        if (DetailInstallProgress != null) DetailInstallProgress.Value = 48;
+        using var response = await _httpClient.GetAsync(selectedFile.Url!);
+        response.EnsureSuccessStatusCode();
+        await using var fs = File.Create(destFile);
+        await response.Content.CopyToAsync(fs);
+
+        if (DetailInstallProgress != null) DetailInstallProgress.Value = 82;
+        LogToOutput("  Checking for conflicts...");
+        CheckModConflicts(targetPath);
+        LogToOutput($"  Mod downloaded: {fileName}");
+    }
+
+    private async Task DownloadResourcePackAsync(ContentItem item, string targetPath, ModrinthAPI.ModVersion selectedVersion)
+    {
+        var selectedFile = PickPrimaryFile(selectedVersion);
+        if (string.IsNullOrWhiteSpace(selectedFile?.Url))
+            throw new Exception("No download file available");
+
+        var resourcepacksFolder = Path.Combine(targetPath, "resourcepacks");
+        Directory.CreateDirectory(resourcepacksFolder);
+
+        var fileName = string.IsNullOrWhiteSpace(selectedFile!.Filename)
+            ? $"{item.Id}.zip"
+            : selectedFile.Filename!;
+
+        var destFile = Path.Combine(resourcepacksFolder, fileName);
+        if (DetailInstallProgress != null) DetailInstallProgress.Value = 52;
+        using var response = await _httpClient.GetAsync(selectedFile.Url!);
+        response.EnsureSuccessStatusCode();
+        await using var fs = File.Create(destFile);
+        await response.Content.CopyToAsync(fs);
+
+        if (DetailInstallProgress != null) DetailInstallProgress.Value = 86;
+        LogToOutput($"  Resource pack downloaded: {fileName}");
+    }
+
+    private string SanitizeFolderName(string name)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        return string.Concat(name.Select(c => invalid.Contains(c) ? '_' : c));
+    }
+
+    private LauncherProfile CreateDefaultLauncherProfile()
+    {
+        return new LauncherProfile
+        {
+            Username = DefaultOfflineUsername,
+            WelcomeCompleted = true,
+            AccountMode = AccountModeOffline,
+            MicrosoftSignInRequested = false,
+            MicrosoftDisplayName = string.Empty
+        };
+    }
+
+    private LauncherProfile NormalizeLauncherProfile(LauncherProfile profile)
+    {
+        profile.Username = string.IsNullOrWhiteSpace(profile.Username)
+            ? DefaultOfflineUsername
+            : profile.Username.Trim();
+
+        profile.AccountMode = string.Equals(profile.AccountMode, AccountModeMicrosoft, StringComparison.OrdinalIgnoreCase)
+            ? AccountModeMicrosoft
+            : AccountModeOffline;
+
+        profile.MicrosoftDisplayName ??= string.Empty;
+
+        profile.WelcomeCompleted = profile.WelcomeCompleted || !string.IsNullOrWhiteSpace(profile.Username);
+        return profile;
+    }
+
+    private void ApplyLauncherProfile(LauncherProfile profile)
+    {
+        _launcherProfile = NormalizeLauncherProfile(profile);
+
+        if (UsernameBox != null)
+            UsernameBox.Text = _launcherProfile.Username;
+
+        UpdateProfileAvatar();
+        UpdateSelectionSummary();
+        UpdateLauncherProfileUi();
+    }
+
+    private void UpdateLauncherProfileUi()
+    {
+        var isMicrosoft = string.Equals(_launcherProfile.AccountMode, AccountModeMicrosoft, StringComparison.OrdinalIgnoreCase);
+        var modeText = isMicrosoft ? "Microsoft" : "Offline";
+        var accountLabel = GetMicrosoftAccountLabel();
+        var accountHeadline = isMicrosoft ? $"Signed in as {accountLabel}" : "Offline mode is active";
+        var accountDetails = isMicrosoft
+            ? "Your Microsoft session is ready for launch. If it expires, the launcher will ask you to sign in again."
+            : "You are ready to launch with a local profile now, and you can switch to Microsoft later from Settings.";
+        var chipBackground = new SolidColorBrush(Color.Parse(isMicrosoft ? "#17314A5A" : "#17344657"));
+        var chipBorder = new SolidColorBrush(Color.Parse(isMicrosoft ? "#2E49D7F5" : "#2E6AA0D5"));
+        var chipText = new SolidColorBrush(Color.Parse(isMicrosoft ? "#8EF3FF" : "#7DE6FF"));
+
+        // SidebarModeText removed from UI
+        if (SettingsAccountHeadlineText != null)
+            SettingsAccountHeadlineText.Text = accountHeadline;
+        if (SettingsAccountDetailText != null)
+            SettingsAccountDetailText.Text = accountDetails;
+        if (SettingsAccountModeText != null)
+            SettingsAccountModeText.Text = modeText;
+        if (SettingsLaunchNameText != null)
+            SettingsLaunchNameText.Text = isMicrosoft
+                ? $"Account: {accountLabel}"
+                : $"Launch name: {_launcherProfile.Username}";
+        if (SettingsModeChip != null)
+        {
+            SettingsModeChip.Background = chipBackground;
+            SettingsModeChip.BorderBrush = chipBorder;
+        }
+        if (SettingsAccountModeText != null)
+            SettingsAccountModeText.Foreground = chipText;
+    }
+
+    private void PersistMicrosoftIdentity(MicrosoftSignInLaunchResult result)
+    {
+        if (string.IsNullOrWhiteSpace(result.DisplayName))
+            return;
+
+        _launcherProfile.MicrosoftDisplayName = result.DisplayName;
+        if (string.Equals(_launcherProfile.AccountMode, AccountModeMicrosoft, StringComparison.OrdinalIgnoreCase))
+            SaveLauncherProfile(_launcherProfile);
+    }
+
+    private async Task<MicrosoftSignInLaunchResult> StartMicrosoftSignInAsync()
+    {
+        UpdateStatus("Opening Microsoft sign-in...");
+        var launch = await MicrosoftAuth.BeginSignInAsync();
+
+        if (!launch.Success)
+        {
+            UpdateStatus($"Microsoft sign-in failed: {launch.ErrorMessage}");
+        }
+        else
+        {
+            PersistMicrosoftIdentity(launch);
+        }
+
+        return launch;
+    }
+
+    private static string BuildMicrosoftLaunchStatus(MicrosoftSignInLaunchResult launch)
+    {
+        return string.IsNullOrWhiteSpace(launch.DisplayName)
+            ? "Microsoft sign-in completed."
+            : $"Microsoft sign-in completed: {launch.DisplayName}.";
+    }
+
+    private async Task PlayOfflineWelcomeSequenceAsync()
+    {
+        try
+        {
+            var htmlPath = Path.Combine(AppContext.BaseDirectory, "WelcomePage.html");
+            await OfflineWelcomeSequencePlayer.PlayAsync(htmlPath);
+            Activate();
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"Offline intro skipped: {ex.Message}");
+        }
+    }
+
+    private async Task RunWelcomeIfNeededAsync()
+    {
+        var profile = LoadLauncherProfile();
+        if (profile.WelcomeCompleted || !string.IsNullOrWhiteSpace(profile.Username))
+        {
+            ApplyLauncherProfile(profile);
+            SaveLauncherProfile(_launcherProfile);
+            return;
+        }
+
+        var welcomeWindow = new WelcomeWindow();
+        var result = await welcomeWindow.ShowDialog<WelcomeWindowResult?>(this);
+        var firstRunProfile = result == null
+            ? CreateDefaultLauncherProfile()
+            : new LauncherProfile
+            {
+                Username = string.IsNullOrWhiteSpace(result.Username) ? DefaultOfflineUsername : result.Username.Trim(),
+                WelcomeCompleted = true,
+                AccountMode = string.Equals(result.AccountMode, AccountModeMicrosoft, StringComparison.OrdinalIgnoreCase)
+                    ? AccountModeMicrosoft
+                    : AccountModeOffline,
+                MicrosoftSignInRequested = result.OpenedMicrosoftSignIn,
+                MicrosoftDisplayName = result.MicrosoftDisplayName ?? string.Empty
+            };
+
+        ApplyLauncherProfile(firstRunProfile);
+        SaveLauncherProfile(_launcherProfile);
+
+        if (result?.PlayOfflineSequence == true &&
+            string.Equals(firstRunProfile.AccountMode, AccountModeOffline, StringComparison.OrdinalIgnoreCase))
+        {
+            await PlayOfflineWelcomeSequenceAsync();
+        }
+
+        UpdateStatus(result?.OpenedMicrosoftSignIn == true
+            ? BuildWelcomeMicrosoftStatus(result)
+            : "Offline mode is ready.");
+    }
+
+    private static string BuildWelcomeMicrosoftStatus(WelcomeWindowResult? result)
+    {
+        return string.IsNullOrWhiteSpace(result?.MicrosoftDisplayName)
+            ? "Microsoft sign-in completed."
+            : $"Microsoft sign-in completed: {result.MicrosoftDisplayName}.";
+    }
+
+    private void WelcomeConfirmButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var value = WelcomeUsernameBox?.Text?.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+            value = DefaultOfflineUsername;
+
+        UsernameBox.Text = value;
+        ApplyLauncherProfile(new LauncherProfile
+        {
+            Username = value,
+            WelcomeCompleted = true,
+            AccountMode = AccountModeOffline,
+            MicrosoftSignInRequested = false,
+            MicrosoftDisplayName = string.Empty
+        });
+        SaveLauncherProfile(_launcherProfile);
+
+        if (WelcomeOverlay != null)
+            WelcomeOverlay.IsVisible = false;
+        _welcomeCompleted.TrySetResult(true);
+        UpdateStatus("Profile created.");
+    }
+
+    private void ProfileMenuButton_Click(object? sender, RoutedEventArgs e)
+    {
+        // Profile menu button removed from UI
+    }
+
+    private void ChangeUsernameFromMenu_Click(object? sender, RoutedEventArgs e)
+    {
+        if (WelcomeOverlay == null || WelcomeInputPanel == null || WelcomeTitleText == null || WelcomeSubtitleText == null)
+            return;
+        WelcomeOverlay.IsVisible = true;
+        WelcomeInputPanel.IsVisible = true;
+        WelcomeTitleText.Text = "Change Username";
+        WelcomeSubtitleText.Text = "Set your launcher profile name";
+        if (WelcomeUsernameBox != null)
+            WelcomeUsernameBox.Text = UsernameBox.Text;
+    }
+
+    private void ExitButtonFromMenu_Click(object? sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void OpenSettingsFromMenu(string statusMessage)
+    {
+        SetHeader("Settings", "Accounts, folders and launcher controls");
+        NavMain.IsChecked = false;
+        NavSkins.IsChecked = true;
+        NavMods.IsChecked = false;
+        NavCredits.IsChecked = false;
+        _ = AnimateSectionSwitchAsync(OptionsSection);
+        UpdateStatus(statusMessage);
+    }
+
+    private void GameDirectoryOption_Click(object? sender, RoutedEventArgs e)
+    {
+        OpenSettingsFromMenu("Opened Settings - folders.");
+    }
+
+    private void JavaSettingsOption_Click(object? sender, RoutedEventArgs e)
+    {
+        OpenSettingsFromMenu("Opened Settings - launch tools.");
+    }
+
+    private void InterfaceSettingsOption_Click(object? sender, RoutedEventArgs e)
+    {
+        OpenSettingsFromMenu("Opened Settings - interface.");
+    }
+
+    private void ContentSearch_Click(object? sender, RoutedEventArgs e)
+    {
+        _contentFilter.SearchQuery = ContentSearchBox?.Text ?? string.Empty;
+        _contentPage = 1;
+        _ = LoadContentBrowserAsync(resetList: true);
+    }
+
+    private async void InstallMod_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Control { DataContext: ContentItem item })
+            return;
+
+        await OpenInstallOverlayAsync(item);
+    }
+
+    private LauncherProfile LoadLauncherProfile()
+    {
+        try
+        {
+            if (!File.Exists(_profileSettingsFile))
+                return new LauncherProfile();
+            var json = File.ReadAllText(_profileSettingsFile);
+            return JsonSerializer.Deserialize<LauncherProfile>(json) ?? new LauncherProfile();
+        }
+        catch
+        {
+            return new LauncherProfile();
+        }
+    }
+
+    private void SaveLauncherProfile(LauncherProfile profile)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(profile, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_profileSettingsFile, json);
+        }
+        catch
+        {
+            // best effort save
+        }
+    }
+
+    private async Task WarmThumbnailsAsync(IEnumerable<ContentItem> items, CancellationToken token)
+    {
+        // Fill above-the-fold first and avoid blocking the main list render.
+        var queue = items.Where(i => i.Thumbnail == null && !string.IsNullOrWhiteSpace(i.IconUrl))
+                         .Take(24)
+                         .ToList();
+        var tasks = queue.Select(item => LoadThumbnailForItemAsync(item, token));
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task LoadThumbnailForItemAsync(ContentItem item, CancellationToken token)
+    {
+        if (string.IsNullOrWhiteSpace(item.IconUrl))
+            return;
+        if (_contentThumbnailCache.TryGetValue(item.IconUrl, out var ready))
+        {
+            item.Thumbnail = ready;
+            return;
+        }
+
+        await _thumbnailConcurrency.WaitAsync(token);
+        try
+        {
+            if (_contentThumbnailCache.TryGetValue(item.IconUrl, out var cached))
+            {
+                item.Thumbnail = cached;
+                return;
+            }
+
+            var bytes = await _httpClient.GetByteArrayAsync(item.IconUrl, token);
+            using var ms = new MemoryStream(bytes);
+            var bitmap = new Bitmap(ms);
+            _contentThumbnailCache[item.IconUrl] = bitmap;
+            await Dispatcher.UIThread.InvokeAsync(() => item.Thumbnail = bitmap);
+        }
+        catch
+        {
+            // Ignore single image failure; keep card visible without picture.
+        }
+        finally
+        {
+            _thumbnailConcurrency.Release();
+        }
+    }
+
+    private bool CheckJava21Oracle()
+    {
+        try
+        {
+            var javaHome = Environment.GetEnvironmentVariable("JAVA_HOME");
+            if (!string.IsNullOrWhiteSpace(javaHome))
+            {
+                var javaExe = Path.Combine(javaHome, "bin", "java" + (OperatingSystem.IsWindows() ? ".exe" : ""));
+                if (File.Exists(javaExe))
+                {
+                    var version = GetJavaVersion(javaExe);
+                    if (version.StartsWith("21") && IsOracleJava(javaHome))
+                        return true;
+                }
+            }
+
+            var pathVar = Environment.GetEnvironmentVariable("PATH");
+            if (!string.IsNullOrWhiteSpace(pathVar))
+            {
+                var paths = pathVar.Split(Path.PathSeparator);
+                foreach (var path in paths)
+                {
+                    var javaExe = Path.Combine(path, "java" + (OperatingSystem.IsWindows() ? ".exe" : ""));
+                    if (File.Exists(javaExe))
+                    {
+                        var version = GetJavaVersion(javaExe);
+                        if (version.StartsWith("21") && IsOracleJava(Path.GetDirectoryName(Path.GetDirectoryName(javaExe)) ?? ""))
+                            return true;
+                    }
+                }
+            }
+
+            if (OperatingSystem.IsWindows())
+            {
+                var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                var javaPath = Path.Combine(programFiles, "Java");
+                if (Directory.Exists(javaPath))
+                {
+                    foreach (var dir in Directory.GetDirectories(javaPath, "jdk-21*"))
+                    {
+                        var javaExe = Path.Combine(dir, "bin", "java.exe");
+                        if (File.Exists(javaExe) && IsOracleJava(dir))
+                            return true;
+                    }
+                }
+            }
+            else
+            {
+                var linuxPaths = new[] { "/usr/lib/jvm", "/usr/java", "/opt/java", "/opt/jdk" };
+                foreach (var basePath in linuxPaths)
+                {
+                    if (!Directory.Exists(basePath)) continue;
+                    foreach (var dir in Directory.GetDirectories(basePath, "*21*"))
+                    {
+                        var javaExe = Path.Combine(dir, "bin", "java");
+                        if (File.Exists(javaExe) && IsOracleJava(dir))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private string GetJavaVersion(string javaPath)
+    {
+        try
+        {
+            using var process = new Process();
+            process.StartInfo.FileName = javaPath;
+            process.StartInfo.Arguments = "-version";
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.UseShellExecute = false;
+            process.Start();
+            var output = process.StandardError.ReadToEnd();
+            process.WaitForExit(5000);
+
+            if (string.IsNullOrWhiteSpace(output))
+                output = process.StandardOutput.ReadToEnd();
+
+            var match = System.Text.RegularExpressions.Regex.Match(output, @"version\s*""?(\d+)");
+            if (match.Success)
+                return match.Groups[1].Value;
+
+            return "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    private bool IsOracleJava(string javaHome)
+    {
+        try
+        {
+            var releaseFile = Path.Combine(javaHome, "release");
+            if (File.Exists(releaseFile))
+            {
+                var content = File.ReadAllText(releaseFile);
+                return content.Contains("Oracle") || content.Contains("oracle");
+            }
+            return javaHome.ToLower().Contains("oracle");
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void ShowJava21Popup()
+    {
+        if (WelcomeOverlay == null || WelcomeTitleText == null || WelcomeSubtitleText == null || WelcomeInputPanel == null)
+        {
+            System.Environment.Exit(1);
+            return;
+        }
+
+        WelcomeOverlay.IsVisible = true;
+        WelcomeTitleText.Text = "Java 21 Required";
+        WelcomeSubtitleText.Text = "Oracle Java 21 is required. Please install Oracle JDK 21 and restart the launcher.";
+        WelcomeInputPanel.IsVisible = false;
+
+        var exitButton = new Button
+        {
+            Content = "Exit",
+            Width = 320,
+            Height = 40,
+            Classes = { "epicPrimary" }
+        };
+        exitButton.Click += (_, _) => System.Environment.Exit(1);
+
+        if (WelcomeInputPanel.Parent is StackPanel sp)
+        {
+            sp.Children.Add(exitButton);
+        }
+    }
+
+    private void LogToOutput(string message)
+    {
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (LogOutputText != null)
+            {
+                var timestamp = DateTime.Now.ToString("HH:mm:ss");
+                LogOutputText.Text += $"[{timestamp}] {message}\n";
+                if (LogScrollViewer != null)
+                    LogScrollViewer.ScrollToEnd();
+            }
+        });
+    }
+
+    private void SetLoadingBar(bool visible, double value = 0)
+    {
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (MainLoadingBar != null)
+            {
+                MainLoadingBar.IsVisible = visible;
+                MainLoadingBar.Value = value;
+            }
+        });
+    }
+
+    private void CheckModConflicts(string instancePath)
+    {
+        try
+        {
+            var modsFolder = Path.Combine(instancePath, "mods");
+            if (!Directory.Exists(modsFolder)) return;
+
+            var modFiles = Directory.GetFiles(modsFolder, "*.jar");
+            var modIds = new Dictionary<string, List<string>>();
+
+            foreach (var modFile in modFiles)
+            {
+                var fileName = Path.GetFileNameWithoutExtension(modFile);
+                var baseName = ExtractModBaseName(fileName);
+
+                if (!modIds.ContainsKey(baseName))
+                    modIds[baseName] = new List<string>();
+                modIds[baseName].Add(modFile);
+            }
+
+            foreach (var kvp in modIds)
+            {
+                if (kvp.Value.Count > 1)
+                {
+                    LogToOutput($"Conflict detected: {kvp.Key} has {kvp.Value.Count} versions");
+                    var versions = kvp.Value.OrderByDescending(f => File.GetLastWriteTime(f)).ToList();
+                    for (var i = 1; i < versions.Count; i++)
+                    {
+                        var disabledPath = versions[i] + ".disabled";
+                        File.Move(versions[i], disabledPath);
+                        LogToOutput($"  Disabled: {Path.GetFileName(versions[i])}");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogToOutput($"Conflict check error: {ex.Message}");
+        }
+    }
+
+    private string ExtractModBaseName(string fileName)
+    {
+        var parts = fileName.Split('-', '_');
+        if (parts.Length >= 2)
+        {
+            var versionIndex = Array.FindIndex(parts, p => char.IsDigit(p[0]));
+            if (versionIndex > 0)
+                return string.Join("-", parts.Take(versionIndex));
+        }
+        return fileName;
+    }
+
 }
 
 public class SkinSettings
 {
     public string Path  { get; set; } = string.Empty;
     public string Model { get; set; } = "classic";
+}
+
+public class LauncherProfile
+{
+    public string Username { get; set; } = string.Empty;
+    public bool WelcomeCompleted { get; set; }
+    public string AccountMode { get; set; } = "Offline";
+    public bool MicrosoftSignInRequested { get; set; }
+    public string MicrosoftDisplayName { get; set; } = string.Empty;
 }

@@ -3,7 +3,7 @@
         xmlns:local="clr-namespace:XylarJavaLauncher"
         x:Class="XylarJavaLauncher.MainWindow"
         x:CompileBindings="False"
-        Title="Xylar"
+        Title="XylarJava"
         Width="1520"
         Height="960"
         MinWidth="1200"
@@ -63,6 +63,34 @@
         </LinearGradientBrush>
       </Setter>
       <Setter Property="Padding" Value="28"/>
+    </Style>
+
+    <Style Selector="Border.epicMetric">
+      <Setter Property="CornerRadius" Value="10"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#35353D"/>
+      <Setter Property="Background" Value="#1F2026"/>
+      <Setter Property="Padding" Value="12,10"/>
+      <Setter Property="MinWidth" Value="128"/>
+    </Style>
+
+    <Style Selector="Border.epicQuickAction">
+      <Setter Property="CornerRadius" Value="10"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#2F3138"/>
+      <Setter Property="Background" Value="#202128"/>
+      <Setter Property="Padding" Value="12,10"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.2"/>
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+        </Transitions>
+      </Setter>
+    </Style>
+
+    <Style Selector="Border.epicQuickAction:pointerover">
+      <Setter Property="Background" Value="#2A2B33"/>
+      <Setter Property="BorderBrush" Value="#4A4D58"/>
     </Style>
 
     <Style Selector="Border.epicModRow">
@@ -126,6 +154,25 @@
 
     <Style Selector="Button.epicSecondary:pointerover">
       <Setter Property="Background" Value="#35353D"/>
+    </Style>
+
+    <Style Selector="Button.epicMicrosoft">
+      <Setter Property="Background" Value="#21C7E5"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Padding" Value="18,10"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="BorderBrush" Value="#4EE4FF"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.15"/>
+        </Transitions>
+      </Setter>
+    </Style>
+
+    <Style Selector="Button.epicMicrosoft:pointerover">
+      <Setter Property="Background" Value="#39D7F2"/>
     </Style>
 
     <Style Selector="Button.epicCompact">
@@ -196,6 +243,119 @@
       <Setter Property="BorderBrush" Value="#B8B8C0"/>
     </Style>
 
+    <Style Selector="Border.contentCard">
+      <Setter Property="CornerRadius" Value="18"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#2F3138"/>
+      <Setter Property="Background" Value="#181A20"/>
+      <Setter Property="ClipToBounds" Value="True"/>
+      <Setter Property="Margin" Value="0,0,18,18"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.2"/>
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+        </Transitions>
+      </Setter>
+    </Style>
+
+    <Style Selector="Border.contentCard:pointerover">
+      <Setter Property="Background" Value="#20232A"/>
+      <Setter Property="BorderBrush" Value="#4D89B7"/>
+    </Style>
+
+    <Style Selector="Border.modrinthHero">
+      <Setter Property="CornerRadius" Value="24"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#2E3040"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+          <GradientStop Color="#182230" Offset="0"/>
+          <GradientStop Color="#11161E" Offset="0.55"/>
+          <GradientStop Color="#101318" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+
+    <Style Selector="Border.modrinthChip">
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#334155"/>
+      <Setter Property="Background" Value="#17202B"/>
+      <Setter Property="Padding" Value="10,5"/>
+    </Style>
+
+    <Style Selector="ToggleButton.modrinthTab">
+      <Setter Property="Background" Value="#171C23"/>
+      <Setter Property="Foreground" Value="#A7AFBC"/>
+      <Setter Property="BorderBrush" Value="#313746"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="16,10"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style Selector="ToggleButton.modrinthTab:pointerover">
+      <Setter Property="Background" Value="#1E2530"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="BorderBrush" Value="#46607A"/>
+    </Style>
+
+    <Style Selector="ToggleButton.modrinthTab:checked">
+      <Setter Property="Background" Value="#212D3C"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="BorderBrush" Value="#65C2FF"/>
+    </Style>
+
+    <Style Selector="TextBox.modrinthSearch">
+      <Setter Property="Background" Value="#12171D"/>
+      <Setter Property="Foreground" Value="#F5F5F5"/>
+      <Setter Property="BorderBrush" Value="#313A45"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="Padding" Value="16,12"/>
+    </Style>
+
+    <Style Selector="Button.modrinthPrimary">
+      <Setter Property="Background" Value="#21C7E5"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="BorderBrush" Value="#71E8FF"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="Padding" Value="16,10"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
+    <Style Selector="Button.modrinthPrimary:pointerover">
+      <Setter Property="Background" Value="#35D7F2"/>
+    </Style>
+
+    <Style Selector="Button.modrinthGhost">
+      <Setter Property="Background" Value="#181C23"/>
+      <Setter Property="Foreground" Value="#F5F5F5"/>
+      <Setter Property="BorderBrush" Value="#313746"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="Padding" Value="16,10"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style Selector="Button.modrinthGhost:pointerover">
+      <Setter Property="Background" Value="#212832"/>
+      <Setter Property="BorderBrush" Value="#4F657E"/>
+    </Style>
+
+    <Style Selector="ProgressBar#ContentLoadingBar">
+      <Setter Property="Minimum" Value="0"/>
+      <Setter Property="Maximum" Value="100"/>
+      <Setter Property="Value" Value="0"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Value" Duration="0:0:0.32"/>
+        </Transitions>
+      </Setter>
+    </Style>
+
     <Style Selector="ListBox#ModpackList">
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="0"/>
@@ -228,7 +388,8 @@
     </Style>
   </Window.Styles>
 
-  <Grid ColumnDefinitions="272,*" Margin="0">
+  <Grid>
+    <Grid ColumnDefinitions="272,*" Margin="0">
     <!-- Liquid glass sidebar (neutral / warm highlights) -->
     <Border x:Name="NavGlassHost"
             Grid.Column="0"
@@ -269,8 +430,8 @@
 
         <StackPanel Grid.Row="1" Margin="4,0,4,0" Spacing="6" VerticalAlignment="Center">
           <ToggleButton x:Name="NavMain" Classes="epicNav" Content="Home" IsChecked="True" Click="NavButton_Click"/>
-          <ToggleButton x:Name="NavSkins" Classes="epicNav" Content="Skins" Click="NavButton_Click"/>
-          <ToggleButton x:Name="NavMods" Classes="epicNav" Content="Modpacks" Click="NavButton_Click"/>
+          <ToggleButton x:Name="NavSkins" Classes="epicNav" Content="Settings" Click="NavButton_Click"/>
+          <ToggleButton x:Name="NavMods" Classes="epicNav" Content="Mods" Click="NavButton_Click"/>
           <ToggleButton x:Name="NavCredits" Classes="epicNav" Content="About" Click="NavButton_Click"/>
         </StackPanel>
 
@@ -288,24 +449,22 @@
                      TextWrapping="Wrap"
                      Opacity="0.72"
                      LineHeight="14"/>
-          <TextBlock Text="Modpack catalog via Modrinth API."
-                     Classes="epicCaption"
-                     TextWrapping="Wrap"
-                     Opacity="0.85"
-                     Margin="0,4,0,0"/>
+        </StackPanel>
+        <StackPanel IsVisible="False">
+          <Border Width="1" Height="1">
+            <Image x:Name="ProfileAvatarImage" Source="/Assets/steve.png"/>
+          </Border>
+          <TextBlock x:Name="HeroStatusText"/>
+          <TextBlock x:Name="SelectionSummaryText"/>
         </StackPanel>
       </Grid>
     </Border>
 
     <Grid Grid.Column="1" Margin="8,16,16,16" RowDefinitions="Auto,*">
-      <Grid Grid.Row="0" Margin="0,0,0,12" ColumnDefinitions="*,Auto">
+      <Grid Grid.Row="0" Margin="0,0,0,12" ColumnDefinitions="*">
         <StackPanel Spacing="4" VerticalAlignment="Center">
           <TextBlock x:Name="HeaderTitleText" Text="Home" FontSize="24" FontWeight="Bold"/>
-          <TextBlock x:Name="HeaderSubtitleText" Text="Profile, version, loader — then launch" Classes="epicMuted" FontSize="13"/>
-        </StackPanel>
-        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-          <TextBlock x:Name="HeroStatusText" Text="Ready" FontWeight="SemiBold" HorizontalAlignment="Right"/>
-          <TextBlock x:Name="SelectionSummaryText" Classes="epicMuted" FontSize="12" TextAlignment="Right"/>
+          <TextBlock x:Name="HeaderSubtitleText" Text="Pick a version, choose a loader, and launch" Classes="epicMuted" FontSize="13"/>
         </StackPanel>
       </Grid>
 
@@ -314,10 +473,10 @@
           <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
             <Grid Margin="24" RowDefinitions="Auto,*" ColumnDefinitions="420,*">
               <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Classes="epicHero" Margin="0,0,0,18">
-                <Grid ColumnDefinitions="*,Auto">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                   <StackPanel Spacing="10" VerticalAlignment="Center">
-                    <TextBlock Text="Ready when you are" FontSize="28" FontWeight="Bold"/>
-                    <TextBlock Text="Choose your Minecraft version, then Fabric or Forge (most used loaders). Status and progress stay below." Classes="epicMuted" TextWrapping="Wrap" MaxWidth="720"/>
+                    <TextBlock Text="Launch setup" FontSize="28" FontWeight="Bold"/>
+                    <TextBlock Text="Pick a version, choose a loader, and launch." Classes="epicMuted" TextWrapping="Wrap" MaxWidth="720"/>
                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
                       <Border Background="#2A2A30" CornerRadius="8" Padding="12,8">
                         <TextBlock x:Name="HeroVersionText" Classes="epicCaption"/>
@@ -327,6 +486,27 @@
                       </Border>
                     </StackPanel>
                   </StackPanel>
+
+                  <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,18,0,0" Orientation="Horizontal" Spacing="10">
+                    <Border Classes="epicMetric">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="Status" Classes="epicCaption"/>
+                        <TextBlock Text="Ready" FontWeight="SemiBold"/>
+                      </StackPanel>
+                    </Border>
+                    <Border Classes="epicMetric">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="Default" Classes="epicCaption"/>
+                        <TextBlock Text="Standard profile" FontWeight="SemiBold"/>
+                      </StackPanel>
+                    </Border>
+                    <Border Classes="epicMetric">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="Modded" Classes="epicCaption"/>
+                        <TextBlock Text="Fabric / Forge" FontWeight="SemiBold"/>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
                 </Grid>
               </Border>
 
@@ -334,17 +514,17 @@
                 <Border Classes="epicPanel">
                   <StackPanel Spacing="14">
                     <TextBlock Text="Profile" FontSize="17" FontWeight="SemiBold"/>
-                    <TextBlock Text="Name, game version, loader and filters in one column." Classes="epicMuted" TextWrapping="Wrap"/>
+                    <TextBlock Text="Version, loader and target profile." Classes="epicMuted" TextWrapping="Wrap"/>
 
-                    <StackPanel Spacing="6">
-                      <TextBlock Text="Player name" Classes="epicCaption"/>
+                    <StackPanel Spacing="6" IsVisible="False">
+                      <TextBlock Text="Launch name" Classes="epicCaption"/>
                       <TextBox x:Name="UsernameBox" Height="44" Watermark="Your in-game name"/>
                     </StackPanel>
 
                     <StackPanel Spacing="6">
                       <TextBlock Text="Play profile (installed modpacks)" Classes="epicCaption"/>
                       <ComboBox x:Name="ProfileTargetCombo" Height="44"/>
-                      <TextBlock Text="Modpacks you install appear here like a game profile. Version and loader follow the pack." Classes="epicMuted" FontSize="11" TextWrapping="Wrap"/>
+                      <TextBlock Text="Installed modpacks appear here automatically." Classes="epicMuted" FontSize="11" TextWrapping="Wrap"/>
                     </StackPanel>
 
                     <StackPanel Spacing="6">
@@ -355,8 +535,11 @@
                     <StackPanel Spacing="6">
                       <TextBlock Text="Loader" Classes="epicCaption"/>
                       <ComboBox x:Name="LoaderCombo" Height="44">
-                        <ComboBoxItem Content="Fabric" IsSelected="True"/>
+                        <ComboBoxItem Content="Vanilla" IsSelected="True"/>
+                        <ComboBoxItem Content="Fabric"/>
                         <ComboBoxItem Content="Forge"/>
+                        <ComboBoxItem Content="NeoForge"/>
+                        <ComboBoxItem Content="Quilt"/>
                       </ComboBox>
                     </StackPanel>
 
@@ -372,6 +555,21 @@
                     <Border Background="#25252C" BorderBrush="#3A3A42" BorderThickness="1" CornerRadius="10" Padding="12,10">
                       <TextBlock x:Name="LoaderWarning" FontSize="12" TextWrapping="Wrap"/>
                     </Border>
+
+                    <Grid ColumnDefinitions="*,*">
+                      <Border Classes="epicQuickAction">
+                        <StackPanel Spacing="2">
+                          <TextBlock Text="Versions" Classes="epicCaption"/>
+                          <TextBlock Text="Use Installed to filter fast" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                      </Border>
+                      <Border Grid.Column="1" Classes="epicQuickAction" Margin="10,0,0,0">
+                        <StackPanel Spacing="2">
+                          <TextBlock Text="Target" Classes="epicCaption"/>
+                          <TextBlock Text="Use profile picker for modpacks" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                      </Border>
+                    </Grid>
                   </StackPanel>
                 </Border>
 
@@ -384,8 +582,32 @@
                             FontSize="15"
                             HorizontalAlignment="Stretch"
                             Click="LaunchButton_Click"/>
-                    <ProgressBar x:Name="DownloadProgress" Height="4" Minimum="0" Maximum="100" Value="0"/>
+                    <Border Background="#1B1C22" BorderBrush="#2F3138" BorderThickness="1" CornerRadius="8" Padding="10,8">
+                      <ProgressBar x:Name="DownloadProgress" Height="6" Minimum="0" Maximum="100" Value="0"/>
+                    </Border>
                     <TextBlock x:Name="StatusText" Classes="epicMuted" FontSize="12" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <Button Classes="epicGhost"
+                              Content="Refresh versions"
+                              Height="34"
+                              Click="RefreshVersionsButton_Click"/>
+                      <Button Classes="epicGhost"
+                              Content="Open instances"
+                              Height="34"
+                              Click="OpenInstancesFolder_Click"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="epicPanel">
+                  <StackPanel Spacing="10">
+                    <TextBlock Text="Activity Log" FontSize="17" FontWeight="SemiBold"/>
+                    <ProgressBar x:Name="MainLoadingBar" Height="6" Minimum="0" Maximum="100" Value="0" IsVisible="False"/>
+                    <Border Background="#0D0D10" BorderBrush="#2F3138" BorderThickness="1" CornerRadius="8" Padding="10" Height="200">
+                      <ScrollViewer x:Name="LogScrollViewer" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="LogOutputText" Classes="epicMuted" FontSize="11" TextWrapping="Wrap" FontFamily="Consolas,Monospace"/>
+                      </ScrollViewer>
+                    </Border>
                   </StackPanel>
                 </Border>
               </StackPanel>
@@ -415,86 +637,137 @@
 
         <Border x:Name="SkinSection" Classes="epicContentShell" IsVisible="False">
           <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="28,24,28,32" Spacing="18" MaxWidth="920">
-              <TextBlock Text="OfflineSkins (Fabric)" FontSize="28" FontWeight="Bold" LetterSpacing="-0.5"/>
-              <TextBlock Text="Step-by-step guide for the OfflineSkins mod on Modrinth. This launcher does not manage skins from this page; follow the instructions below inside your Minecraft directory." Classes="epicMuted" TextWrapping="Wrap" FontSize="13"/>
-
-              <Button Classes="epicPrimary"
-                      Content="Open OfflineSkins on Modrinth"
-                      HorizontalAlignment="Left"
-                      Height="44"
-                      Padding="20,0"
-                      Click="OpenOfflineSkinsModPage_Click"/>
-
-              <Border Classes="epicPanel">
-                <StackPanel Spacing="14">
-                  <TextBlock Text="1. What you need" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
-                    Minecraft: Java Edition. The OfflineSkins mod is Fabric-only and runs on the client only. For version 1.21.11, use a build of the mod that matches Minecraft 1.21.6 through 1.21.11 as listed on the project page. You must have Fabric Loader installed for that Minecraft version.
-                  </TextBlock>
+            <StackPanel Margin="28,24,28,32" Spacing="20" MaxWidth="960">
+              <Border Padding="24,20" CornerRadius="16" BorderBrush="#2E3040" BorderThickness="1">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="1,0.5">
+                    <GradientStop Color="#1E1E26" Offset="0"/>
+                    <GradientStop Color="#14141A" Offset="1"/>
+                  </LinearGradientBrush>
+                </Border.Background>
+                <StackPanel Spacing="10">
+                  <TextBlock Text="OfflineSkins Mod" FontSize="28" FontWeight="Bold" LetterSpacing="-0.5"/>
+                  <TextBlock Text="Play offline Minecraft with custom skins using the Fabric mod OfflineSkins. Full setup guide below." Classes="epicMuted" TextWrapping="Wrap" FontSize="13" LineHeight="20"/>
+                  <Button Classes="epicPrimary" Content="Open OfflineSkins on Modrinth" Margin="0,8,0,0" Height="40" Padding="16,0" Click="OpenOfflineSkinsModPage_Click" HorizontalAlignment="Left"/>
                 </StackPanel>
               </Border>
 
               <Border Classes="epicPanel">
-                <StackPanel Spacing="14">
-                  <TextBlock Text="2. Install Fabric Loader" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
-                    Close Minecraft completely. Download the Fabric installer from the official Fabric site for your operating system. Run the installer, choose &quot;Client&quot;, select the same Minecraft version you play (for example 1.21.11), and install into your default .minecraft directory (or the game directory you use with this launcher). Wait until the installer finishes without errors.
-                  </TextBlock>
+                <StackPanel Spacing="12">
+                  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                    <Border Grid.Column="0" Grid.Row="0" Width="48" Height="48" CornerRadius="10" Background="#2A2A30" BorderBrush="#3A3A42" BorderThickness="1" Padding="8">
+                      <TextBlock Text="1" FontSize="24" FontWeight="Bold" Foreground="#D8D8E0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="Requirements" FontSize="16" FontWeight="SemiBold"/>
+                      <TextBlock Text="Java Edition · Fabric 1.21+ · OfflineSkins mod" Classes="epicMuted" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12" LineHeight="18" Classes="epicMuted">
+                      Download Fabric for your Minecraft version from the official Fabric website. OfflineSkins is a client-only Fabric mod; you must have Fabric Loader installed.
+                    </TextBlock>
+                  </Grid>
                 </StackPanel>
               </Border>
 
               <Border Classes="epicPanel">
-                <StackPanel Spacing="14">
-                  <TextBlock Text="3. Download the OfflineSkins mod JAR" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
-                    On Modrinth, open the OfflineSkins project and go to the Versions tab. Download the .jar file that matches your Minecraft version (for 1.21.11, pick a file explicitly compatible with 1.21.6 to 1.21.11). The mod is licensed under MIT and declares no mandatory mod dependencies beyond Fabric on the client.
-                  </TextBlock>
+                <StackPanel Spacing="12">
+                  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                    <Border Grid.Column="0" Grid.Row="0" Width="48" Height="48" CornerRadius="10" Background="#2A2A30" BorderBrush="#3A3A42" BorderThickness="1" Padding="8">
+                      <TextBlock Text="2" FontSize="24" FontWeight="Bold" Foreground="#D8D8E0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="Install Fabric" FontSize="16" FontWeight="SemiBold"/>
+                      <TextBlock Text="Run the Fabric installer, choose Client" Classes="epicMuted" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12" LineHeight="18" Classes="epicMuted">
+                      Download the Fabric installer from fabric.net, run it, select your Minecraft version, and install to your .minecraft directory (or the custom game directory you use with this launcher).
+                    </TextBlock>
+                  </Grid>
                 </StackPanel>
               </Border>
 
               <Border Classes="epicPanel">
-                <StackPanel Spacing="14">
-                  <TextBlock Text="4. Place the mod in the mods folder" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
-                    Move the downloaded OfflineSkins .jar into the mods folder inside your Minecraft game directory. The usual path is .minecraft/mods/ on Windows (inside your user AppData folder unless you use a custom directory). Do not unzip the jar. If a mods folder does not exist, create it.
-                  </TextBlock>
+                <StackPanel Spacing="12">
+                  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                    <Border Grid.Column="0" Grid.Row="0" Width="48" Height="48" CornerRadius="10" Background="#2A2A30" BorderBrush="#3A3A42" BorderThickness="1" Padding="8">
+                      <TextBlock Text="3" FontSize="24" FontWeight="Bold" Foreground="#D8D8E0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="Download Mod" FontSize="16" FontWeight="SemiBold"/>
+                      <TextBlock Text="Get the .jar file from Modrinth" Classes="epicMuted" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12" LineHeight="18" Classes="epicMuted">
+                      On Modrinth, find OfflineSkins and download the .jar matching your Minecraft version. Do not unzip the file.
+                    </TextBlock>
+                  </Grid>
                 </StackPanel>
               </Border>
 
               <Border Classes="epicPanel">
-                <StackPanel Spacing="14">
-                  <TextBlock Text="5. Create the offlineskins config folder" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
-                    Inside the same game directory where mods and config live, go to config/offlineskins/ (full path: .minecraft/config/offlineskins/). Create the offlineskins folder if it is missing. This is the only folder the mod uses for your PNG skin files, not the mods folder.
-                  </TextBlock>
+                <StackPanel Spacing="12">
+                  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                    <Border Grid.Column="0" Grid.Row="0" Width="48" Height="48" CornerRadius="10" Background="#2A2A30" BorderBrush="#3A3A42" BorderThickness="1" Padding="8">
+                      <TextBlock Text="4" FontSize="24" FontWeight="Bold" Foreground="#D8D8E0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="Place Mod" FontSize="16" FontWeight="SemiBold"/>
+                      <TextBlock Text="Move .jar to .minecraft/mods/" Classes="epicMuted" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12" LineHeight="18" Classes="epicMuted">
+                      Copy the OfflineSkins .jar file into your game directory's mods folder. Create the mods folder if it does not exist.
+                    </TextBlock>
+                  </Grid>
                 </StackPanel>
               </Border>
 
               <Border Classes="epicPanel">
-                <StackPanel Spacing="14">
-                  <TextBlock Text="6. Add your skin PNG files" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
-                    Export or obtain a valid Minecraft skin as a PNG (typically 64x64 pixels, or legacy 64x32). Copy the file into config/offlineskins/. The file name (without .png) must match the in-game name you want to use. Example: if your offline username is Player, name the file Player.png. Use only letters, numbers, and underscores as needed so the name matches what you type in commands.
-                  </TextBlock>
+                <StackPanel Spacing="12">
+                  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                    <Border Grid.Column="0" Grid.Row="0" Width="48" Height="48" CornerRadius="10" Background="#2A2A30" BorderBrush="#3A3A42" BorderThickness="1" Padding="8">
+                      <TextBlock Text="5" FontSize="24" FontWeight="Bold" Foreground="#D8D8E0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="Config Folder" FontSize="16" FontWeight="SemiBold"/>
+                      <TextBlock Text="Create config/offlineskins/" Classes="epicMuted" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12" LineHeight="18" Classes="epicMuted">
+                      Create a config/offlineskins/ folder in the same game directory. This is where the mod looks for your PNG skin files.
+                    </TextBlock>
+                  </Grid>
                 </StackPanel>
               </Border>
 
               <Border Classes="epicPanel">
-                <StackPanel Spacing="14">
-                  <TextBlock Text="7. Launch the game and select the skin" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
-                    Start Minecraft with the Fabric profile for your version. In a world or on the main menu, use the mod client commands: type /offlineskins list to see every PNG name the mod found. Type /offlineskins change &lt;skin_name&gt; where skin_name is the file name without .png to apply it to your local player. Type /offlineskins default steve or /offlineskins default alex to reset the arm model to the wide Steve or slim Alex default. The mod stores your choice in config.json inside the same offlineskins folder and reloads it when you start the game.
-                  </TextBlock>
+                <StackPanel Spacing="12">
+                  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                    <Border Grid.Column="0" Grid.Row="0" Width="48" Height="48" CornerRadius="10" Background="#2A2A30" BorderBrush="#3A3A42" BorderThickness="1" Padding="8">
+                      <TextBlock Text="6" FontSize="24" FontWeight="Bold" Foreground="#D8D8E0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="Add Skins" FontSize="16" FontWeight="SemiBold"/>
+                      <TextBlock Text="Copy PNG files matching your username" Classes="epicMuted" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12" LineHeight="18" Classes="epicMuted">
+                      Export or download Minecraft skins (64x64 or 64x32 PNG). Copy them into config/offlineskins/. File names must match your in-game name: if your username is OfflineUser, name the file OfflineUser.png.
+                    </TextBlock>
+                  </Grid>
                 </StackPanel>
               </Border>
 
               <Border Classes="epicPanel">
-                <StackPanel Spacing="14">
-                  <TextBlock Text="8. Troubleshooting" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22">
-                    If the skin does not appear: confirm Fabric Loader is active, confirm the OfflineSkins jar is in mods/, confirm the PNG is in config/offlineskins/ (not in mods), confirm the file name matches the name you pass to /offlineskins change, and confirm the PNG dimensions are valid for Minecraft. If commands are missing, the mod did not load; check the game log for errors. This launcher launches the same .minecraft directory unless you use --gameDir with a modpack instance; in that case, use that instance's config/offlineskins/ folder instead.
-                  </TextBlock>
+                <StackPanel Spacing="12">
+                  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                    <Border Grid.Column="0" Grid.Row="0" Width="48" Height="48" CornerRadius="10" Background="#2A2A30" BorderBrush="#3A3A42" BorderThickness="1" Padding="8">
+                      <TextBlock Text="7" FontSize="24" FontWeight="Bold" Foreground="#D8D8E0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="Launch &amp; Apply" FontSize="16" FontWeight="SemiBold"/>
+                      <TextBlock Text="Use /offlineskins commands in-game" Classes="epicMuted" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12" LineHeight="18" Classes="epicMuted">
+                      Launch Minecraft with Fabric. In-game, use /offlineskins list to see available skins, /offlineskins change [name] to apply one, or /offlineskins default [steve|alex] to reset.
+                    </TextBlock>
+                  </Grid>
                 </StackPanel>
               </Border>
             </StackPanel>
@@ -502,121 +775,327 @@
         </Border>
 
         <Border x:Name="ModSection" Classes="epicContentShell" IsVisible="False">
-          <Grid Margin="22" RowDefinitions="Auto,Auto,Auto,*">
-            <StackPanel Spacing="6">
-              <TextBlock Text="Modrinth library" FontSize="24" FontWeight="Bold"/>
-              <TextBlock Text="Full Modrinth catalog. Install extracts the .mrpack then downloads every file listed in modrinth.index.json (mods, configs) into /instances." Classes="epicMuted" TextWrapping="Wrap"/>
-            </StackPanel>
-
-            <Grid Grid.Row="1" Margin="0,14,0,0" ColumnDefinitions="*,Auto,Auto">
-              <TextBox x:Name="ModSearchBox" Height="44" Watermark="Filter installed catalog..." KeyUp="ModSearchBox_KeyUp"/>
-              <Button Grid.Column="1"
-                      Margin="10,0,0,0"
-                      x:Name="RefreshModpacksButton"
-                      Classes="epicSecondary"
-                      Content="Reload catalog"
-                      Height="44"
-                      Padding="16,0"
-                      Click="RefreshModpacksButton_Click"/>
-              <Button Grid.Column="2"
-                      Margin="10,0,0,0"
-                      Classes="epicGhost"
-                      Content="Stop"
-                      Height="44"
-                      Padding="16,0"
-                      Click="StopModpackLoad_Click"/>
-            </Grid>
-
-            <TextBlock x:Name="ModpackLoadProgressText"
-                       Grid.Row="2"
-                       Margin="0,10,0,0"
-                       Classes="epicCaption"
-                       TextWrapping="Wrap"/>
-
-            <Grid Grid.Row="3" Margin="0,12,0,0" ColumnDefinitions="*,280">
-              <ListBox x:Name="ModpackList">
-                <ListBox.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <VirtualizingStackPanel />
-                  </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                  <DataTemplate DataType="local:ModpackItem">
-                    <Border Classes="epicModRow" Loaded="ModpackRow_Loaded">
-                      <Grid ColumnDefinitions="88,*" RowDefinitions="*,Auto">
-                        <Border Grid.RowSpan="2"
-                                Width="88"
-                                Height="88"
-                                VerticalAlignment="Top"
-                                CornerRadius="8"
-                                ClipToBounds="True"
-                                Background="#25252C"
-                                BorderBrush="#3A3A42"
-                                BorderThickness="1">
-                          <Image Source="{Binding Icon}"
-                                 Stretch="UniformToFill"
-                                 IsVisible="{Binding HasIcon}"/>
-                        </Border>
-
-                        <StackPanel Grid.Column="1" Margin="14,0,0,0" Spacing="6">
-                          <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="520"/>
-                            <Border Background="#2A2A30" CornerRadius="4" Padding="8,4" VerticalAlignment="Center">
-                              <TextBlock Text="{Binding StateLabel}" Classes="epicCaption"/>
-                            </Border>
-                          </StackPanel>
-                          <TextBlock Text="{Binding Description}"
-                                     Classes="epicMuted"
-                                     FontSize="12"
-                                     MaxHeight="40"
-                                     TextTrimming="CharacterEllipsis"
-                                     TextWrapping="Wrap"/>
-                          <TextBlock Text="{Binding MetaLine}" Classes="epicCaption"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1"
-                                    Grid.Row="1"
-                                    Margin="14,10,0,0"
-                                    Orientation="Horizontal"
-                                    Spacing="8"
-                                    HorizontalAlignment="Right">
-                          <Button Classes="epicCompact"
-                                  Content="{Binding InstallActionText}"
-                                  Click="ModpackInstall_Click"
-                                  IsEnabled="{Binding CanClickInstall}"/>
-                          <Button Classes="epicGhost"
-                                  Content="Web"
-                                  Click="ModpackWeb_Click"
-                                  IsEnabled="{Binding CanOpenWeb}"/>
-                          <Button Classes="epicSecondary"
-                                  Content="Folder"
-                                  Padding="12,8"
-                                  Click="ModpackOpenFolder_Click"
-                                  IsVisible="{Binding ShowOpenFolder}"
-                                  IsEnabled="{Binding CanOpenFolder}"/>
-                        </StackPanel>
-                      </Grid>
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="32" RowDefinitions="Auto,Auto,*" ColumnDefinitions="*">
+              <Border Classes="modrinthHero"
+                      Padding="28,26"
+                      Margin="0,0,0,24">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="12">
+                    <Border Classes="modrinthChip" HorizontalAlignment="Left">
+                      <TextBlock Text="CONTENT BROWSER" FontSize="11" FontWeight="Bold" Foreground="#9FE2FF"/>
                     </Border>
-                  </DataTemplate>
-                </ListBox.ItemTemplate>
-              </ListBox>
+                    <TextBlock Text="Install mods, modpacks, and resource packs"
+                               FontSize="34"
+                               FontWeight="Bold"
+                               LetterSpacing="-0.8"
+                               TextWrapping="Wrap"
+                               MaxWidth="700"/>
+                    <TextBlock Text="Choose a project, pick a supported version and loader, then install it into a valid target."
+                               Foreground="#B7C3D1"
+                               TextWrapping="Wrap"
+                               FontSize="14"
+                               LineHeight="22"
+                               MaxWidth="700"/>
+                  </StackPanel>
 
-              <Border Grid.Column="1" Margin="16,0,0,0" Classes="epicPanel">
-                <StackPanel Spacing="12">
-                  <TextBlock Text="Selection" FontSize="16" FontWeight="SemiBold"/>
-                  <TextBlock x:Name="ModpackTargetTitle" Text="Pick a row" FontWeight="SemiBold"/>
-                  <TextBlock x:Name="ModpackTargetSubtitle" Classes="epicMuted" TextWrapping="Wrap"/>
-                  <TextBlock x:Name="ModpackTargetStatus" Classes="epicCaption" TextWrapping="Wrap"/>
-
-                  <Button x:Name="ClearActiveModpackButton"
-                          Classes="epicSecondary"
-                          Content="Use normal profile"
-                          Height="42"
-                          IsVisible="False"/>
-                </StackPanel>
+                  <StackPanel Grid.Column="1" Margin="28,0,0,0" Spacing="12" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <Border Classes="modrinthChip" HorizontalAlignment="Right">
+                      <TextBlock Text="Source: Modrinth" FontSize="12" FontWeight="SemiBold"/>
+                    </Border>
+                    <Border Classes="modrinthChip" HorizontalAlignment="Right">
+                      <TextBlock Text="Installs require a downloaded Minecraft version" FontSize="12" FontWeight="SemiBold"/>
+                    </Border>
+                  </StackPanel>
+                </Grid>
               </Border>
+
+              <StackPanel Grid.Row="1" Spacing="16">
+                <WrapPanel Orientation="Horizontal">
+                  <ToggleButton x:Name="TabMods"
+                                Classes="modrinthTab"
+                                Content="Mods"
+                                IsChecked="True"
+                                Margin="0,0,10,10"
+                                Click="ContentTab_Click"/>
+                  <ToggleButton x:Name="TabModpacks"
+                                Classes="modrinthTab"
+                                Content="Modpacks"
+                                Margin="0,0,10,10"
+                                Click="ContentTab_Click"/>
+                  <ToggleButton x:Name="TabResourcePacks"
+                                Classes="modrinthTab"
+                                Content="Resource Packs"
+                                Margin="0,0,10,10"
+                                Click="ContentTab_Click"/>
+                </WrapPanel>
+
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBox x:Name="ContentSearchBox"
+                           Classes="modrinthSearch"
+                           Height="48"
+                           Watermark="Search mods, e.g. Sodium"
+                           KeyUp="ContentSearchBox_KeyUp"/>
+                  <Button Grid.Column="1"
+                          Margin="12,0,0,0"
+                          Classes="modrinthPrimary"
+                          Content="Search"
+                          Width="118"
+                          Height="48"
+                          Click="ContentSearch_Click"/>
+                </Grid>
+
+                <ProgressBar x:Name="ContentLoadingBar" Height="6" IsVisible="False"/>
+                <TextBlock x:Name="ContentStatusText"
+                           Classes="epicCaption"
+                           Text="Discover popular mods from Modrinth."
+                           TextWrapping="Wrap"
+                           Foreground="#A5B4C2"
+                           Opacity="1"/>
+              </StackPanel>
+
+              <ScrollViewer Grid.Row="2" Margin="0,24,0,0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="20">
+                  <ItemsControl x:Name="ContentItemsControl" Padding="0,0,12,0">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="contentCard" Width="324">
+                          <Grid RowDefinitions="Auto,Auto,Auto">
+                            <Grid Margin="18,18,18,0" ColumnDefinitions="72,*,Auto">
+                              <Border Width="72"
+                                      Height="72"
+                                      CornerRadius="18"
+                                      BorderBrush="#334155"
+                                      BorderThickness="1"
+                                      Background="#18212C">
+                                <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"/>
+                              </Border>
+
+                              <StackPanel Grid.Column="1" Margin="14,0,0,0" Spacing="7" VerticalAlignment="Center">
+                                <WrapPanel Orientation="Horizontal">
+                                  <Border Classes="modrinthChip" Margin="0,0,8,6">
+                                    <TextBlock Text="{Binding DisplaySourceName}" FontSize="11" FontWeight="Bold" Foreground="#9FE2FF"/>
+                                  </Border>
+                                  <Border Classes="modrinthChip" Margin="0,0,0,6">
+                                    <TextBlock Text="{Binding DisplayType}" FontSize="11" FontWeight="Bold"/>
+                                  </Border>
+                                </WrapPanel>
+                                <TextBlock Text="{Binding Title}"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           TextWrapping="Wrap"
+                                           MaxHeight="48"/>
+                                <TextBlock Text="{Binding DisplayAuthor}"
+                                           Foreground="#A7B7C6"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"/>
+                              </StackPanel>
+
+                              <Button Grid.Column="2"
+                                      Margin="14,0,0,0"
+                                      Classes="modrinthGhost"
+                                      Content="Open"
+                                      Height="38"
+                                      VerticalAlignment="Top"
+                                      Click="ContentOpenPage_Click"/>
+                            </Grid>
+
+                            <StackPanel Grid.Row="1" Margin="18,16,18,0" Spacing="12">
+                              <TextBlock Text="{Binding Description}"
+                                         Foreground="#D8E0E7"
+                                         FontSize="13"
+                                         LineHeight="20"
+                                         TextWrapping="Wrap"
+                                         MaxHeight="64"/>
+
+                              <WrapPanel Orientation="Horizontal">
+                                <Border Classes="modrinthChip" Margin="0,0,8,8">
+                                  <TextBlock Text="{Binding DisplayPrimaryCategory}" FontSize="11"/>
+                                </Border>
+                                <Border Classes="modrinthChip" Margin="0,0,8,8">
+                                  <TextBlock Text="{Binding DisplayLoaderSummary}" FontSize="11"/>
+                                </Border>
+                                <Border Classes="modrinthChip" Margin="0,0,0,8">
+                                  <TextBlock Text="{Binding DisplayUpdated}" FontSize="11"/>
+                                </Border>
+                              </WrapPanel>
+                            </StackPanel>
+
+                            <Grid Grid.Row="2" Margin="18,0,18,18" ColumnDefinitions="*,Auto">
+                              <StackPanel VerticalAlignment="Center" Spacing="3">
+                                <TextBlock Text="{Binding DownloadCount, StringFormat='{}{0:N0} downloads'}"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Text="Version and loader are picked in the install sheet."
+                                           FontSize="11"
+                                           Foreground="#8DA0B2"
+                                           TextWrapping="Wrap"/>
+                              </StackPanel>
+
+                              <Button Grid.Column="1"
+                                      Margin="10,0,0,0"
+                                      Classes="modrinthPrimary"
+                                      Content="Install"
+                                      Height="40"
+                                      Click="InstallMod_Click"/>
+                            </Grid>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <Button x:Name="LoadMoreContentButton"
+                          Classes="modrinthGhost"
+                          Content="Load more"
+                          Height="46"
+                          Width="180"
+                          HorizontalAlignment="Center"
+                          IsVisible="False"
+                          Click="LoadMoreContent_Click"/>
+                </StackPanel>
+              </ScrollViewer>
             </Grid>
-          </Grid>
+          </ScrollViewer>
+        </Border>
+
+        <Border x:Name="OptionsSection" Classes="epicContentShell" IsVisible="False">
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="32,28,32,40" Spacing="24" MaxWidth="980">
+              <Border Padding="24,22" CornerRadius="18" BorderBrush="#2E3040" BorderThickness="1">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="1,0.6">
+                    <GradientStop Color="#162332" Offset="0"/>
+                    <GradientStop Color="#10161F" Offset="1"/>
+                  </LinearGradientBrush>
+                </Border.Background>
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="10">
+                    <TextBlock Text="Settings" FontSize="32" FontWeight="Bold" LetterSpacing="-0.8"/>
+                    <TextBlock Text="Accounts, folders and launch controls."
+                               Classes="epicMuted"
+                               TextWrapping="Wrap"
+                               FontSize="14"
+                               LineHeight="21"
+                               MaxWidth="620"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
+                      <Border x:Name="SettingsModeChip"
+                              Background="#17344657"
+                              BorderBrush="#2E6AA0D5"
+                              BorderThickness="1"
+                              CornerRadius="999"
+                              Padding="12,6">
+                        <TextBlock x:Name="SettingsAccountModeText"
+                                   Text="Offline"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Foreground="#7DE6FF"/>
+                      </Border>
+                      <TextBlock x:Name="SettingsLaunchNameText"
+                                 Text="Launch name: OfflineUser"
+                                 Classes="epicMuted"
+                                 VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center">
+                    <Button Classes="epicMicrosoft"
+                            Content="Sign in Microsoft"
+                            Width="210"
+                            Height="42"
+                            Click="SettingsMicrosoftSignIn_Click"/>
+                    <Button Classes="epicSecondary"
+                            Content="Go offline"
+                            Width="210"
+                            Height="42"
+                            Click="SettingsOfflineMode_Click"/>
+                  </StackPanel>
+                </Grid>
+              </Border>
+
+              <Grid ColumnDefinitions="*,*">
+                <Border Classes="epicPanel" Margin="0,0,7,0">
+                  <StackPanel Spacing="14">
+                    <TextBlock Text="Account" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock x:Name="SettingsAccountHeadlineText"
+                               Text="Offline mode is active"
+                               FontSize="20"
+                               FontWeight="SemiBold"/>
+                    <TextBlock x:Name="SettingsAccountDetailText"
+                               Text="Launch offline now, or switch to Microsoft when you want an online account."
+                               Classes="epicMuted"
+                               TextWrapping="Wrap"
+                               FontSize="13"
+                               LineHeight="20"/>
+                    <Border Height="1" Background="#28FFFFFF"/>
+                    <TextBlock Text="The launcher refreshes the Microsoft session again automatically at launch if needed."
+                               Classes="epicMuted"
+                               TextWrapping="Wrap"
+                               FontSize="12"
+                               LineHeight="18"/>
+                  </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="epicPanel" Margin="7,0,0,0">
+                  <StackPanel Spacing="14">
+                    <TextBlock Text="Folders" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="Quick shortcuts for the launcher, instances and base Minecraft folder."
+                               Classes="epicMuted"
+                               TextWrapping="Wrap"
+                               FontSize="13"
+                               LineHeight="20"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <Button Classes="epicSecondary"
+                              Content="Launcher folder"
+                              Height="40"
+                              Click="OpenLauncherFolder_Click"/>
+                      <Button Classes="epicSecondary"
+                              Content="Instances folder"
+                              Height="40"
+                              Click="OpenInstancesFolder_Click"/>
+                    </StackPanel>
+                    <Button Classes="epicSecondary"
+                            Content="Minecraft folder"
+                            Height="40"
+                            Click="OpenMinecraftFolder_Click"/>
+                  </StackPanel>
+                </Border>
+              </Grid>
+
+              <Grid ColumnDefinitions="*">
+                <Border Classes="epicPanel">
+                  <StackPanel Spacing="14">
+                    <TextBlock Text="Launch &amp; performance" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="Java 21 is still required before launch. Use Home for version and loader selection."
+                               Classes="epicMuted"
+                               TextWrapping="Wrap"
+                               FontSize="13"
+                               LineHeight="20"/>
+                    <StackPanel Spacing="8">
+                      <TextBlock Text="Recommended setup" Classes="epicCaption"/>
+                      <TextBlock Text="Choose a downloaded version, pick Vanilla, Fabric, Forge, NeoForge or Quilt, then launch."
+                                 Classes="epicMuted"
+                                 TextWrapping="Wrap"
+                                 FontSize="12"
+                                 LineHeight="18"/>
+                    </StackPanel>
+                    <StackPanel Spacing="8">
+                      <TextBlock Text="Interface" Classes="epicCaption"/>
+                      <TextBlock Text="Settings keeps only the controls that matter for account and launcher management."
+                                 Classes="epicMuted"
+                                 TextWrapping="Wrap"
+                                 FontSize="12"
+                                 LineHeight="18"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+              </Grid>
+            </StackPanel>
+          </ScrollViewer>
         </Border>
 
         <Border x:Name="CreditsSection" Classes="epicContentShell" IsVisible="False">
@@ -631,7 +1110,7 @@
                 </Border.Background>
                 <StackPanel Spacing="8">
                   <TextBlock Text="About Xylar" FontSize="30" FontWeight="Bold" LetterSpacing="-0.8"/>
-                  <TextBlock Text="Desktop launcher for Minecraft Java Edition. Modrinth modpack install, Fabric and Forge on Home, and a written guide for OfflineSkins under Skins." Classes="epicMuted" TextWrapping="Wrap" FontSize="13" LineHeight="20"/>
+                  <TextBlock Text="Desktop launcher for Minecraft Java Edition. Modrinth modpack install, Fabric and Forge on Home, plus account tools and offline helpers under Settings." Classes="epicMuted" TextWrapping="Wrap" FontSize="13" LineHeight="20"/>
                 </StackPanel>
               </Border>
 
@@ -674,7 +1153,7 @@
               <Border Classes="epicPanel">
                 <StackPanel Spacing="10">
                   <TextBlock Text="Build" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock Text="Version 0.0.0.2 · .NET 8 · Avalonia UI 11" Classes="epicMuted" TextWrapping="Wrap"/>
+                  <TextBlock Text="Version 0.0.0.3 · .NET 8 · Avalonia UI 11" Classes="epicMuted" TextWrapping="Wrap"/>
                   <TextBlock Text="Libraries: CmlLib.Core (install and launch), Modrinth API v2 (search and .mrpack download)." Classes="epicMuted" TextWrapping="Wrap" FontSize="12" LineHeight="18"/>
                 </StackPanel>
               </Border>
@@ -698,5 +1177,193 @@
         </Border>
       </Grid>
     </Grid>
+    </Grid>
+
+  <Border x:Name="WelcomeOverlay"
+          IsVisible="False"
+          Background="#E612131A">
+    <Grid RowDefinitions="*,Auto,*">
+      <Border Grid.Row="1"
+              Width="640"
+              Padding="28"
+              CornerRadius="18"
+              BorderBrush="#3A3D46"
+              BorderThickness="1"
+              Background="#1A1E28">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" MaxWidth="620">
+        <Border Width="120" Height="76" CornerRadius="10" BorderBrush="#4A4D58" BorderThickness="1" Background="#232833">
+          <TextBlock Text="XJ"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     FontSize="28"
+                     FontWeight="Bold"
+                     Foreground="#8DF4FF"/>
+        </Border>
+        <TextBlock x:Name="WelcomeTitleText"
+                   Text="Welcome to XylarJava"
+                   FontSize="34"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"/>
+        <TextBlock x:Name="WelcomeSubtitleText"
+                   Text="Choose your launcher username"
+                   FontSize="16"
+                   Classes="epicMuted"
+                   HorizontalAlignment="Center"/>
+        <StackPanel x:Name="WelcomeInputPanel" IsVisible="True" Spacing="8" Margin="0,14,0,0">
+          <TextBox x:Name="WelcomeUsernameBox" Width="320" Height="42" Watermark="Type your username"/>
+          <Button x:Name="WelcomeConfirmButton" Width="320" Height="40" Classes="epicPrimary" Content="Save username" Click="WelcomeConfirmButton_Click"/>
+        </StackPanel>
+      </StackPanel>
+      </Border>
+    </Grid>
+  </Border>
+
+  <Border x:Name="DetailOverlay"
+          IsVisible="False"
+          Background="#E612131A">
+    <Grid>
+      <Border Width="1000"
+              Padding="0"
+              CornerRadius="16"
+              BorderBrush="#3A3D46"
+              BorderThickness="1"
+              Background="#16181D"
+              VerticalAlignment="Center"
+              HorizontalAlignment="Center">
+        <Grid RowDefinitions="Auto,*">
+          <Grid Grid.Row="0" Background="#1E2127" Height="56">
+            <Button x:Name="DetailCloseButton"
+                    Width="44"
+                    Height="36"
+                    Margin="12,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Classes="epicGhost"
+                    Content="X"
+                    Foreground="#FF4444"
+                    FontWeight="Bold"
+                    FontSize="18"
+                    Click="DetailCloseButton_Click"/>
+            <TextBlock x:Name="DetailTitleText"
+                       Text="Install content"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"/>
+          </Grid>
+
+          <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" MaxHeight="750">
+            <Grid Margin="32,24" RowDefinitions="Auto,Auto,*" ColumnDefinitions="*,340">
+              <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="96" Height="96" CornerRadius="12" Background="#1E2127" BorderBrush="#343949" BorderThickness="1" ClipToBounds="True">
+                  <Image x:Name="DetailIconImage" Stretch="UniformToFill"/>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="20,0,0,0" Spacing="6">
+                  <TextBlock x:Name="DetailItemTitle" FontSize="28" FontWeight="Bold" TextWrapping="Wrap"/>
+                  <TextBlock x:Name="DetailItemDescription" Classes="epicMuted" FontSize="14" TextWrapping="Wrap" MaxHeight="44"/>
+                  <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                    <TextBlock x:Name="DetailItemDownloads" Classes="epicCaption"/>
+                    <TextBlock Text="|" Classes="epicMuted"/>
+                    <TextBlock x:Name="DetailSourceText" Classes="epicCaption"/>
+                  </StackPanel>
+                </StackPanel>
+              </Grid>
+
+              <!-- Details tabs disabled - simplified UI -->
+              <!-- <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+                <ToggleButton x:Name="DetailTabDesc" Classes="epicFilter" Content="Description" IsChecked="True" Click="DetailsTab_Click"/>
+                <ToggleButton x:Name="DetailTabChangelog" Classes="epicFilter" Content="Changelog" Click="DetailsTab_Click"/>
+                <ToggleButton x:Name="DetailTabVersions" Classes="epicFilter" Content="Versions" Click="DetailsTab_Click"/>
+              </StackPanel> -->
+
+              <Border Grid.Row="2" Grid.Column="0" Background="#1E2127" BorderBrush="#343949" BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,0,24,0">
+                <StackPanel Spacing="16">
+                  <TextBlock x:Name="DetailBodyTitle" FontSize="20" FontWeight="Bold"/>
+                  <TextBlock x:Name="DetailBodyText" TextWrapping="Wrap" FontSize="14" LineHeight="22"/>
+                </StackPanel>
+              </Border>
+
+              <StackPanel Grid.Row="2" Grid.Column="1" Spacing="16">
+                <Border Background="#1E2127" BorderBrush="#343949" BorderThickness="1" CornerRadius="12" Padding="16">
+                  <StackPanel Spacing="16">
+                    <Button x:Name="DetailInstallButton"
+                            Background="#00D084"
+                            Foreground="#FFFFFF"
+                            Height="48"
+                            FontSize="15"
+                            FontWeight="SemiBold"
+                            CornerRadius="8"
+                            Click="DetailInstallButton_Click">
+                      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="Install" VerticalAlignment="Center"/>
+                      </StackPanel>
+                    </Button>
+
+                    <TextBlock x:Name="DetailTargetText"
+                               Classes="epicMuted"
+                               FontSize="12"
+                               TextWrapping="Wrap"/>
+
+                    <StackPanel Spacing="8">
+                      <TextBlock Text="Minecraft Version" FontSize="12" Classes="epicMuted"/>
+                      <ComboBox x:Name="DetailVersionCombo" Height="40" SelectionChanged="DetailVersionCombo_SelectionChanged"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="DetailLoaderPanel" Spacing="8">
+                      <TextBlock Text="Loader" FontSize="12" Classes="epicMuted"/>
+                      <ComboBox x:Name="DetailLoaderCombo" Height="40" SelectionChanged="DetailLoaderCombo_SelectionChanged"/>
+                    </StackPanel>
+
+                    <ProgressBar x:Name="DetailInstallProgress" Height="4" IsVisible="False" Margin="0,4,0,0"/>
+                    <TextBlock x:Name="DetailRequirementText" Classes="epicCaption" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="DetailInstallStatus" Classes="epicCaption" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </Border>
+
+                <Border Background="#1E2127" BorderBrush="#343949" BorderThickness="1" CornerRadius="12" Padding="16">
+                  <StackPanel Spacing="12">
+                    <TextBlock Text="Compatibility" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="Minecraft: Java Edition" FontSize="13" Classes="epicMuted" Margin="0,4,0,0"/>
+                    <WrapPanel x:Name="DetailVersionTags" Margin="0,4,0,0"/>
+                    <TextBlock Text="Platforms" FontSize="13" Classes="epicMuted" Margin="0,8,0,0"/>
+                    <WrapPanel x:Name="DetailPlatformTags" Margin="0,4,0,0"/>
+                    <TextBlock Text="Supported environments" FontSize="13" Classes="epicMuted" Margin="0,8,0,0"/>
+                    <WrapPanel x:Name="DetailEnvironmentTags" Margin="0,4,0,0">
+                      <Border Background="#343949" CornerRadius="4" Padding="8,4" Margin="0,0,6,4">
+                        <TextBlock Text="Client-side" FontSize="12"/>
+                      </Border>
+                      <Border Background="#343949" CornerRadius="4" Padding="8,4" Margin="0,0,6,4">
+                        <TextBlock Text="Server-side" FontSize="12"/>
+                      </Border>
+                    </WrapPanel>
+                  </StackPanel>
+                </Border>
+
+                <Border Background="#1E2127" BorderBrush="#343949" BorderThickness="1" CornerRadius="12" Padding="16">
+                  <StackPanel Spacing="12">
+                    <TextBlock Text="Links" FontSize="16" FontWeight="SemiBold"/>
+                    <StackPanel Spacing="8">
+                      <TextBlock x:Name="DetailLinkProject" Classes="epicMuted" FontSize="13" Cursor="Hand" PointerPressed="DetailLinkProject_PointerPressed"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+
+                <Border Background="#1E2127" BorderBrush="#343949" BorderThickness="1" CornerRadius="12" Padding="16">
+                  <StackPanel Spacing="12">
+                    <TextBlock Text="Tags" FontSize="16" FontWeight="SemiBold"/>
+                    <WrapPanel x:Name="DetailTagsPanel" Margin="0,4,0,0"/>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Grid>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
   </Grid>
 </Window>

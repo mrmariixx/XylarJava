@@ -1,0 +1,140 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="XylarJavaLauncher.WelcomeWindow"
+        x:CompileBindings="False"
+        Title="Welcome to XylarJava"
+        Width="920"
+        Height="620"
+        MinWidth="860"
+        MinHeight="580"
+        WindowStartupLocation="CenterScreen"
+        Background="#020406"
+        CanResize="False"
+        ShowInTaskbar="False">
+
+  <Window.Styles>
+    <Style Selector="Window">
+      <Setter Property="FontFamily" Value="Segoe UI Variable, Segoe UI, Arial"/>
+    </Style>
+
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+    </Style>
+
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="#B9C9DA"/>
+    </Style>
+
+    <Style Selector="Button.microsoftPrimary">
+      <Setter Property="Background" Value="#21CBE8"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Height" Value="54"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="BorderBrush" Value="#92F4FF"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="18,0"/>
+    </Style>
+
+    <Style Selector="Button.microsoftPrimary:pointerover">
+      <Setter Property="Background" Value="#35D8F2"/>
+    </Style>
+
+    <Style Selector="Button.welcomeSecondary">
+      <Setter Property="Background" Value="#141D28"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Height" Value="54"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="BorderBrush" Value="#3E5369"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="18,0"/>
+    </Style>
+
+    <Style Selector="Button.welcomeSecondary:pointerover">
+      <Setter Property="Background" Value="#1A2634"/>
+    </Style>
+  </Window.Styles>
+
+  <Grid ClipToBounds="True">
+    <Ellipse Width="560"
+             Height="560"
+             HorizontalAlignment="Left"
+             VerticalAlignment="Top"
+             Margin="-140,-120,0,0"
+             Opacity="0.82">
+      <Ellipse.Fill>
+        <RadialGradientBrush RadiusX="78%" RadiusY="78%">
+          <GradientStop Color="#44179AFB" Offset="0.1"/>
+          <GradientStop Color="#00179AFB" Offset="1"/>
+        </RadialGradientBrush>
+      </Ellipse.Fill>
+    </Ellipse>
+
+    <Ellipse Width="760"
+             Height="760"
+             HorizontalAlignment="Right"
+             VerticalAlignment="Top"
+             Margin="0,-260,-140,0"
+             Opacity="0.7">
+      <Ellipse.Fill>
+        <RadialGradientBrush RadiusX="82%" RadiusY="82%">
+          <GradientStop Color="#4A4138D2" Offset="0.15"/>
+          <GradientStop Color="#004138D2" Offset="1"/>
+        </RadialGradientBrush>
+      </Ellipse.Fill>
+    </Ellipse>
+
+    <Ellipse Width="520"
+             Height="520"
+             HorizontalAlignment="Center"
+             VerticalAlignment="Bottom"
+             Margin="0,0,160,-180"
+             Opacity="0.72">
+      <Ellipse.Fill>
+        <RadialGradientBrush RadiusX="80%" RadiusY="80%">
+          <GradientStop Color="#3A0C77FF" Offset="0.12"/>
+          <GradientStop Color="#000C77FF" Offset="1"/>
+        </RadialGradientBrush>
+      </Ellipse.Fill>
+    </Ellipse>
+
+    <Border x:Name="StagePanel"
+            Width="470"
+            Padding="38"
+            CornerRadius="28"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#08111A"
+            BorderBrush="#D9F7FF"
+            BorderThickness="1.5"
+            Opacity="0">
+      <StackPanel x:Name="IntroPanel"
+                  Spacing="18">
+        <TextBlock Text="Hi! Welcome to XylarJava!"
+                   FontSize="40"
+                   FontWeight="SemiBold"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"/>
+
+        <TextBlock Text="Choose how you want to continue."
+                   Classes="muted"
+                   FontSize="16"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"/>
+
+        <Button x:Name="MicrosoftSignInButton"
+                Classes="microsoftPrimary"
+                Content="Sign in Microsoft"
+                Click="MicrosoftSignInButton_Click"/>
+
+        <Button x:Name="GoOfflineButton"
+                Classes="welcomeSecondary"
+                Content="Go offline"
+                Click="GoOfflineButton_Click"/>
+      </StackPanel>
+    </Border>
+  </Grid>
+</Window>
