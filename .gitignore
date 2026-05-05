@@ -10,6 +10,11 @@ publish/
 *.cache
 .DS_Store
 Thumbs.db
+debug.log
+launcher_profile.json
+microsoft_accounts.json
+instances/
+skins/
 
 # Allow the release EXE to be tracked
 !release/

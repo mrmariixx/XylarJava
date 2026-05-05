@@ -9,8 +9,14 @@ namespace XylarJavaLauncher;
 
 internal static class MicrosoftAuth
 {
-    private static readonly string AccountStorePath = Path.Combine(
+    private static readonly string LegacyAccountStorePath = Path.Combine(
         AppContext.BaseDirectory,
+        "microsoft_accounts.json");
+
+    private static readonly string AccountStorePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "XylarJava",
+        "Auth",
         "microsoft_accounts.json");
 
     public static async Task<MicrosoftSignInLaunchResult> BeginSignInAsync(CancellationToken cancellationToken = default)
@@ -65,9 +71,33 @@ internal static class MicrosoftAuth
     private static JELoginHandler CreateLoginHandler()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(AccountStorePath) ?? AppContext.BaseDirectory);
+        MigrateLegacyAccountStore();
         return new JELoginHandlerBuilder()
             .WithAccountManager(AccountStorePath)
             .Build();
+    }
+
+    private static void MigrateLegacyAccountStore()
+    {
+        try
+        {
+            if (!File.Exists(LegacyAccountStorePath))
+                return;
+
+            if (string.Equals(LegacyAccountStorePath, AccountStorePath, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            if (!File.Exists(AccountStorePath))
+            {
+                File.Copy(LegacyAccountStorePath, AccountStorePath, overwrite: false);
+            }
+
+            File.Delete(LegacyAccountStorePath);
+        }
+        catch
+        {
+            // Best effort only. If migration fails, the sign-in flow can still continue.
+        }
     }
 
     private static MicrosoftSignInLaunchResult Success(MSession session, string message)

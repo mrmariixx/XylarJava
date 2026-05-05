@@ -1070,7 +1070,7 @@
                 <Border Classes="epicPanel">
                   <StackPanel Spacing="14">
                     <TextBlock Text="Launch &amp; performance" FontSize="18" FontWeight="Bold"/>
-                    <TextBlock Text="Java 21 is still required before launch. Use Home for version and loader selection."
+                    <TextBlock Text=".NET is bundled in the release build. Java is resolved only when you actually launch Minecraft."
                                Classes="epicMuted"
                                TextWrapping="Wrap"
                                FontSize="13"

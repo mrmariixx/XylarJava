@@ -78,12 +78,6 @@ public MainWindow()
 
     try
     {
-        if (!CheckJava21Oracle())
-        {
-            ShowJava21Popup();
-            return;
-        }
-
         _minecraftPath = new MinecraftPath();
         _launcher = new MinecraftLauncher(_minecraftPath);
 
@@ -133,7 +127,9 @@ public MainWindow()
             await RunWelcomeIfNeededAsync();
         };
 
-        UpdateStatus("Ready to play.");
+        UpdateStatus(CheckJava21Oracle()
+            ? "Ready to play."
+            : "Ready to play. Java will be checked only when you launch Minecraft.");
     }
     catch (Exception ex)
     {

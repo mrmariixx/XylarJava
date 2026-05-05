@@ -16,6 +16,10 @@
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <UseWindowsForms>true</UseWindowsForms>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,21 +27,27 @@
     <AvaloniaResource Include="Assets\steve.png" />
     <None Update="Assets\minecraft.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
     <None Update="Assets\steve.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
     <None Include="minecraft.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
     <None Include="Resources\logo\xylarinc.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
     <None Include="Resources\logo\xylarsupport.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
     <None Update="WelcomePage.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 
@@ -48,6 +58,11 @@
 
   <Target Name="CopyResourcesLogoToOutput" AfterTargets="Build">
     <Copy SourceFiles="Resources\logo\xylarinc.png;Resources\logo\xylarsupport.png" DestinationFolder="$(OutputPath)\Resources\logo" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyResourcesLogoToPublish" AfterTargets="Publish">
+    <MakeDir Directories="$(PublishDir)\Resources\logo" />
+    <Copy SourceFiles="Resources\logo\xylarinc.png;Resources\logo\xylarsupport.png" DestinationFolder="$(PublishDir)\Resources\logo" SkipUnchangedFiles="true" />
   </Target>
 
   <ItemGroup>
