@@ -31,4 +31,4 @@ install -m 644 "$ROOT_DIR/Assets/minecraft.png" "$APPDIR/.DirIcon"
 chmod +x "$APPDIR/AppRun"
 chmod +x "$APPDIR/usr/bin/XylarJavaLauncher" || true
 
-APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGETOOL_BIN" "$APPDIR" "$DIST_DIR/XylarJava-x86_64.AppImage"
+APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGETOOL_BIN" --no-appstream "$APPDIR" "$DIST_DIR/XylarJava-x86_64.AppImage"
