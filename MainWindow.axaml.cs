@@ -21,8 +21,6 @@ using Avalonia.Threading;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Installer.Forge;
-using CmlLib.Core.Installer.NeoForge;
-using CmlLib.Core.Installer.NeoForge.Installers;
 using CmlLib.Core.ProcessBuilder;
 
 namespace XylarJavaLauncher;
@@ -191,11 +189,9 @@ public MainWindow()
         var loader = GetSelectedLoader();
         LoaderWarning.Text = loader switch
         {
-            "Forge" => "Forge: installs the matching Forge profile for the selected Minecraft version.",
-            "NeoForge" => "NeoForge: installs the matching NeoForge profile for the selected Minecraft version.",
-            "Quilt" => "Quilt: creates a quilt-loader profile under versions.",
-            "Vanilla" => "Vanilla: launches the base Minecraft version without a mod loader.",
-            _ => "Fabric: creates a fabric-loader profile under versions."
+            "Forge" => "Forge profile for the selected version.",
+            "Vanilla" => "Base Minecraft without a loader.",
+            _ => "Fabric profile for the selected version."
         };
         UpdateSelectionSummary();
     }
@@ -302,8 +298,6 @@ public MainWindow()
 
                     var launchVersionId = mcVersion;
                     var forgeOpts = new ForgeInstallOptions { SkipIfAlreadyInstalled = true };
-                    var neoOpts = new NeoForgeInstallOptions { SkipIfAlreadyInstalled = true };
-
                     if (!string.Equals(loader, "Vanilla", StringComparison.OrdinalIgnoreCase))
                     {
                         if (string.Equals(loader, "Forge", StringComparison.OrdinalIgnoreCase))
@@ -329,39 +323,15 @@ public MainWindow()
                                 throw;
                             }
                         }
-                        else if (string.Equals(loader, "NeoForge", StringComparison.OrdinalIgnoreCase))
-                        {
-                            UpdateStatus($"Installing NeoForge {mcVersion}…");
-                            var neoInst = new NeoForgeInstaller(_launcher);
-                            try
-                            {
-                                launchVersionId = string.IsNullOrWhiteSpace(pinnedLoaderVersion)
-                                    ? await neoInst.Install(mcVersion, neoOpts)
-                                    : await neoInst.Install(mcVersion, pinnedLoaderVersion, neoOpts);
-                                if (LoaderWarning != null) LoaderWarning.Text = $"NeoForge {mcVersion} ready.";
-                            }
-                            catch (Exception neoEx)
-                            {
-                                if (launchAttempt < maxAttempts)
-                                {
-                                    await CleanupNeoForgeArtifacts(mcVersion);
-                                    UpdateStatus($"NeoForge error detected; cleaning cache and retrying…");
-                                    await Task.Delay(1000);
-                                    throw new Exception($"NeoForge install requires retry: {neoEx.Message}", neoEx);
-                                }
-                                throw;
-                            }
-                        }
-                        else if (string.Equals(loader, "Fabric", StringComparison.OrdinalIgnoreCase) ||
-                                 string.Equals(loader, "Quilt", StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(loader, "Fabric", StringComparison.OrdinalIgnoreCase))
                         {
                             UpdateStatus($"Installing {loader} {mcVersion}…");
-                            var ok = await RunFabricQuiltInstallerAsync(mcVersion, loader, pinnedLoaderVersion, launchAttempt, maxAttempts);
+                            var ok = await RunFabricInstallerAsync(mcVersion, loader, pinnedLoaderVersion, launchAttempt, maxAttempts);
                             if (!ok)
                             {
                                 if (launchAttempt < maxAttempts)
                                 {
-                                    await CleanupFabricQuiltArtifacts(mcVersion, loader);
+                                    await CleanupFabricArtifacts(mcVersion, loader);
                                     UpdateStatus($"{loader} setup failed; cleaning artifacts and retrying…");
                                     await Task.Delay(1500);
                                     throw new Exception($"{loader} install requires retry.");
@@ -370,7 +340,7 @@ public MainWindow()
                                 return;
                             }
 
-                            launchVersionId = DiscoverFabricQuiltVersionId(loader, mcVersion);
+                            launchVersionId = DiscoverFabricVersionId(loader, mcVersion);
                             if (string.IsNullOrWhiteSpace(launchVersionId))
                             {
                                 if (launchAttempt < maxAttempts)
@@ -500,7 +470,7 @@ public MainWindow()
         throw new InvalidOperationException(interactive.ErrorMessage ?? restored.ErrorMessage ?? "Microsoft sign-in is required before launch.");
     }
 
-    private string? DiscoverFabricQuiltVersionId(string loader, string mcVersion)
+    private string? DiscoverFabricVersionId(string loader, string mcVersion)
     {
         var versionsDir = Path.Combine(_minecraftPath.BasePath, "versions");
         try
@@ -508,9 +478,7 @@ public MainWindow()
             if (!Directory.Exists(versionsDir))
                 return null;
 
-            var prefix = string.Equals(loader, "Fabric", StringComparison.OrdinalIgnoreCase)
-                ? "fabric-loader-"
-                : "quilt-loader-";
+            var prefix = "fabric-loader-";
 
             return Directory.GetDirectories(versionsDir)
                 .Select(static d => Path.GetFileName(d))
@@ -526,7 +494,7 @@ public MainWindow()
         }
     }
 
-    private async Task<bool> RunFabricQuiltInstallerAsync(string version, string loader, string? loaderVersion, int attempt = 1, int maxAttempts = 3)
+    private async Task<bool> RunFabricInstallerAsync(string version, string loader, string? loaderVersion, int attempt = 1, int maxAttempts = 3)
     {
         try
         {
@@ -534,7 +502,6 @@ public MainWindow()
             var loaderUrl = loaderKey switch
             {
                 "fabric" => await GetFabricInstallerUrlAsync(version),
-                "quilt"  => await GetQuiltInstallerUrlAsync(version),
                 _        => null
             };
 
@@ -718,30 +685,7 @@ public MainWindow()
         });
     }
 
-    private async Task CleanupNeoForgeArtifacts(string version)
-    {
-        await Task.Run(() =>
-        {
-            try
-            {
-                var neoVersions = Path.Combine(_minecraftPath.BasePath, "versions");
-                if (Directory.Exists(neoVersions))
-                {
-                    foreach (var dir in Directory.GetDirectories(neoVersions))
-                    {
-                        var name = Path.GetFileName(dir);
-                        if (name.Contains("neoforge", StringComparison.OrdinalIgnoreCase) && name.Contains(version))
-                        {
-                            try { Directory.Delete(dir, true); } catch { }
-                        }
-                    }
-                }
-            }
-            catch { }
-        });
-    }
-
-    private async Task CleanupFabricQuiltArtifacts(string version, string loader)
+    private async Task CleanupFabricArtifacts(string version, string loader)
     {
         await Task.Run(() =>
         {
@@ -750,7 +694,7 @@ public MainWindow()
                 var versionsDir = Path.Combine(_minecraftPath.BasePath, "versions");
                 if (Directory.Exists(versionsDir))
                 {
-                    var prefix = loader.Equals("Fabric", StringComparison.OrdinalIgnoreCase) ? "fabric-loader-" : "quilt-loader-";
+                    var prefix = "fabric-loader-";
                     foreach (var dir in Directory.GetDirectories(versionsDir))
                     {
                         var name = Path.GetFileName(dir);
@@ -806,22 +750,6 @@ public MainWindow()
 
             if (!string.IsNullOrWhiteSpace(latestVersion))
                 return $"https://maven.fabricmc.net/net/fabricmc/fabric-installer/{latestVersion}/fabric-installer-{latestVersion}.jar";
-        }
-        catch { }
-        return null;
-    }
-
-    private async Task<string?> GetQuiltInstallerUrlAsync(string version)
-    {
-        try
-        {
-            using var response = await _httpClient.GetAsync("https://meta.quiltmc.org/v3/versions/installer");
-            var json = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(json);
-            var latestVersion = doc.RootElement.GetProperty("latest").GetProperty("release").GetString();
-
-            if (!string.IsNullOrWhiteSpace(latestVersion))
-                return $"https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/{latestVersion}/quilt-installer-{latestVersion}.jar";
         }
         catch { }
         return null;
@@ -976,12 +904,8 @@ public MainWindow()
     {
         if (string.IsNullOrWhiteSpace(loader))
             return "Fabric";
-        if (loader.Equals("NeoForge", StringComparison.OrdinalIgnoreCase))
-            return "NeoForge";
         if (loader.Equals("Forge", StringComparison.OrdinalIgnoreCase))
             return "Forge";
-        if (loader.Equals("Quilt", StringComparison.OrdinalIgnoreCase))
-            return "Quilt";
         if (loader.Equals("Vanilla", StringComparison.OrdinalIgnoreCase))
             return "Vanilla";
         return "Fabric";
@@ -1850,8 +1774,9 @@ public MainWindow()
         var loaders = _currentInstallVersions
             .SelectMany(version => version.Loaders ?? new List<string>())
             .Where(loader => !string.IsNullOrWhiteSpace(loader))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
             .Select(NormalizeLoaderDisplayName)
+            .Where(loader => !string.IsNullOrWhiteSpace(loader))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         if (loaders.Count > 0)
@@ -1861,7 +1786,11 @@ public MainWindow()
             return new List<string> { "Vanilla" };
 
         return item.Loaders.Any()
-            ? item.Loaders.Select(loader => loader.GetDisplayName()).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            ? item.Loaders
+                .Select(loader => loader.GetDisplayName())
+                .Where(IsSupportedLoaderDisplayName)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList()
             : new List<string> { "Vanilla" };
     }
 
@@ -1976,6 +1905,7 @@ public MainWindow()
             .SelectMany(version => version.Loaders ?? new List<string>())
             .Where(loader => !string.IsNullOrWhiteSpace(loader))
             .Select(NormalizeLoaderDisplayName)
+            .Where(loader => !string.IsNullOrWhiteSpace(loader))
             .Distinct(StringComparer.OrdinalIgnoreCase);
 
         var list = loaders.ToList();
@@ -1993,22 +1923,26 @@ public MainWindow()
         return version.GameVersions?.Any(v => string.Equals(v, gameVersion, StringComparison.OrdinalIgnoreCase)) == true;
     }
 
+    private static bool IsSupportedLoaderDisplayName(string loader)
+    {
+        return loader.Equals("Fabric", StringComparison.OrdinalIgnoreCase)
+               || loader.Equals("Forge", StringComparison.OrdinalIgnoreCase)
+               || loader.Equals("Vanilla", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string NormalizeLoaderDisplayName(string loader)
     {
         if (string.IsNullOrWhiteSpace(loader))
             return "Vanilla";
 
-        return loader.Equals("neoforge", StringComparison.OrdinalIgnoreCase)
-            ? "NeoForge"
-            : loader.Equals("quilt", StringComparison.OrdinalIgnoreCase)
-                ? "Quilt"
-                : loader.Equals("forge", StringComparison.OrdinalIgnoreCase)
-                    ? "Forge"
-                    : loader.Equals("fabric", StringComparison.OrdinalIgnoreCase)
-                        ? "Fabric"
-                        : loader.Equals("vanilla", StringComparison.OrdinalIgnoreCase)
-                            ? "Vanilla"
-                            : loader;
+        if (loader.Equals("forge", StringComparison.OrdinalIgnoreCase))
+            return "Forge";
+        if (loader.Equals("fabric", StringComparison.OrdinalIgnoreCase))
+            return "Fabric";
+        if (loader.Equals("vanilla", StringComparison.OrdinalIgnoreCase))
+            return "Vanilla";
+
+        return string.Empty;
     }
 
     private static string NormalizeLoaderKey(string? loader)
@@ -2426,11 +2360,11 @@ public MainWindow()
         var accountLabel = GetMicrosoftAccountLabel();
         var accountHeadline = isMicrosoft ? $"Signed in as {accountLabel}" : "Offline mode is active";
         var accountDetails = isMicrosoft
-            ? "Your Microsoft session is ready for launch. If it expires, the launcher will ask you to sign in again."
-            : "You are ready to launch with a local profile now, and you can switch to Microsoft later from Settings.";
-        var chipBackground = new SolidColorBrush(Color.Parse(isMicrosoft ? "#17314A5A" : "#17344657"));
-        var chipBorder = new SolidColorBrush(Color.Parse(isMicrosoft ? "#2E49D7F5" : "#2E6AA0D5"));
-        var chipText = new SolidColorBrush(Color.Parse(isMicrosoft ? "#8EF3FF" : "#7DE6FF"));
+            ? "Microsoft account ready"
+            : "Local profile ready";
+        var chipBackground = new SolidColorBrush(Color.Parse("#1A1B20"));
+        var chipBorder = new SolidColorBrush(Color.Parse("#32323C"));
+        var chipText = new SolidColorBrush(Color.Parse("#F0F0F2"));
 
         // SidebarModeText removed from UI
         if (SettingsAccountHeadlineText != null)
@@ -2486,20 +2420,6 @@ public MainWindow()
             : $"Microsoft sign-in completed: {launch.DisplayName}.";
     }
 
-    private async Task PlayOfflineWelcomeSequenceAsync()
-    {
-        try
-        {
-            var htmlPath = Path.Combine(AppContext.BaseDirectory, "WelcomePage.html");
-            await OfflineWelcomeSequencePlayer.PlayAsync(htmlPath);
-            Activate();
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus($"Offline intro skipped: {ex.Message}");
-        }
-    }
-
     private async Task RunWelcomeIfNeededAsync()
     {
         var profile = LoadLauncherProfile();
@@ -2527,12 +2447,6 @@ public MainWindow()
 
         ApplyLauncherProfile(firstRunProfile);
         SaveLauncherProfile(_launcherProfile);
-
-        if (result?.PlayOfflineSequence == true &&
-            string.Equals(firstRunProfile.AccountMode, AccountModeOffline, StringComparison.OrdinalIgnoreCase))
-        {
-            await PlayOfflineWelcomeSequenceAsync();
-        }
 
         UpdateStatus(result?.OpenedMicrosoftSignIn == true
             ? BuildWelcomeMicrosoftStatus(result)

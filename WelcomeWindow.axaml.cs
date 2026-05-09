@@ -59,8 +59,7 @@ public partial class WelcomeWindow : Window
             AccountMode = "Microsoft",
             OpenedMicrosoftSignIn = true,
             MicrosoftStatusMessage = launch.Message,
-            MicrosoftDisplayName = launch.DisplayName,
-            PlayOfflineSequence = false
+            MicrosoftDisplayName = launch.DisplayName
         });
     }
 
@@ -89,8 +88,7 @@ public partial class WelcomeWindow : Window
         {
             Username = username,
             AccountMode = "Offline",
-            OpenedMicrosoftSignIn = false,
-            PlayOfflineSequence = false
+            OpenedMicrosoftSignIn = false
         });
     }
 
@@ -136,5 +134,4 @@ public class WelcomeWindowResult
     public bool OpenedMicrosoftSignIn { get; set; }
     public string? MicrosoftStatusMessage { get; set; }
     public string? MicrosoftDisplayName { get; set; }
-    public bool PlayOfflineSequence { get; set; }
 }

@@ -173,7 +173,7 @@ public class ModrinthParser : BaseContentParser
                 }
             }
 
-            foreach (var loader in new[] { ModLoader.Fabric, ModLoader.Forge, ModLoader.NeoForge, ModLoader.Quilt })
+            foreach (var loader in new[] { ModLoader.Fabric, ModLoader.Forge })
             {
                 if (item.Categories.Contains(loader.ToString().ToLower()))
                     item.Loaders.Add(loader);
@@ -238,7 +238,9 @@ public class ModrinthParser : BaseContentParser
             {
                 foreach (var loaderValue in loaders.EnumerateArray())
                 {
-                    if (Enum.TryParse<ModLoader>(loaderValue.GetString(), true, out var loader) && !item.Loaders.Contains(loader))
+                    if (Enum.TryParse<ModLoader>(loaderValue.GetString(), true, out var loader) &&
+                        (loader == ModLoader.Fabric || loader == ModLoader.Forge || loader == ModLoader.Vanilla) &&
+                        !item.Loaders.Contains(loader))
                         item.Loaders.Add(loader);
                 }
             }

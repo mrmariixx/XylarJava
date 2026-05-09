@@ -16,7 +16,6 @@
     <ApplicationIcon>minecraft.ico</ApplicationIcon>
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <UseWindowsForms>true</UseWindowsForms>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -52,15 +51,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
-    <None Update="WelcomePage.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
     <Using Remove="System.Drawing" />
-    <Using Remove="System.Windows.Forms" />
   </ItemGroup>
 
   <Target Name="CopyResourcesLogoToOutput" AfterTargets="Build">
@@ -79,7 +73,6 @@
     <PackageReference Include="CmlLib.Core" Version="4.0.6" />
     <PackageReference Include="CmlLib.Core.Auth.Microsoft" Version="3.3.1" />
     <PackageReference Include="CmlLib.Core.Installer.Forge" Version="1.1.1" />
-    <PackageReference Include="CmlLib.Core.Installer.NeoForge" Version="4.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
   </ItemGroup>

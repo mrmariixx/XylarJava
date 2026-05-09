@@ -8,7 +8,7 @@
         MinWidth="860"
         MinHeight="580"
         WindowStartupLocation="CenterScreen"
-        Background="#020406"
+        Background="#08080A"
         CanResize="False"
         ShowInTaskbar="False">
 
@@ -22,13 +22,13 @@
     </Style>
 
     <Style Selector="TextBlock.muted">
-      <Setter Property="Foreground" Value="#B9C9DA"/>
+      <Setter Property="Foreground" Value="#A2A2AA"/>
     </Style>
 
     <Style Selector="TextBox.welcomeInput">
-      <Setter Property="Background" Value="#101A25"/>
+      <Setter Property="Background" Value="#15161B"/>
       <Setter Property="Foreground" Value="#FFFFFF"/>
-      <Setter Property="BorderBrush" Value="#2D445D"/>
+      <Setter Property="BorderBrush" Value="#2F3038"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="CornerRadius" Value="14"/>
       <Setter Property="Height" Value="46"/>
@@ -37,13 +37,13 @@
     </Style>
 
     <Style Selector="Button.microsoftPrimary">
-      <Setter Property="Background" Value="#F7FBFF"/>
-      <Setter Property="Foreground" Value="#06111B"/>
+      <Setter Property="Background" Value="#F5F5F7"/>
+      <Setter Property="Foreground" Value="#111217"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="FontSize" Value="15"/>
       <Setter Property="Height" Value="48"/>
       <Setter Property="CornerRadius" Value="14"/>
-      <Setter Property="BorderBrush" Value="#82E8F5"/>
+      <Setter Property="BorderBrush" Value="#373843"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Padding" Value="18,0"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -51,38 +51,38 @@
 
     <Style Selector="Button.microsoftPrimary:pointerover">
       <Setter Property="Background" Value="#FFFFFF"/>
-      <Setter Property="BorderBrush" Value="#A2F3FF"/>
+      <Setter Property="BorderBrush" Value="#4A4B57"/>
     </Style>
 
     <Style Selector="Button.microsoftPrimary:pressed">
-      <Setter Property="Background" Value="#EAF8FF"/>
+      <Setter Property="Background" Value="#ECECEF"/>
     </Style>
 
     <Style Selector="Button.welcomeSecondary">
-      <Setter Property="Background" Value="#141D28"/>
+      <Setter Property="Background" Value="#17181D"/>
       <Setter Property="Foreground" Value="#FFFFFF"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="FontSize" Value="15"/>
       <Setter Property="Height" Value="46"/>
       <Setter Property="CornerRadius" Value="14"/>
-      <Setter Property="BorderBrush" Value="#3E5369"/>
+      <Setter Property="BorderBrush" Value="#34353E"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Padding" Value="18,0"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
     </Style>
 
     <Style Selector="Button.welcomeSecondary:pointerover">
-      <Setter Property="Background" Value="#1A2634"/>
+      <Setter Property="Background" Value="#1E2027"/>
     </Style>
 
     <Style Selector="Button.welcomePrimary">
-      <Setter Property="Background" Value="#37C7F4"/>
-      <Setter Property="Foreground" Value="#06111B"/>
+      <Setter Property="Background" Value="#F5F5F7"/>
+      <Setter Property="Foreground" Value="#111217"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="FontSize" Value="15"/>
       <Setter Property="Height" Value="48"/>
       <Setter Property="CornerRadius" Value="14"/>
-      <Setter Property="BorderBrush" Value="#6CE2FF"/>
+      <Setter Property="BorderBrush" Value="#373843"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Padding" Value="18,0"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -98,8 +98,8 @@
              Opacity="0.82">
       <Ellipse.Fill>
         <RadialGradientBrush RadiusX="78%" RadiusY="78%">
-          <GradientStop Color="#44179AFB" Offset="0.1"/>
-          <GradientStop Color="#00179AFB" Offset="1"/>
+          <GradientStop Color="#26272F" Offset="0.1"/>
+          <GradientStop Color="#0026272F" Offset="1"/>
         </RadialGradientBrush>
       </Ellipse.Fill>
     </Ellipse>
@@ -112,8 +112,8 @@
              Opacity="0.7">
       <Ellipse.Fill>
         <RadialGradientBrush RadiusX="82%" RadiusY="82%">
-          <GradientStop Color="#4A4138D2" Offset="0.15"/>
-          <GradientStop Color="#004138D2" Offset="1"/>
+          <GradientStop Color="#2E2E36" Offset="0.15"/>
+          <GradientStop Color="#002E2E36" Offset="1"/>
         </RadialGradientBrush>
       </Ellipse.Fill>
     </Ellipse>
@@ -126,8 +126,8 @@
              Opacity="0.72">
       <Ellipse.Fill>
         <RadialGradientBrush RadiusX="80%" RadiusY="80%">
-          <GradientStop Color="#3A0C77FF" Offset="0.12"/>
-          <GradientStop Color="#000C77FF" Offset="1"/>
+          <GradientStop Color="#202127" Offset="0.12"/>
+          <GradientStop Color="#00202127" Offset="1"/>
         </RadialGradientBrush>
       </Ellipse.Fill>
     </Ellipse>
@@ -138,8 +138,8 @@
             CornerRadius="28"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#08111A"
-            BorderBrush="#D9F7FF"
+            Background="#101115"
+            BorderBrush="#2F3038"
             BorderThickness="1.5"
             Opacity="0">
       <Grid>
@@ -153,7 +153,7 @@
                      TextAlignment="Center"
                      TextWrapping="Wrap"/>
 
-          <TextBlock Text="Choose how you want to continue."
+          <TextBlock Text="Choose your account setup."
                       Classes="muted"
                      MaxWidth="360"
                      FontSize="15"
@@ -208,7 +208,7 @@
                      TextAlignment="Center"
                      TextWrapping="Wrap"/>
 
-          <TextBlock Text="This local name is used for offline play."
+          <TextBlock Text="Set the name used by your offline profile."
                      Classes="muted"
                      MaxWidth="340"
                      FontSize="14"

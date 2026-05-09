@@ -8,7 +8,7 @@
         Height="960"
         MinWidth="1200"
         MinHeight="780"
-        Background="#091019">
+        Background="#09090B">
 
   <Window.Styles>
     <Style Selector="Window">
@@ -20,11 +20,11 @@
     </Style>
 
     <Style Selector="TextBlock.epicMuted">
-      <Setter Property="Foreground" Value="#A7A7AD"/>
+      <Setter Property="Foreground" Value="#9D9DA6"/>
     </Style>
 
     <Style Selector="TextBlock.epicCaption">
-      <Setter Property="Foreground" Value="#7E7E86"/>
+      <Setter Property="Foreground" Value="#75757D"/>
       <Setter Property="FontSize" Value="11"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
@@ -32,8 +32,8 @@
     <Style Selector="Border.epicPanel">
       <Setter Property="CornerRadius" Value="12"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#2D4158"/>
-      <Setter Property="Background" Value="#141F2B"/>
+      <Setter Property="BorderBrush" Value="#2A2A31"/>
+      <Setter Property="Background" Value="#131317"/>
       <Setter Property="Padding" Value="20"/>
       <Setter Property="ClipToBounds" Value="True"/>
     </Style>
@@ -41,8 +41,8 @@
     <Style Selector="Border.epicContentShell">
       <Setter Property="CornerRadius" Value="16"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#27415E"/>
-      <Setter Property="Background" Value="#101A25"/>
+      <Setter Property="BorderBrush" Value="#25252C"/>
+      <Setter Property="Background" Value="#0F1014"/>
       <Setter Property="ClipToBounds" Value="True"/>
       <Setter Property="Opacity" Value="1"/>
       <Setter Property="Transitions">
@@ -55,12 +55,12 @@
     <Style Selector="Border.epicHero">
       <Setter Property="CornerRadius" Value="14"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#315173"/>
+      <Setter Property="BorderBrush" Value="#2D2D36"/>
       <Setter Property="Background">
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-          <GradientStop Color="#132436" Offset="0"/>
-          <GradientStop Color="#0D1621" Offset="0.62"/>
-          <GradientStop Color="#0A1118" Offset="1"/>
+          <GradientStop Color="#151519" Offset="0"/>
+          <GradientStop Color="#101115" Offset="0.62"/>
+          <GradientStop Color="#0C0D10" Offset="1"/>
         </LinearGradientBrush>
       </Setter>
       <Setter Property="Padding" Value="28"/>
@@ -69,8 +69,8 @@
     <Style Selector="Border.epicMetric">
       <Setter Property="CornerRadius" Value="10"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#2F4E73"/>
-      <Setter Property="Background" Value="#13202D"/>
+      <Setter Property="BorderBrush" Value="#2A2A32"/>
+      <Setter Property="Background" Value="#141418"/>
       <Setter Property="Padding" Value="12,10"/>
       <Setter Property="MinWidth" Value="128"/>
     </Style>
@@ -78,8 +78,8 @@
     <Style Selector="Border.epicQuickAction">
       <Setter Property="CornerRadius" Value="10"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#2A455F"/>
-      <Setter Property="Background" Value="#101A24"/>
+      <Setter Property="BorderBrush" Value="#26262D"/>
+      <Setter Property="Background" Value="#111216"/>
       <Setter Property="Padding" Value="12,10"/>
       <Setter Property="Transitions">
         <Transitions>
@@ -90,8 +90,8 @@
     </Style>
 
     <Style Selector="Border.epicQuickAction:pointerover">
-      <Setter Property="Background" Value="#152332"/>
-      <Setter Property="BorderBrush" Value="#4A7BA8"/>
+      <Setter Property="Background" Value="#181920"/>
+      <Setter Property="BorderBrush" Value="#3A3A45"/>
     </Style>
 
     <Style Selector="Border.epicModRow">
@@ -115,17 +115,17 @@
     </Style>
 
     <Style Selector="TextBox, ComboBox">
-      <Setter Property="Background" Value="#25252C"/>
+      <Setter Property="Background" Value="#17181D"/>
       <Setter Property="Foreground" Value="#F5F5F5"/>
-      <Setter Property="BorderBrush" Value="#3A3A42"/>
+      <Setter Property="BorderBrush" Value="#303039"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Padding" Value="12,10"/>
       <Setter Property="CornerRadius" Value="8"/>
     </Style>
 
     <Style Selector="Button.epicPrimary">
-      <Setter Property="Background" Value="#E5F7FF"/>
-      <Setter Property="Foreground" Value="#091019"/>
+      <Setter Property="Background" Value="#F4F4F6"/>
+      <Setter Property="Foreground" Value="#111217"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Padding" Value="18,10"/>
       <Setter Property="CornerRadius" Value="12"/>
@@ -141,7 +141,7 @@
     </Style>
 
     <Style Selector="Button.epicSecondary">
-      <Setter Property="Background" Value="#142130"/>
+      <Setter Property="Background" Value="#181920"/>
       <Setter Property="Foreground" Value="#F5F5F5"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Padding" Value="18,10"/>
@@ -154,16 +154,16 @@
     </Style>
 
     <Style Selector="Button.epicSecondary:pointerover">
-      <Setter Property="Background" Value="#1A2A3C"/>
+      <Setter Property="Background" Value="#20212A"/>
     </Style>
 
     <Style Selector="Button.epicMicrosoft">
-      <Setter Property="Background" Value="#1DBDDE"/>
-      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="Background" Value="#F4F4F6"/>
+      <Setter Property="Foreground" Value="#111217"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Padding" Value="18,10"/>
       <Setter Property="CornerRadius" Value="12"/>
-      <Setter Property="BorderBrush" Value="#4EE4FF"/>
+      <Setter Property="BorderBrush" Value="#3A3A45"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Transitions">
         <Transitions>
@@ -173,7 +173,7 @@
     </Style>
 
     <Style Selector="Button.epicMicrosoft:pointerover">
-      <Setter Property="Background" Value="#31D0EE"/>
+      <Setter Property="Background" Value="#FFFFFF"/>
     </Style>
 
     <Style Selector="Button.epicCompact">
@@ -192,7 +192,7 @@
     <Style Selector="Button.epicGhost">
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="Foreground" Value="#C8C8D0"/>
-      <Setter Property="BorderBrush" Value="#33506F"/>
+      <Setter Property="BorderBrush" Value="#32323C"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Padding" Value="14,8"/>
       <Setter Property="CornerRadius" Value="12"/>
@@ -200,9 +200,9 @@
     </Style>
 
     <Style Selector="ToggleButton.epicNav">
-      <Setter Property="Background" Value="#101B27"/>
-      <Setter Property="Foreground" Value="#C7D5E2"/>
-      <Setter Property="BorderBrush" Value="#1C3146"/>
+      <Setter Property="Background" Value="#111216"/>
+      <Setter Property="Foreground" Value="#D2D2D8"/>
+      <Setter Property="BorderBrush" Value="#24252C"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -219,15 +219,15 @@
     </Style>
 
     <Style Selector="ToggleButton.epicNav:pointerover">
-      <Setter Property="Background" Value="#16283A"/>
+      <Setter Property="Background" Value="#1A1C23"/>
       <Setter Property="Foreground" Value="#FFFFFF"/>
-      <Setter Property="BorderBrush" Value="#3F6A95"/>
+      <Setter Property="BorderBrush" Value="#3C3D49"/>
     </Style>
 
     <Style Selector="ToggleButton.epicNav:checked">
-      <Setter Property="Background" Value="#18314A"/>
+      <Setter Property="Background" Value="#1D1E26"/>
       <Setter Property="Foreground" Value="#FFFFFF"/>
-      <Setter Property="BorderBrush" Value="#77DFFF"/>
+      <Setter Property="BorderBrush" Value="#E8E8EC"/>
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
 
@@ -249,8 +249,8 @@
     <Style Selector="Border.contentCard">
       <Setter Property="CornerRadius" Value="18"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#294866"/>
-      <Setter Property="Background" Value="#101A25"/>
+      <Setter Property="BorderBrush" Value="#292931"/>
+      <Setter Property="Background" Value="#111216"/>
       <Setter Property="ClipToBounds" Value="True"/>
       <Setter Property="Margin" Value="0,0,18,18"/>
       <Setter Property="Transitions">
@@ -541,8 +541,6 @@
                         <ComboBoxItem Content="Vanilla" IsSelected="True"/>
                         <ComboBoxItem Content="Fabric"/>
                         <ComboBoxItem Content="Forge"/>
-                        <ComboBoxItem Content="NeoForge"/>
-                        <ComboBoxItem Content="Quilt"/>
                       </ComboBox>
                     </StackPanel>
 
@@ -789,18 +787,12 @@
                   <TextBlock Text="MODSPACK"
                              FontSize="11"
                              FontWeight="Bold"
-                             Foreground="#9FE2FF"/>
+                             Foreground="#F4F4F5"/>
                 </Border>
 
-                <TextBlock Text="Modpacks only"
+                <TextBlock Text="Modpack library"
                            FontSize="28"
                            FontWeight="Bold"
-                           TextWrapping="Wrap"/>
-
-                <TextBlock Text="Search curated Modrinth packs, pick a downloaded version, then install into a dedicated instance."
-                           Classes="epicMuted"
-                           FontSize="13"
-                           LineHeight="20"
                            TextWrapping="Wrap"/>
 
                 <TextBox x:Name="ContentSearchBox"
@@ -819,25 +811,10 @@
                              IsVisible="False"/>
 
                 <TextBlock x:Name="ContentStatusText"
-                           Text="Discover popular modpacks from Modrinth."
+                           Text="Popular packs."
                            TextWrapping="Wrap"
-                           Foreground="#A5B4C2"
-                           FontSize="12"
-                           LineHeight="18"/>
-
-                <Border Classes="epicQuickAction">
-                  <StackPanel Spacing="4">
-                    <TextBlock Text="Install flow" Classes="epicCaption"/>
-                    <TextBlock Text="Install picks only already-downloaded Minecraft versions." FontWeight="SemiBold" FontSize="12" TextWrapping="Wrap"/>
-                  </StackPanel>
-                </Border>
-
-                <Border Classes="epicQuickAction">
-                  <StackPanel Spacing="4">
-                    <TextBlock Text="Source" Classes="epicCaption"/>
-                    <TextBlock Text="Modrinth modpack catalog" FontWeight="SemiBold" FontSize="12" TextWrapping="Wrap"/>
-                  </StackPanel>
-                </Border>
+                           Foreground="#A1A1AA"
+                           FontSize="12"/>
               </StackPanel>
             </Border>
 
@@ -850,17 +827,11 @@
                         Padding="28,26">
                   <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="12">
-                      <TextBlock Text="Build your next stack"
+                      <TextBlock Text="Pick a modpack"
                                  FontSize="34"
                                  FontWeight="Bold"
                                  LetterSpacing="-0.8"
                                  TextWrapping="Wrap"
-                                 MaxWidth="700"/>
-                      <TextBlock Text="Only modpacks are shown here now. Open the pack page, check support, or install directly into a clean instance."
-                                 Foreground="#B7C3D1"
-                                 TextWrapping="Wrap"
-                                 FontSize="14"
-                                 LineHeight="22"
                                  MaxWidth="700"/>
                     </StackPanel>
 
@@ -871,9 +842,6 @@
                                 HorizontalAlignment="Right">
                       <Border Classes="modrinthChip" HorizontalAlignment="Right">
                         <TextBlock Text="Source: Modrinth" FontSize="12" FontWeight="SemiBold"/>
-                      </Border>
-                      <Border Classes="modrinthChip" HorizontalAlignment="Right">
-                        <TextBlock Text="Only compatible installed versions are offered" FontSize="12" FontWeight="SemiBold"/>
                       </Border>
                     </StackPanel>
                   </Grid>
@@ -895,9 +863,9 @@
                             <Border Width="72"
                                     Height="72"
                                     CornerRadius="18"
-                                    BorderBrush="#33597D"
+                                    BorderBrush="#31313A"
                                     BorderThickness="1"
-                                    Background="#162636">
+                                    Background="#18181C">
                               <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"/>
                             </Border>
 
@@ -907,7 +875,7 @@
                                         VerticalAlignment="Center">
                               <WrapPanel Orientation="Horizontal">
                                 <Border Classes="modrinthChip" Margin="0,0,8,6">
-                                  <TextBlock Text="{Binding DisplaySourceName}" FontSize="11" FontWeight="Bold" Foreground="#9FE2FF"/>
+                                  <TextBlock Text="{Binding DisplaySourceName}" FontSize="11" FontWeight="Bold" Foreground="#F4F4F5"/>
                                 </Border>
                                 <Border Classes="modrinthChip" Margin="0,0,0,6">
                                   <TextBlock Text="Modpack" FontSize="11" FontWeight="Bold"/>
@@ -919,7 +887,7 @@
                                          TextWrapping="Wrap"
                                          MaxHeight="50"/>
                               <TextBlock Text="{Binding DisplayAuthor}"
-                                         Foreground="#A7B7C6"
+                                         Foreground="#A1A1AA"
                                          FontSize="12"
                                          TextWrapping="Wrap"/>
                             </StackPanel>
@@ -935,7 +903,7 @@
 
                           <StackPanel Grid.Row="1" Margin="18,16,18,0" Spacing="12">
                             <TextBlock Text="{Binding Description}"
-                                       Foreground="#D8E0E7"
+                                       Foreground="#D4D4D8"
                                        FontSize="13"
                                        LineHeight="20"
                                        TextWrapping="Wrap"
@@ -959,10 +927,6 @@
                               <TextBlock Text="{Binding DownloadCount, StringFormat='{}{0:N0} downloads'}"
                                          FontSize="13"
                                          FontWeight="SemiBold"/>
-                              <TextBlock Text="Version and loader are picked during install."
-                                         FontSize="11"
-                                         Foreground="#8DA0B2"
-                                         TextWrapping="Wrap"/>
                             </StackPanel>
 
                             <Button Grid.Column="1"
@@ -994,26 +958,20 @@
         <Border x:Name="OptionsSection" Classes="epicContentShell" IsVisible="False">
           <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="32,28,32,40" Spacing="24" MaxWidth="980">
-              <Border Padding="24,22" CornerRadius="18" BorderBrush="#2E3040" BorderThickness="1">
-                <Border.Background>
+                <Border Padding="24,22" CornerRadius="18" BorderBrush="#2E3040" BorderThickness="1">
+                  <Border.Background>
                   <LinearGradientBrush StartPoint="0,0" EndPoint="1,0.6">
-                    <GradientStop Color="#162332" Offset="0"/>
-                    <GradientStop Color="#10161F" Offset="1"/>
+                    <GradientStop Color="#17171B" Offset="0"/>
+                    <GradientStop Color="#101014" Offset="1"/>
                   </LinearGradientBrush>
                 </Border.Background>
                 <Grid ColumnDefinitions="*,Auto">
                   <StackPanel Spacing="10">
                     <TextBlock Text="Settings" FontSize="32" FontWeight="Bold" LetterSpacing="-0.8"/>
-                    <TextBlock Text="Account, folders and launch."
-                               Classes="epicMuted"
-                               TextWrapping="Wrap"
-                               FontSize="14"
-                               LineHeight="21"
-                               MaxWidth="620"/>
                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
                       <Border x:Name="SettingsModeChip"
-                              Background="#17344657"
-                              BorderBrush="#2E6AA0D5"
+                              Background="#1A1B20"
+                              BorderBrush="#32323C"
                               BorderThickness="1"
                               CornerRadius="999"
                               Padding="12,6">
@@ -1021,7 +979,7 @@
                                    Text="Offline"
                                    FontSize="12"
                                    FontWeight="Bold"
-                                   Foreground="#7DE6FF"/>
+                                   Foreground="#F4F4F5"/>
                       </Border>
                       <TextBlock x:Name="SettingsLaunchNameText"
                                  Text="Launch name: OfflineUser"
@@ -1053,28 +1011,15 @@
                                FontSize="20"
                                FontWeight="SemiBold"/>
                     <TextBlock x:Name="SettingsAccountDetailText"
-                               Text="Launch offline now, or switch to Microsoft when you want an online account."
+                               Text="Local profile ready"
                                Classes="epicMuted"
-                               TextWrapping="Wrap"
-                               FontSize="13"
-                               LineHeight="20"/>
-                    <Border Height="1" Background="#28FFFFFF"/>
-                    <TextBlock Text="The launcher refreshes the Microsoft session again automatically at launch if needed."
-                               Classes="epicMuted"
-                               TextWrapping="Wrap"
-                               FontSize="12"
-                               LineHeight="18"/>
+                               FontSize="13"/>
                   </StackPanel>
                 </Border>
 
                 <Border Grid.Column="1" Classes="epicPanel" Margin="7,0,0,0">
                   <StackPanel Spacing="14">
                     <TextBlock Text="Folders" FontSize="18" FontWeight="Bold"/>
-                    <TextBlock Text="Quick shortcuts for the launcher, instances and base Minecraft folder."
-                               Classes="epicMuted"
-                               TextWrapping="Wrap"
-                               FontSize="13"
-                               LineHeight="20"/>
                     <StackPanel Orientation="Horizontal" Spacing="8">
                       <Button Classes="epicSecondary"
                               Content="Launcher folder"
@@ -1093,34 +1038,18 @@
                 </Border>
               </Grid>
 
-              <Grid ColumnDefinitions="*">
-                <Border Classes="epicPanel">
-                  <StackPanel Spacing="14">
-                    <TextBlock Text="Launch &amp; performance" FontSize="18" FontWeight="Bold"/>
-                    <TextBlock Text=".NET is bundled in release builds. Java is checked only when you actually launch Minecraft."
-                               Classes="epicMuted"
-                               TextWrapping="Wrap"
-                               FontSize="13"
-                               LineHeight="20"/>
-                    <StackPanel Spacing="8">
-                      <TextBlock Text="Recommended setup" Classes="epicCaption"/>
-                      <TextBlock Text="Choose a downloaded version, pick Vanilla, Fabric, Forge, NeoForge or Quilt."
-                                 Classes="epicMuted"
-                                 TextWrapping="Wrap"
-                                 FontSize="12"
-                                 LineHeight="18"/>
-                    </StackPanel>
-                    <StackPanel Spacing="8">
-                      <TextBlock Text="Interface" Classes="epicCaption"/>
-                      <TextBlock Text="Settings keeps only the controls that matter for account and launcher management."
-                                 Classes="epicMuted"
-                                 TextWrapping="Wrap"
-                                 FontSize="12"
-                                 LineHeight="18"/>
-                    </StackPanel>
-                  </StackPanel>
-                </Border>
-              </Grid>
+              <Border Classes="epicPanel">
+                <StackPanel Spacing="10">
+                  <Grid ColumnDefinitions="*,*">
+                    <TextBlock Text="Runtime" Classes="epicCaption"/>
+                    <TextBlock Grid.Column="1" Text=".NET bundled" HorizontalAlignment="Right"/>
+                  </Grid>
+                  <Grid ColumnDefinitions="*,*">
+                    <TextBlock Text="Java" Classes="epicCaption"/>
+                    <TextBlock Grid.Column="1" Text="Checked on launch" HorizontalAlignment="Right"/>
+                  </Grid>
+                </StackPanel>
+              </Border>
             </StackPanel>
           </ScrollViewer>
         </Border>

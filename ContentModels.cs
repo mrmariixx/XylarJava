@@ -25,8 +25,6 @@ public enum ModLoader
 {
     Fabric,
     Forge,
-    NeoForge,
-    Quilt,
     Vanilla
 }
 
@@ -88,7 +86,7 @@ public class ContentItem : INotifyPropertyChanged
         ? HumanizeToken(value)
         : "Minecraft Java";
     public string DisplayLoaderSummary => Loaders.Any()
-        ? string.Join(" · ", Loaders.Take(3).Select(loader => loader.GetDisplayName()))
+        ? string.Join(" / ", Loaders.Take(3).Select(loader => loader.GetDisplayName()))
         : "Vanilla";
 
     public string GetNormalizedTitle() => Title.ToLowerInvariant().Replace(" ", "-").Replace("_", "-");
@@ -97,8 +95,8 @@ public class ContentItem : INotifyPropertyChanged
     {
         var thisTitle = GetNormalizedTitle();
         var otherTitle = other.GetNormalizedTitle();
-        return thisTitle == otherTitle || 
-               thisTitle.Contains(otherTitle) || 
+        return thisTitle == otherTitle ||
+               thisTitle.Contains(otherTitle) ||
                otherTitle.Contains(thisTitle);
     }
 
@@ -189,8 +187,6 @@ public static class ModLoaderExtensions
     {
         ModLoader.Fabric => "Fabric",
         ModLoader.Forge => "Forge",
-        ModLoader.NeoForge => "NeoForge",
-        ModLoader.Quilt => "Quilt",
         ModLoader.Vanilla => "Vanilla",
         _ => "Unknown"
     };
@@ -199,8 +195,6 @@ public static class ModLoaderExtensions
     {
         ModLoader.Fabric => "#DBB8FF",
         ModLoader.Forge => "#F16436",
-        ModLoader.NeoForge => "#F16436",
-        ModLoader.Quilt => "#00D084",
         ModLoader.Vanilla => "#808080",
         _ => "#808080"
     };
