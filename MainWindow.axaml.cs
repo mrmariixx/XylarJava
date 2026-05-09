@@ -2327,12 +2327,15 @@ public MainWindow()
         try
         {
             if (DetailInstallProgress != null) DetailInstallProgress.Value = 28;
+            SetModpackInstallFeedback($"Downloading {item.Title}...", 28, true);
             await ModrinthModpackInstaller.DownloadFileAsync(_httpClient, selectedFile.Url!, tempFile, CancellationToken.None);
             if (DetailInstallProgress != null) DetailInstallProgress.Value = 46;
+            SetModpackInstallFeedback($"Extracting {item.Title}...", 46, true);
 
             ModrinthModpackInstaller.ExtractMrpackZip(tempFile, instancePath);
             var packRoot = ModrinthModpackInstaller.FindPackRoot(instancePath) ?? instancePath;
             if (DetailInstallProgress != null) DetailInstallProgress.Value = 62;
+            SetModpackInstallFeedback($"Preparing {item.Title}...", 62, true);
 
             var packInfo = ModrinthPackIndexReader.TryRead(packRoot);
             if (packInfo != null &&
@@ -2349,6 +2352,8 @@ public MainWindow()
                     DetailInstallProgress.Value = 62 + (38.0 * step.done / step.total);
                 if (DetailInstallStatus != null && step.total > 0)
                     DetailInstallStatus.Text = $"Downloading pack files {step.done}/{step.total}...";
+                if (step.total > 0)
+                    SetModpackInstallFeedback($"Downloading pack files {step.done}/{step.total}...", 62 + (38.0 * step.done / step.total), true);
             });
 
             await ModrinthModpackInstaller.DownloadPackFilesFromIndexAsync(_httpClient, packRoot, progress, CancellationToken.None);
@@ -2900,10 +2905,129 @@ public MainWindow()
 
     private async void InstallMod_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is not Control { DataContext: ContentItem item })
+        if (sender is not Button { DataContext: ContentItem item } installButton)
             return;
 
+        if (item.ContentType == ContentType.Modpack)
+        {
+            await QuickInstallModpackAsync(item, installButton);
+            return;
+        }
+
         await OpenInstallOverlayAsync(item);
+    }
+
+    private async Task QuickInstallModpackAsync(ContentItem item, Button installButton)
+    {
+        var originalContent = installButton.Content;
+        installButton.IsEnabled = false;
+        installButton.Content = "Installing...";
+
+        try
+        {
+            SetModpackInstallFeedback("Checking compatibility...", 8, true);
+
+            var details = MergeContentDetails(item, await _contentService!.GetDetailsAsync(item.Id, item.Source));
+            var versions = details.Source == ContentSource.Modrinth
+                ? await ModrinthAPI.GetProjectVersions(details.Id) ?? new List<ModrinthAPI.ModVersion>()
+                : new List<ModrinthAPI.ModVersion>();
+
+            if (versions.Count == 0)
+                throw new InvalidOperationException("No installable versions were returned for this modpack.");
+
+            var choice = GetBestDirectModpackChoice(details, versions);
+            if (choice == null)
+            {
+                SetModpackInstallFeedback("Download a compatible Minecraft version from Home first.", 0, false);
+                UpdateStatus("No compatible downloaded version was found for this modpack.");
+                return;
+            }
+
+            var selectedChoice = choice.Value;
+
+            _currentDetailsItem = details;
+            _currentInstallVersions = versions;
+
+            var target = ResolveInstallTarget(details, selectedChoice.GameVersion, selectedChoice.Loader);
+            _currentInstallTargetPath = target.Item1;
+            _currentInstallTargetLabel = target.Item2;
+
+            SetModpackInstallFeedback($"Installing {details.Title} for {selectedChoice.GameVersion}...", 18, true);
+            UpdateStatus($"Installing {details.Title}...");
+
+            var installedProfileId = await DownloadContentAsync(details, _currentInstallTargetPath, selectedChoice.GameVersion, selectedChoice.Loader, selectedChoice.Version);
+
+            RefreshPlayProfiles(installedProfileId);
+            SetModpackInstallFeedback($"Installed and selected: {details.Title}", 100, true);
+            UpdateStatus($"Installed and selected play profile: {details.Title}");
+        }
+        catch (Exception ex)
+        {
+            SetModpackInstallFeedback($"Install failed: {ex.Message}", 0, false);
+            UpdateStatus($"Modpack install failed: {ex.Message}");
+            LogToOutput($"Modpack quick install failed: {ex.Message}");
+        }
+        finally
+        {
+            installButton.IsEnabled = true;
+            installButton.Content = originalContent;
+        }
+    }
+
+    private (ModrinthAPI.ModVersion Version, string GameVersion, string Loader)? GetBestDirectModpackChoice(
+        ContentItem item,
+        List<ModrinthAPI.ModVersion> versions)
+    {
+        foreach (var version in versions)
+        {
+            if (PickPrimaryModpackFile(version) == null)
+                continue;
+
+            var matchingGameVersion = OrderMinecraftVersions(version.GameVersions ?? new List<string>())
+                .FirstOrDefault(IsGameVersionDownloaded);
+            if (string.IsNullOrWhiteSpace(matchingGameVersion))
+                continue;
+
+            var loaders = (version.Loaders ?? new List<string>())
+                .Select(NormalizeLoaderDisplayName)
+                .Where(loader => !string.IsNullOrWhiteSpace(loader) && IsSupportedLoaderDisplayName(loader))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (loaders.Count == 0)
+            {
+                loaders = item.Loaders
+                    .Select(loader => loader.GetDisplayName())
+                    .Where(IsSupportedLoaderDisplayName)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
+
+            var selectedLoader = loaders.FirstOrDefault(loader =>
+                                     string.Equals(loader, "Fabric", StringComparison.OrdinalIgnoreCase))
+                                 ?? loaders.FirstOrDefault(loader =>
+                                     string.Equals(loader, "Forge", StringComparison.OrdinalIgnoreCase))
+                                 ?? loaders.FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(selectedLoader))
+                selectedLoader = "Vanilla";
+
+            return (version, matchingGameVersion, selectedLoader);
+        }
+
+        return null;
+    }
+
+    private void SetModpackInstallFeedback(string status, double progressValue, bool showProgress)
+    {
+        if (ContentStatusText != null)
+            ContentStatusText.Text = status;
+
+        if (ContentLoadingBar != null)
+        {
+            ContentLoadingBar.IsVisible = showProgress;
+            ContentLoadingBar.Value = progressValue;
+        }
     }
 
     private LauncherProfile LoadLauncherProfile()
