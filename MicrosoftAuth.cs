@@ -64,7 +64,7 @@ internal static class MicrosoftAuth
         }
         catch
         {
-            // Keep the launcher usable even if Microsoft sign-out fails.
+            // Keep the launcher usable even if Microsoft sign-out fails [tuff sigma boi]
         }
     }
 

@@ -60,7 +60,8 @@ public partial class MainWindow : Window
     private PlayProfile _activePlayProfile = PlayProfile.Standard;
     private bool _suppressProfileReaction;
     private bool _isInitialized = false;
-    private readonly TaskCompletionSource<bool> _welcomeCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private TaskCompletionSource<WelcomeWindowResult?>? _inlineWelcomeTcs;
+    private bool _welcomeEditMode;
     private ContentItem? _currentDetailsItem;
     private List<ModrinthAPI.ModVersion> _currentInstallVersions = new();
     private string _currentInstallTargetPath = string.Empty;
@@ -102,10 +103,10 @@ public MainWindow()
         OptionsSection.IsVisible = false;
         ModSection.IsVisible = false;
         CreditsSection.IsVisible = false;
-        SetHeader("Home", "Version, loader, modpacks.");
+        SetHeader("Home", string.Empty);
 
         _isInitialized = true;
-        SetHeader("Home", "Version, loader, modpacks.");
+        SetHeader("Home", string.Empty);
         
         // Register event handlers AFTER initialization
         LoaderCombo.SelectionChanged += LoaderCombo_SelectionChanged;
@@ -1345,7 +1346,7 @@ public MainWindow()
 
         if (btn == NavSkins && string.Equals(btn.Content?.ToString(), "Settings", StringComparison.Ordinal))
         {
-            SetHeader("Settings", "Accounts, folders and launcher controls");
+            SetHeader("Settings", string.Empty);
             NavMain.IsChecked = false;
             NavSkins.IsChecked = true;
             NavMods.IsChecked = false;
@@ -1367,19 +1368,19 @@ public MainWindow()
         switch (content)
         {
             case "Home":
-                SetHeader("Home", "Version, loader, modpacks.");
+                SetHeader("Home", string.Empty);
                 RefreshPlayProfiles();
                 break;
             case "Skins":
-                SetHeader("Settings", "Accounts, folders and launcher controls");
+                SetHeader("Settings", string.Empty);
                 break;
             case "Modspack":
-                SetHeader("Modspack", "Browse and install supported modpacks.");
+                SetHeader("Modspack", string.Empty);
                 UpdateContentBrowserCopy();
                 _ = LoadContentBrowserAsync();
                 break;
             case "About":
-                SetHeader("About", "Credits and legal");
+                SetHeader("About", string.Empty);
                 break;
         }
 
@@ -1389,7 +1390,7 @@ public MainWindow()
         NavCredits.IsChecked = content == "About";
 
         if (content == "Home")
-            SetHeader("Home", "Version, loader, modpacks.");
+            SetHeader("Home", string.Empty);
 
         await AnimateSectionSwitchAsync(target);
     }
@@ -1659,14 +1660,12 @@ public MainWindow()
             DetailTitleText.Text = $"Install {item.DisplayType}";
         if (DetailItemTitle != null)
             DetailItemTitle.Text = item.Title;
-        if (DetailItemDescription != null)
-            DetailItemDescription.Text = item.Description ?? "No description available.";
         if (DetailItemDownloads != null)
             DetailItemDownloads.Text = $"{item.DownloadCount:N0} downloads";
         if (DetailSourceText != null)
             DetailSourceText.Text = item.Source.GetDisplayName();
         if (DetailBodyTitle != null)
-            DetailBodyTitle.Text = "Project summary";
+            DetailBodyTitle.Text = "Install";
 
         if (DetailIconImage != null)
             DetailIconImage.Source = item.Thumbnail;
@@ -1724,9 +1723,7 @@ public MainWindow()
 
         if (DetailBodyText != null)
         {
-            DetailBodyText.Text = string.IsNullOrWhiteSpace(item.Description)
-                ? "No description available."
-                : item.Description;
+            DetailBodyText.Text = "Select version and loader.";
         }
 
         if (DetailInstallStatus != null)
@@ -1816,9 +1813,8 @@ public MainWindow()
         _isRefreshingInstallSheet = true;
         try
         {
-            var installedVersions = GetInstalledMinecraftVersions();
             var compatibleVersions = GetDisplayedVersions(_currentDetailsItem)
-                .Where(installedVersions.Contains)
+                .Where(IsGameVersionDownloaded)
                 .ToList();
 
             DetailVersionCombo.ItemsSource = compatibleVersions;
@@ -1838,8 +1834,8 @@ public MainWindow()
             if (DetailRequirementText != null)
             {
                 DetailRequirementText.Text = compatibleVersions.Count > 0
-                    ? "Pick one of the already-downloaded Minecraft versions below."
-                    : "No compatible Minecraft version is downloaded yet. Download a supported version from Home first.";
+                    ? "Choose one downloaded version."
+                    : "Download a supported version from Home first.";
             }
         }
         finally
@@ -1867,15 +1863,15 @@ public MainWindow()
         _currentInstallTargetLabel = target.Item2;
 
         if (DetailTargetText != null)
-            DetailTargetText.Text = $"Install target: {_currentInstallTargetLabel}";
+            DetailTargetText.Text = _currentInstallTargetLabel;
 
         if (DetailInstallStatus != null)
         {
             DetailInstallStatus.Text = !hasVersion
-                ? "Choose a downloaded Minecraft version first."
+                ? "Choose a downloaded version."
                 : selectedFile == null
-                    ? "No file is available for that version and loader."
-                    : $"Ready to install into {_currentInstallTargetLabel}.";
+                    ? "No file is available for that choice."
+                    : "Ready.";
         }
 
         if (DetailInstallButton != null)
@@ -1893,6 +1889,28 @@ public MainWindow()
             .Where(name => !string.IsNullOrWhiteSpace(name))
             .Select(name => name!)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private bool IsGameVersionDownloaded(string? gameVersion)
+    {
+        if (string.IsNullOrWhiteSpace(gameVersion))
+            return false;
+
+        foreach (var installed in GetInstalledMinecraftVersions())
+        {
+            if (string.Equals(installed, gameVersion, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (installed.EndsWith("-" + gameVersion, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (installed.Contains(gameVersion, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return _playProfiles.Any(profile =>
+            !string.IsNullOrWhiteSpace(profile.MinecraftVersion) &&
+            string.Equals(profile.MinecraftVersion, gameVersion, StringComparison.OrdinalIgnoreCase));
     }
 
     private List<string> GetCompatibleLoaders(ContentItem item, string? selectedVersion)
@@ -1992,6 +2010,13 @@ public MainWindow()
                     continue;
             }
 
+            if (item.ContentType == ContentType.Modpack)
+            {
+                if (PickPrimaryModpackFile(version) != null)
+                    return version;
+                continue;
+            }
+
             if (PickPrimaryFile(version) != null)
                 return version;
         }
@@ -2004,6 +2029,20 @@ public MainWindow()
         var files = version.Files ?? new List<ModrinthAPI.ModFile>();
         return files.FirstOrDefault(file => file.IsPrimary && !string.IsNullOrWhiteSpace(file.Url))
             ?? files.FirstOrDefault(file => !string.IsNullOrWhiteSpace(file.Url));
+    }
+
+    private static ModrinthAPI.ModFile? PickPrimaryModpackFile(ModrinthAPI.ModVersion version)
+    {
+        var files = version.Files ?? new List<ModrinthAPI.ModFile>();
+        return files.FirstOrDefault(file =>
+                   file.IsPrimary &&
+                   !string.IsNullOrWhiteSpace(file.Url) &&
+                   !string.IsNullOrWhiteSpace(file.Filename) &&
+                   file.Filename.EndsWith(".mrpack", StringComparison.OrdinalIgnoreCase))
+               ?? files.FirstOrDefault(file =>
+                   !string.IsNullOrWhiteSpace(file.Url) &&
+                   !string.IsNullOrWhiteSpace(file.Filename) &&
+                   file.Filename.EndsWith(".mrpack", StringComparison.OrdinalIgnoreCase));
     }
 
     private static List<string> OrderMinecraftVersions(IEnumerable<string> versions)
@@ -2157,7 +2196,7 @@ public MainWindow()
             return;
         }
 
-        if (!GetInstalledMinecraftVersions().Contains(gameVersion))
+        if (!IsGameVersionDownloaded(gameVersion))
         {
             LogToOutput($"Install blocked: Minecraft {gameVersion} is not downloaded yet.");
             if (DetailInstallStatus != null)
@@ -2224,9 +2263,9 @@ public MainWindow()
 
     private async Task DownloadModpackAsync(ContentItem item, ModrinthAPI.ModVersion selectedVersion)
     {
-        var selectedFile = PickPrimaryFile(selectedVersion);
+        var selectedFile = PickPrimaryModpackFile(selectedVersion);
         if (string.IsNullOrWhiteSpace(selectedFile?.Url))
-            throw new Exception("No download file available");
+            throw new Exception("No .mrpack file is available for this modpack version.");
 
         var instancePath = Path.Combine(_instancesFolder, SanitizeFolderName(item.Title));
         var tempFile = Path.Combine(Path.GetTempPath(), $"xylar-{Guid.NewGuid():N}.mrpack");
@@ -2239,6 +2278,15 @@ public MainWindow()
             ModrinthModpackInstaller.ExtractMrpackZip(tempFile, instancePath);
             var packRoot = ModrinthModpackInstaller.FindPackRoot(instancePath) ?? instancePath;
             if (DetailInstallProgress != null) DetailInstallProgress.Value = 62;
+
+            var packInfo = ModrinthPackIndexReader.TryRead(packRoot);
+            if (packInfo != null &&
+                !string.Equals(packInfo.Loader, "Fabric", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(packInfo.Loader, "Forge", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(packInfo.Loader, "Vanilla", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception($"{packInfo.Loader} modpacks are not supported in this build.");
+            }
 
             var progress = new Progress<(int done, int total, string relativePath)>(step =>
             {
@@ -2430,8 +2478,7 @@ public MainWindow()
             return;
         }
 
-        var welcomeWindow = new WelcomeWindow();
-        var result = await welcomeWindow.ShowDialog<WelcomeWindowResult?>(this);
+        var result = await RunInlineWelcomeAsync(isEditMode: false);
         var firstRunProfile = result == null
             ? CreateDefaultLauncherProfile()
             : new LauncherProfile
@@ -2460,44 +2507,301 @@ public MainWindow()
             : $"Microsoft sign-in completed: {result.MicrosoftDisplayName}.";
     }
 
-    private void WelcomeConfirmButton_Click(object? sender, RoutedEventArgs e)
-    {
-        var value = WelcomeUsernameBox?.Text?.Trim();
-        if (string.IsNullOrWhiteSpace(value))
-            value = DefaultOfflineUsername;
-
-        UsernameBox.Text = value;
-        ApplyLauncherProfile(new LauncherProfile
-        {
-            Username = value,
-            WelcomeCompleted = true,
-            AccountMode = AccountModeOffline,
-            MicrosoftSignInRequested = false,
-            MicrosoftDisplayName = string.Empty
-        });
-        SaveLauncherProfile(_launcherProfile);
-
-        if (WelcomeOverlay != null)
-            WelcomeOverlay.IsVisible = false;
-        _welcomeCompleted.TrySetResult(true);
-        UpdateStatus("Profile created.");
-    }
-
     private void ProfileMenuButton_Click(object? sender, RoutedEventArgs e)
     {
         // Profile menu button removed from UI
     }
 
-    private void ChangeUsernameFromMenu_Click(object? sender, RoutedEventArgs e)
+    private async Task<WelcomeWindowResult?> RunInlineWelcomeAsync(bool isEditMode)
     {
-        if (WelcomeOverlay == null || WelcomeInputPanel == null || WelcomeTitleText == null || WelcomeSubtitleText == null)
+        _welcomeEditMode = isEditMode;
+        _inlineWelcomeTcs = new TaskCompletionSource<WelcomeWindowResult?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (isEditMode)
+            await ShowWelcomeOfflineStepAsync(isEditMode: true, userValue: UsernameBox?.Text);
+        else
+            await ShowWelcomeChoiceStepAsync();
+
+        return await _inlineWelcomeTcs.Task;
+    }
+
+    private async Task ShowWelcomeChoiceStepAsync()
+    {
+        if (WelcomeOverlay == null || WelcomeChoicePanel == null || WelcomeInputPanel == null)
             return;
-        WelcomeOverlay.IsVisible = true;
-        WelcomeInputPanel.IsVisible = true;
-        WelcomeTitleText.Text = "Change Username";
-        WelcomeSubtitleText.Text = "Set your launcher profile name";
+
+        _welcomeEditMode = false;
+
+        if (WelcomeTitleText != null)
+            WelcomeTitleText.Text = "Hi! Welcome to XylarJava!";
+        if (WelcomeSubtitleText != null)
+            WelcomeSubtitleText.Text = "Continue with Microsoft or stay offline.";
+        if (WelcomeModeHintText != null)
+            WelcomeModeHintText.Text = "Microsoft or Offline";
+        if (WelcomePanelTitleText != null)
+            WelcomePanelTitleText.Text = "Choose how to continue";
+        if (WelcomePanelSubtitleText != null)
+            WelcomePanelSubtitleText.Text = "One tap and you're in.";
+        if (WelcomeStatusText != null)
+        {
+            WelcomeStatusText.Text = string.Empty;
+            WelcomeStatusText.IsVisible = false;
+        }
+        if (WelcomeInputStatusText != null)
+        {
+            WelcomeInputStatusText.Text = string.Empty;
+            WelcomeInputStatusText.IsVisible = false;
+        }
+
+        SetWelcomeChoiceButtonsEnabled(true);
+        SetWelcomeInputButtonsEnabled(true);
+
+        if (!WelcomeOverlay.IsVisible)
+        {
+            WelcomeChoicePanel.Opacity = 0;
+            WelcomeChoicePanel.IsVisible = true;
+            WelcomeInputPanel.IsVisible = false;
+            WelcomeOverlay.Opacity = 0;
+            WelcomeOverlay.IsVisible = true;
+            await FadeControlAsync(WelcomeOverlay, 0, 1, 190);
+            await FadeControlAsync(WelcomeChoicePanel, 0, 1, 170);
+            return;
+        }
+
+        await SwapWelcomePanelsAsync(WelcomeInputPanel, WelcomeChoicePanel);
+    }
+
+    private async Task ShowWelcomeOfflineStepAsync(bool isEditMode, string? userValue = null)
+    {
+        if (WelcomeOverlay == null || WelcomeChoicePanel == null || WelcomeInputPanel == null)
+            return;
+
+        _welcomeEditMode = isEditMode;
+
+        if (WelcomeTitleText != null)
+            WelcomeTitleText.Text = isEditMode ? "Update launcher name" : "Choose a launcher name";
+        if (WelcomeSubtitleText != null)
+            WelcomeSubtitleText.Text = isEditMode
+                ? "Change the local name used by XylarJava."
+                : "Create a local profile and continue.";
+        if (WelcomeModeHintText != null)
+            WelcomeModeHintText.Text = isEditMode ? "Local profile" : "Offline setup";
+        if (WelcomeInputTitleText != null)
+            WelcomeInputTitleText.Text = isEditMode ? "Launcher name" : "Offline profile";
+        if (WelcomeInputSubtitleText != null)
+            WelcomeInputSubtitleText.Text = isEditMode
+                ? "Save the name you want to use here."
+                : "Pick the name you want to use.";
+        if (WelcomeBackButton != null)
+            WelcomeBackButton.Content = isEditMode ? "Cancel" : "Back";
+        if (WelcomeConfirmButton != null)
+            WelcomeConfirmButton.Content = isEditMode ? "Save" : "Continue";
+        if (WelcomeInputStatusText != null)
+        {
+            WelcomeInputStatusText.Text = string.Empty;
+            WelcomeInputStatusText.IsVisible = false;
+        }
+
+        var normalizedUser = string.IsNullOrWhiteSpace(userValue) ? DefaultOfflineUsername : userValue.Trim();
         if (WelcomeUsernameBox != null)
-            WelcomeUsernameBox.Text = UsernameBox.Text;
+            WelcomeUsernameBox.Text = normalizedUser;
+
+        SetWelcomeInputButtonsEnabled(true);
+
+        if (!WelcomeOverlay.IsVisible)
+        {
+            WelcomeInputPanel.Opacity = 0;
+            WelcomeInputPanel.IsVisible = true;
+            WelcomeChoicePanel.IsVisible = false;
+            WelcomeOverlay.Opacity = 0;
+            WelcomeOverlay.IsVisible = true;
+            await FadeControlAsync(WelcomeOverlay, 0, 1, 190);
+            await FadeControlAsync(WelcomeInputPanel, 0, 1, 170);
+        }
+        else
+        {
+            await SwapWelcomePanelsAsync(WelcomeChoicePanel, WelcomeInputPanel);
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            WelcomeUsernameBox?.Focus();
+            if (WelcomeUsernameBox != null)
+                WelcomeUsernameBox.CaretIndex = WelcomeUsernameBox.Text?.Length ?? 0;
+        });
+    }
+
+    private async Task CompleteInlineWelcomeAsync(WelcomeWindowResult? result)
+    {
+        var tcs = _inlineWelcomeTcs;
+        _inlineWelcomeTcs = null;
+
+        await HideWelcomeOverlayAsync();
+
+        tcs?.TrySetResult(result);
+    }
+
+    private async Task HideWelcomeOverlayAsync()
+    {
+        if (WelcomeOverlay == null || !WelcomeOverlay.IsVisible)
+            return;
+
+        await FadeControlAsync(WelcomeOverlay, WelcomeOverlay.Opacity, 0, 150);
+        WelcomeOverlay.IsVisible = false;
+
+        if (WelcomeChoicePanel != null)
+        {
+            WelcomeChoicePanel.IsVisible = false;
+            WelcomeChoicePanel.Opacity = 1;
+        }
+
+        if (WelcomeInputPanel != null)
+        {
+            WelcomeInputPanel.IsVisible = false;
+            WelcomeInputPanel.Opacity = 1;
+        }
+    }
+
+    private async Task SwapWelcomePanelsAsync(Control? hiddenControl, Control? shownControl)
+    {
+        if (shownControl == null)
+            return;
+
+        if (hiddenControl != null && hiddenControl.IsVisible)
+        {
+            await FadeControlAsync(hiddenControl, hiddenControl.Opacity <= 0 ? 1 : hiddenControl.Opacity, 0, 120);
+            hiddenControl.IsVisible = false;
+        }
+
+        shownControl.Opacity = 0;
+        shownControl.IsVisible = true;
+        await FadeControlAsync(shownControl, 0, 1, 170);
+    }
+
+    private static async Task FadeControlAsync(Control? control, double from, double to, int durationMs)
+    {
+        if (control == null)
+            return;
+
+        const int steps = 16;
+        control.Opacity = from;
+
+        for (int index = 1; index <= steps; index++)
+        {
+            control.Opacity = from + ((to - from) * index / steps);
+            await Task.Delay(Math.Max(1, durationMs / steps));
+        }
+    }
+
+    private void SetWelcomeChoiceButtonsEnabled(bool enabled)
+    {
+        if (WelcomeMicrosoftButton != null)
+            WelcomeMicrosoftButton.IsEnabled = enabled;
+
+        if (WelcomeOfflineButton != null)
+            WelcomeOfflineButton.IsEnabled = enabled;
+    }
+
+    private void SetWelcomeInputButtonsEnabled(bool enabled)
+    {
+        if (WelcomeUsernameBox != null)
+            WelcomeUsernameBox.IsEnabled = enabled;
+
+        if (WelcomeBackButton != null)
+            WelcomeBackButton.IsEnabled = enabled;
+
+        if (WelcomeConfirmButton != null)
+            WelcomeConfirmButton.IsEnabled = enabled;
+    }
+
+    private async void WelcomeMicrosoftButton_Click(object? sender, RoutedEventArgs e)
+    {
+        SetWelcomeChoiceButtonsEnabled(false);
+        if (WelcomeStatusText != null)
+        {
+            WelcomeStatusText.Text = "Opening Microsoft sign-in...";
+            WelcomeStatusText.IsVisible = true;
+        }
+
+        var launch = await StartMicrosoftSignInAsync();
+        if (!launch.Success)
+        {
+            if (WelcomeStatusText != null)
+            {
+                WelcomeStatusText.Text = launch.ErrorMessage ?? "Microsoft sign-in failed.";
+                WelcomeStatusText.IsVisible = true;
+            }
+            SetWelcomeChoiceButtonsEnabled(true);
+            return;
+        }
+
+        await CompleteInlineWelcomeAsync(new WelcomeWindowResult
+        {
+            Username = string.IsNullOrWhiteSpace(launch.DisplayName) ? DefaultOfflineUsername : launch.DisplayName!,
+            AccountMode = AccountModeMicrosoft,
+            OpenedMicrosoftSignIn = true,
+            MicrosoftStatusMessage = launch.Message,
+            MicrosoftDisplayName = launch.DisplayName
+        });
+    }
+
+    private async void WelcomeOfflineButton_Click(object? sender, RoutedEventArgs e)
+    {
+        await ShowWelcomeOfflineStepAsync(isEditMode: false, userValue: DefaultOfflineUsername);
+    }
+
+    private async void WelcomeBackButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_welcomeEditMode)
+        {
+            await CompleteInlineWelcomeAsync(null);
+            return;
+        }
+
+        await ShowWelcomeChoiceStepAsync();
+    }
+
+    private async void WelcomeConfirmButton_Click(object? sender, RoutedEventArgs e)
+    {
+        SetWelcomeInputButtonsEnabled(false);
+
+        var value = WelcomeUsernameBox?.Text?.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+            value = DefaultOfflineUsername;
+
+        if (WelcomeInputStatusText != null)
+        {
+            WelcomeInputStatusText.Text = _welcomeEditMode ? "Saving launcher name..." : "Creating local profile...";
+            WelcomeInputStatusText.IsVisible = true;
+        }
+
+        await CompleteInlineWelcomeAsync(new WelcomeWindowResult
+        {
+            Username = value,
+            AccountMode = _welcomeEditMode ? _launcherProfile.AccountMode : AccountModeOffline,
+            OpenedMicrosoftSignIn = false,
+            MicrosoftDisplayName = _launcherProfile.MicrosoftDisplayName
+        });
+    }
+
+    private async void ChangeUsernameFromMenu_Click(object? sender, RoutedEventArgs e)
+    {
+        var result = await RunInlineWelcomeAsync(isEditMode: true);
+        if (result == null)
+            return;
+
+        var updatedProfile = new LauncherProfile
+        {
+            Username = string.IsNullOrWhiteSpace(result.Username) ? DefaultOfflineUsername : result.Username.Trim(),
+            WelcomeCompleted = true,
+            AccountMode = _launcherProfile.AccountMode,
+            MicrosoftSignInRequested = _launcherProfile.MicrosoftSignInRequested,
+            MicrosoftDisplayName = _launcherProfile.MicrosoftDisplayName
+        };
+
+        ApplyLauncherProfile(updatedProfile);
+        SaveLauncherProfile(_launcherProfile);
+        UpdateStatus("Launcher name updated.");
     }
 
     private void ExitButtonFromMenu_Click(object? sender, RoutedEventArgs e)
@@ -2507,7 +2811,7 @@ public MainWindow()
 
     private void OpenSettingsFromMenu(string statusMessage)
     {
-        SetHeader("Settings", "Accounts, folders and launcher controls");
+        SetHeader("Settings", string.Empty);
         NavMain.IsChecked = false;
         NavSkins.IsChecked = true;
         NavMods.IsChecked = false;
@@ -2518,17 +2822,17 @@ public MainWindow()
 
     private void GameDirectoryOption_Click(object? sender, RoutedEventArgs e)
     {
-        OpenSettingsFromMenu("Opened Settings - folders.");
+        OpenSettingsFromMenu("Opened Settings.");
     }
 
     private void JavaSettingsOption_Click(object? sender, RoutedEventArgs e)
     {
-        OpenSettingsFromMenu("Opened Settings - launch tools.");
+        OpenSettingsFromMenu("Opened Settings.");
     }
 
     private void InterfaceSettingsOption_Click(object? sender, RoutedEventArgs e)
     {
-        OpenSettingsFromMenu("Opened Settings - interface.");
+        OpenSettingsFromMenu("Opened Settings.");
     }
 
     private void ContentSearch_Click(object? sender, RoutedEventArgs e)
@@ -2737,30 +3041,8 @@ public MainWindow()
 
     private void ShowJava21Popup()
     {
-        if (WelcomeOverlay == null || WelcomeTitleText == null || WelcomeSubtitleText == null || WelcomeInputPanel == null)
-        {
-            System.Environment.Exit(1);
-            return;
-        }
-
-        WelcomeOverlay.IsVisible = true;
-        WelcomeTitleText.Text = "Java 21 Required";
-        WelcomeSubtitleText.Text = "Oracle Java 21 is required. Please install Oracle JDK 21 and restart the launcher.";
-        WelcomeInputPanel.IsVisible = false;
-
-        var exitButton = new Button
-        {
-            Content = "Exit",
-            Width = 320,
-            Height = 40,
-            Classes = { "epicPrimary" }
-        };
-        exitButton.Click += (_, _) => System.Environment.Exit(1);
-
-        if (WelcomeInputPanel.Parent is StackPanel sp)
-        {
-            sp.Children.Add(exitButton);
-        }
+        UpdateStatus("Oracle Java 21 is required. Install it and restart XylarJava.");
+        Close();
     }
 
     private void LogToOutput(string message)

@@ -902,13 +902,6 @@
                           </Grid>
 
                           <StackPanel Grid.Row="1" Margin="18,16,18,0" Spacing="12">
-                            <TextBlock Text="{Binding Description}"
-                                       Foreground="#D4D4D8"
-                                       FontSize="13"
-                                       LineHeight="20"
-                                       TextWrapping="Wrap"
-                                       MaxHeight="64"/>
-
                             <WrapPanel Orientation="Horizontal">
                               <Border Classes="modrinthChip" Margin="0,0,8,8">
                                 <TextBlock Text="{Binding DisplayPrimaryCategory}" FontSize="11"/>
@@ -1066,7 +1059,6 @@
                 </Border.Background>
                 <StackPanel Spacing="8">
                   <TextBlock Text="About Xylar" FontSize="30" FontWeight="Bold" LetterSpacing="-0.8"/>
-                  <TextBlock Text="Desktop launcher for Minecraft Java Edition with Modrinth modpack install, loader switching and account tools." Classes="epicMuted" TextWrapping="Wrap" FontSize="13" LineHeight="20"/>
                 </StackPanel>
               </Border>
 
@@ -1109,8 +1101,7 @@
               <Border Classes="epicPanel">
                 <StackPanel Spacing="10">
                   <TextBlock Text="Build" FontSize="17" FontWeight="SemiBold"/>
-                  <TextBlock Text="Version 0.0.0.3 · .NET 8 · Avalonia UI 11" Classes="epicMuted" TextWrapping="Wrap"/>
-                  <TextBlock Text="Libraries: CmlLib.Core (install and launch), Modrinth API v2 (search and .mrpack download)." Classes="epicMuted" TextWrapping="Wrap" FontSize="12" LineHeight="18"/>
+                  <TextBlock Text="Version 0.0.0.4 · .NET 8 · Avalonia UI 11" Classes="epicMuted" TextWrapping="Wrap"/>
                 </StackPanel>
               </Border>
 
@@ -1118,13 +1109,11 @@
                 <Border Classes="epicPanel" Margin="0,0,7,0">
                   <StackPanel Spacing="8">
                     <TextBlock Text="Modpacks" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBlock Text="Catalog from Modrinth. Install downloads the .mrpack and all indexed files into the instances folder next to the launcher." Classes="epicMuted" TextWrapping="Wrap" FontSize="12" LineHeight="18"/>
                   </StackPanel>
                 </Border>
                 <Border Grid.Column="1" Classes="epicPanel" Margin="7,0,0,0">
                   <StackPanel Spacing="8">
                     <TextBlock Text="Interface" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBlock Text="Dark layout, glass-style sidebar, smooth section transitions." Classes="epicMuted" TextWrapping="Wrap" FontSize="12" LineHeight="18"/>
                   </StackPanel>
                 </Border>
               </Grid>
@@ -1137,39 +1126,224 @@
 
   <Border x:Name="WelcomeOverlay"
           IsVisible="False"
-          Background="#E612131A">
-    <Grid RowDefinitions="*,Auto,*">
-      <Border Grid.Row="1"
-              Width="640"
-              Padding="28"
-              CornerRadius="18"
-              BorderBrush="#3A3D46"
-              BorderThickness="1"
-              Background="#1A1E28">
-      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" MaxWidth="620">
-        <Border Width="120" Height="76" CornerRadius="10" BorderBrush="#4A4D58" BorderThickness="1" Background="#232833">
-          <TextBlock Text="XJ"
-                     HorizontalAlignment="Center"
-                     VerticalAlignment="Center"
-                     FontSize="28"
-                     FontWeight="Bold"
-                     Foreground="#8DF4FF"/>
-        </Border>
-        <TextBlock x:Name="WelcomeTitleText"
-                   Text="Welcome to XylarJava"
-                   FontSize="34"
-                   FontWeight="Bold"
-                   HorizontalAlignment="Center"/>
-        <TextBlock x:Name="WelcomeSubtitleText"
-                   Text="Choose your launcher username"
-                   FontSize="16"
-                   Classes="epicMuted"
-                   HorizontalAlignment="Center"/>
-        <StackPanel x:Name="WelcomeInputPanel" IsVisible="True" Spacing="8" Margin="0,14,0,0">
-          <TextBox x:Name="WelcomeUsernameBox" Width="320" Height="42" Watermark="Type your username"/>
-          <Button x:Name="WelcomeConfirmButton" Width="320" Height="40" Classes="epicPrimary" Content="Save username" Click="WelcomeConfirmButton_Click"/>
-        </StackPanel>
-      </StackPanel>
+          Background="#E60A0A0F">
+    <Grid ClipToBounds="True">
+      <Ellipse Width="620"
+               Height="620"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="-180,-160,0,0"
+               Opacity="0.84">
+        <Ellipse.Fill>
+          <RadialGradientBrush RadiusX="78%" RadiusY="78%">
+            <GradientStop Color="#202127" Offset="0.08"/>
+            <GradientStop Color="#00202127" Offset="1"/>
+          </RadialGradientBrush>
+        </Ellipse.Fill>
+      </Ellipse>
+
+      <Ellipse Width="760"
+               Height="760"
+               HorizontalAlignment="Right"
+               VerticalAlignment="Bottom"
+               Margin="0,0,-220,-260"
+               Opacity="0.72">
+        <Ellipse.Fill>
+          <RadialGradientBrush RadiusX="82%" RadiusY="82%">
+            <GradientStop Color="#282931" Offset="0.12"/>
+            <GradientStop Color="#00282931" Offset="1"/>
+          </RadialGradientBrush>
+        </Ellipse.Fill>
+      </Ellipse>
+
+      <Border x:Name="WelcomeModalCard"
+              Width="980"
+              MaxWidth="980"
+              Margin="28"
+              CornerRadius="30"
+              BorderBrush="#2F3038"
+              BorderThickness="1.5"
+              Background="#101115"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center">
+        <Grid ColumnDefinitions="*,*">
+          <Border Grid.Column="0"
+                  Padding="48,44"
+                  Background="#0D0E12"
+                  BorderBrush="#22232A"
+                  BorderThickness="0,0,1,0">
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Spacing="18"
+                        MaxWidth="420">
+              <Border HorizontalAlignment="Center"
+                      Padding="12,6"
+                      CornerRadius="999"
+                      Background="#15161B"
+                      BorderBrush="#2B2C33"
+                      BorderThickness="1">
+                <TextBlock Text="WELCOME"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           Foreground="#F4F4F5"/>
+              </Border>
+
+              <TextBlock x:Name="WelcomeTitleText"
+                         Text="Hi! Welcome to XylarJava!"
+                         FontSize="42"
+                         FontWeight="SemiBold"
+                         TextAlignment="Center"
+                         TextWrapping="Wrap"
+                         MaxWidth="400"/>
+
+              <TextBlock x:Name="WelcomeSubtitleText"
+                         Text="Set up your launcher and continue inside XylarJava."
+                         FontSize="16"
+                         Classes="epicMuted"
+                         TextAlignment="Center"
+                         TextWrapping="Wrap"
+                         MaxWidth="380"/>
+
+              <Grid Margin="0,8,0,0"
+                    ColumnDefinitions="*,*">
+                <Border Margin="0,0,10,0"
+                        CornerRadius="18"
+                        BorderBrush="#26272E"
+                        BorderThickness="1"
+                        Background="#121318"
+                        Padding="18,16">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="Launcher" Classes="epicCaption"/>
+                    <TextBlock Text="XylarJava" FontSize="20" FontWeight="SemiBold"/>
+                  </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1"
+                        Margin="10,0,0,0"
+                        CornerRadius="18"
+                        BorderBrush="#26272E"
+                        BorderThickness="1"
+                        Background="#121318"
+                        Padding="18,16">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="Setup" Classes="epicCaption"/>
+                    <TextBlock x:Name="WelcomeModeHintText"
+                               Text="Microsoft or Offline"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap"/>
+                  </StackPanel>
+                </Border>
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <Border Grid.Column="1"
+                  Padding="34,30"
+                  Background="#131419">
+            <Grid>
+              <StackPanel x:Name="WelcomeChoicePanel"
+                          VerticalAlignment="Center"
+                          Spacing="14">
+                <TextBlock x:Name="WelcomePanelTitleText"
+                           Text="Account setup"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           TextAlignment="Center"/>
+
+                <TextBlock x:Name="WelcomePanelSubtitleText"
+                           Text="Choose one option to continue."
+                           FontSize="14"
+                           Classes="epicMuted"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"/>
+
+                <Button x:Name="WelcomeMicrosoftButton"
+                        Classes="epicMicrosoft"
+                        Height="50"
+                        Click="WelcomeMicrosoftButton_Click">
+                  <StackPanel Orientation="Horizontal"
+                              Spacing="12"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Center">
+                    <Grid Width="18"
+                          Height="18"
+                          ColumnDefinitions="*,*"
+                          RowDefinitions="*,*">
+                      <Border Grid.Row="0" Grid.Column="0" Background="#F35325" Margin="0,0,1,1"/>
+                      <Border Grid.Row="0" Grid.Column="1" Background="#81BC06" Margin="1,0,0,1"/>
+                      <Border Grid.Row="1" Grid.Column="0" Background="#05A6F0" Margin="0,1,1,0"/>
+                      <Border Grid.Row="1" Grid.Column="1" Background="#FFBA08" Margin="1,1,0,0"/>
+                    </Grid>
+                    <TextBlock Text="Sign in with Microsoft"
+                               Foreground="#111217"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                  </StackPanel>
+                </Button>
+
+                <Button x:Name="WelcomeOfflineButton"
+                        Classes="epicSecondary"
+                        Height="48"
+                        Content="Go offline"
+                        Click="WelcomeOfflineButton_Click"/>
+
+                <TextBlock x:Name="WelcomeStatusText"
+                           IsVisible="False"
+                           Classes="epicCaption"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"/>
+              </StackPanel>
+
+              <StackPanel x:Name="WelcomeInputPanel"
+                          IsVisible="False"
+                          VerticalAlignment="Center"
+                          Spacing="14">
+                <TextBlock x:Name="WelcomeInputTitleText"
+                           Text="Choose a launch name"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           TextAlignment="Center"/>
+
+                <TextBlock x:Name="WelcomeInputSubtitleText"
+                           Text="Set the name used by your local profile."
+                           FontSize="14"
+                           Classes="epicMuted"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"/>
+
+                <TextBox x:Name="WelcomeUsernameBox"
+                         Height="48"
+                         Watermark="Launch name"/>
+
+                <Grid ColumnDefinitions="*,*">
+                  <Button x:Name="WelcomeBackButton"
+                          Classes="epicSecondary"
+                          Height="46"
+                          Content="Back"
+                          Click="WelcomeBackButton_Click"/>
+
+                  <Button x:Name="WelcomeConfirmButton"
+                          Grid.Column="1"
+                          Margin="12,0,0,0"
+                          Classes="epicPrimary"
+                          Height="46"
+                          Content="Continue"
+                          Click="WelcomeConfirmButton_Click"/>
+                </Grid>
+
+                <TextBlock x:Name="WelcomeInputStatusText"
+                           IsVisible="False"
+                           Classes="epicCaption"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"/>
+              </StackPanel>
+            </Grid>
+          </Border>
+        </Grid>
       </Border>
     </Grid>
   </Border>
@@ -1220,7 +1394,6 @@
                 </Border>
                 <StackPanel Grid.Column="1" Margin="20,0,0,0" Spacing="6">
                   <TextBlock x:Name="DetailItemTitle" FontSize="28" FontWeight="Bold" TextWrapping="Wrap"/>
-                  <TextBlock x:Name="DetailItemDescription" Classes="epicMuted" FontSize="14" TextWrapping="Wrap" MaxHeight="44"/>
                   <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
                     <TextBlock x:Name="DetailItemDownloads" Classes="epicCaption"/>
                     <TextBlock Text="|" Classes="epicMuted"/>

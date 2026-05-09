@@ -1,6 +1,7 @@
 ﻿bin/
 obj/
 publish/
+artifacts/
 AppDir/
 dist/
 tools/appimage/
@@ -18,7 +19,5 @@ launcher_profile.json
 microsoft_accounts.json
 instances/
 skins/
-
-# Allow the release EXE to be tracked
 !release/
 !release/*.exe

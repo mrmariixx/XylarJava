@@ -1,4 +1,4 @@
-# XylarJava v0.0.0.3-ALPHA
+# XylarJava v0.0.0.4-ALPHA
 
 XylarJava is a lightweight Minecraft launcher focused on offline accessibility and integrated modding support. It allows users to manage game instances and visual customization without requiring a constant internet connection.
 Core Features
