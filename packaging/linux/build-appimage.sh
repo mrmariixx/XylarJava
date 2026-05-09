@@ -22,6 +22,7 @@ mkdir -p "$APPDIR/usr/bin" \
 cp -R "$PUBLISH_DIR"/. "$APPDIR/usr/bin/"
 install -m 755 "$ROOT_DIR/packaging/linux/AppRun" "$APPDIR/AppRun"
 install -m 644 "$ROOT_DIR/packaging/linux/XylarJava.desktop" "$APPDIR/usr/share/applications/XylarJava.desktop"
+install -m 644 "$ROOT_DIR/packaging/linux/XylarJava.desktop" "$APPDIR/XylarJava.desktop"
 install -m 644 "$ROOT_DIR/packaging/linux/XylarJava.appdata.xml" "$APPDIR/usr/share/metainfo/XylarJava.appdata.xml"
 install -m 644 "$ROOT_DIR/Assets/minecraft.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/XylarJava.png"
 install -m 644 "$ROOT_DIR/Assets/minecraft.png" "$APPDIR/XylarJava.png"
