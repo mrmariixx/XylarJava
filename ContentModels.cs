@@ -85,6 +85,9 @@ public class ContentItem : INotifyPropertyChanged
     public string DisplayPrimaryCategory => Categories.FirstOrDefault() is { Length: > 0 } value
         ? HumanizeToken(value)
         : "Minecraft Java";
+    public string DisplayVersionSummary => MinecraftVersions.Any()
+        ? string.Join(" / ", MinecraftVersions.Take(3))
+        : "Minecraft Java";
     public string DisplayLoaderSummary => Loaders.Any()
         ? string.Join(" / ", Loaders.Take(3).Select(loader => loader.GetDisplayName()))
         : "Vanilla";

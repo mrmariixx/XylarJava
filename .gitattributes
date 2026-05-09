@@ -1,0 +1,6 @@
+bin/** linguist-vendored
+obj/** linguist-vendored
+publish/** linguist-vendored
+artifacts/** linguist-vendored
+dist/** linguist-vendored
+AppDir/** linguist-vendored

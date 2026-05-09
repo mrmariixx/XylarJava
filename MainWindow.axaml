@@ -246,13 +246,40 @@
       <Setter Property="BorderBrush" Value="#B8B8C0"/>
     </Style>
 
-    <Style Selector="Border.contentCard">
+    <Style Selector="Border.modpackRail">
+      <Setter Property="CornerRadius" Value="26"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#2A2B31"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+          <GradientStop Color="#121318" Offset="0"/>
+          <GradientStop Color="#0F1014" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+      <Setter Property="BoxShadow" Value="0 22 64 0 #26000000"/>
+    </Style>
+
+    <Style Selector="Border.modpackMetric">
       <Setter Property="CornerRadius" Value="18"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#292931"/>
-      <Setter Property="Background" Value="#111216"/>
+      <Setter Property="BorderBrush" Value="#2A2C33"/>
+      <Setter Property="Background" Value="#14151B"/>
+      <Setter Property="Padding" Value="14,12"/>
+    </Style>
+
+    <Style Selector="Border.contentCard">
+      <Setter Property="CornerRadius" Value="24"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#2A2C33"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+          <GradientStop Color="#14151A" Offset="0"/>
+          <GradientStop Color="#101115" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
       <Setter Property="ClipToBounds" Value="True"/>
       <Setter Property="Margin" Value="0,0,18,18"/>
+      <Setter Property="BoxShadow" Value="0 20 48 0 #22000000"/>
       <Setter Property="Transitions">
         <Transitions>
           <BrushTransition Property="Background" Duration="0:0:0.2"/>
@@ -262,28 +289,40 @@
     </Style>
 
     <Style Selector="Border.contentCard:pointerover">
-      <Setter Property="Background" Value="#142333"/>
-      <Setter Property="BorderBrush" Value="#64C7E8"/>
+      <Setter Property="Background" Value="#181A20"/>
+      <Setter Property="BorderBrush" Value="#565C67"/>
+    </Style>
+
+    <Style Selector="Border.modpackCover">
+      <Setter Property="CornerRadius" Value="0,0,24,24"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+          <GradientStop Color="#1C1D24" Offset="0"/>
+          <GradientStop Color="#16171D" Offset="0.55"/>
+          <GradientStop Color="#111217" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
     </Style>
 
     <Style Selector="Border.modrinthHero">
-      <Setter Property="CornerRadius" Value="24"/>
+      <Setter Property="CornerRadius" Value="28"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#2E3040"/>
+      <Setter Property="BorderBrush" Value="#2A2B31"/>
       <Setter Property="Background">
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-          <GradientStop Color="#182230" Offset="0"/>
-          <GradientStop Color="#11161E" Offset="0.55"/>
-          <GradientStop Color="#101318" Offset="1"/>
+          <GradientStop Color="#16171D" Offset="0"/>
+          <GradientStop Color="#121318" Offset="0.52"/>
+          <GradientStop Color="#0F1014" Offset="1"/>
         </LinearGradientBrush>
       </Setter>
+      <Setter Property="BoxShadow" Value="0 24 60 0 #26000000"/>
     </Style>
 
     <Style Selector="Border.modrinthChip">
       <Setter Property="CornerRadius" Value="999"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="#334155"/>
-      <Setter Property="Background" Value="#17202B"/>
+      <Setter Property="BorderBrush" Value="#30323A"/>
+      <Setter Property="Background" Value="#17181E"/>
       <Setter Property="Padding" Value="10,5"/>
     </Style>
 
@@ -311,41 +350,41 @@
     </Style>
 
     <Style Selector="TextBox.modrinthSearch">
-      <Setter Property="Background" Value="#12171D"/>
+      <Setter Property="Background" Value="#14151B"/>
       <Setter Property="Foreground" Value="#F5F5F5"/>
-      <Setter Property="BorderBrush" Value="#313A45"/>
+      <Setter Property="BorderBrush" Value="#2F3138"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="CornerRadius" Value="14"/>
       <Setter Property="Padding" Value="16,12"/>
     </Style>
 
     <Style Selector="Button.modrinthPrimary">
-      <Setter Property="Background" Value="#21C7E5"/>
-      <Setter Property="Foreground" Value="#FFFFFF"/>
-      <Setter Property="BorderBrush" Value="#71E8FF"/>
+      <Setter Property="Background" Value="#F4F4F6"/>
+      <Setter Property="Foreground" Value="#0F1014"/>
+      <Setter Property="BorderBrush" Value="#FFFFFF"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="CornerRadius" Value="14"/>
       <Setter Property="Padding" Value="16,10"/>
       <Setter Property="FontWeight" Value="Bold"/>
     </Style>
 
     <Style Selector="Button.modrinthPrimary:pointerover">
-      <Setter Property="Background" Value="#35D7F2"/>
+      <Setter Property="Background" Value="#FFFFFF"/>
     </Style>
 
     <Style Selector="Button.modrinthGhost">
-      <Setter Property="Background" Value="#181C23"/>
+      <Setter Property="Background" Value="#18191F"/>
       <Setter Property="Foreground" Value="#F5F5F5"/>
-      <Setter Property="BorderBrush" Value="#313746"/>
+      <Setter Property="BorderBrush" Value="#2F3138"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="CornerRadius" Value="14"/>
       <Setter Property="Padding" Value="16,10"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
     <Style Selector="Button.modrinthGhost:pointerover">
-      <Setter Property="Background" Value="#212832"/>
-      <Setter Property="BorderBrush" Value="#4F657E"/>
+      <Setter Property="Background" Value="#1F2027"/>
+      <Setter Property="BorderBrush" Value="#4C505A"/>
     </Style>
 
     <Style Selector="ProgressBar#ContentLoadingBar">
@@ -776,11 +815,11 @@
         </Border>
 
         <Border x:Name="ModSection" Classes="epicContentShell" IsVisible="False">
-          <Grid Margin="28" ColumnDefinitions="290,*">
+          <Grid Margin="28" ColumnDefinitions="320,*">
             <Border Grid.Column="0"
-                    Classes="epicPanel"
+                    Classes="modpackRail"
                     Padding="22"
-                    CornerRadius="22">
+                    CornerRadius="26">
               <StackPanel Spacing="16">
                 <Border Classes="modrinthChip"
                         HorizontalAlignment="Left">
@@ -790,8 +829,8 @@
                              Foreground="#F4F4F5"/>
                 </Border>
 
-                <TextBlock Text="Modpack library"
-                           FontSize="28"
+                <TextBlock Text="Modpacks"
+                           FontSize="34"
                            FontWeight="Bold"
                            TextWrapping="Wrap"/>
 
@@ -801,20 +840,49 @@
                          Watermark="Search modpacks, e.g. Better MC"
                          KeyUp="ContentSearchBox_KeyUp"/>
 
-                <Button Classes="modrinthPrimary"
-                        Content="Search"
-                        Height="46"
-                        Click="ContentSearch_Click"/>
+                <Grid ColumnDefinitions="*,*">
+                  <Button Classes="modrinthPrimary"
+                          Content="Search"
+                          Height="46"
+                          Click="ContentSearch_Click"/>
+                  <Button Grid.Column="1"
+                          Classes="modrinthGhost"
+                          Margin="10,0,0,0"
+                          Content="Refresh"
+                          Height="46"
+                          Click="RefreshContentButton_Click"/>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,*">
+                  <Border Classes="modpackMetric">
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="Source" Classes="epicCaption"/>
+                      <TextBlock Text="Modrinth" FontSize="16" FontWeight="SemiBold"/>
+                    </StackPanel>
+                  </Border>
+
+                  <Border Grid.Column="1" Classes="modpackMetric" Margin="10,0,0,0">
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="Install" Classes="epicCaption"/>
+                      <TextBlock Text="Play profile" FontSize="16" FontWeight="SemiBold"/>
+                    </StackPanel>
+                  </Border>
+                </Grid>
+
+                <Border Classes="modpackMetric">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="Status" Classes="epicCaption"/>
+                    <TextBlock x:Name="ContentStatusText"
+                               Text="Browse and install."
+                               TextWrapping="Wrap"
+                               Foreground="#C8C8D0"
+                               FontSize="13"/>
+                  </StackPanel>
+                </Border>
 
                 <ProgressBar x:Name="ContentLoadingBar"
                              Height="6"
                              IsVisible="False"/>
-
-                <TextBlock x:Name="ContentStatusText"
-                           Text="Popular packs."
-                           TextWrapping="Wrap"
-                           Foreground="#A1A1AA"
-                           FontSize="12"/>
               </StackPanel>
             </Border>
 
@@ -827,12 +895,24 @@
                         Padding="28,26">
                   <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="12">
-                      <TextBlock Text="Pick a modpack"
-                                 FontSize="34"
+                      <TextBlock Text="Curated modpacks"
+                                 FontSize="38"
                                  FontWeight="Bold"
                                  LetterSpacing="-0.8"
                                  TextWrapping="Wrap"
-                                 MaxWidth="700"/>
+                                  MaxWidth="700"/>
+
+                      <WrapPanel Orientation="Horizontal">
+                        <Border Classes="modrinthChip" Margin="0,0,8,8">
+                          <TextBlock Text="One-click install" FontSize="12" FontWeight="SemiBold"/>
+                        </Border>
+                        <Border Classes="modrinthChip" Margin="0,0,8,8">
+                          <TextBlock Text="Fabric" FontSize="12" FontWeight="SemiBold"/>
+                        </Border>
+                        <Border Classes="modrinthChip" Margin="0,0,0,8">
+                          <TextBlock Text="Forge" FontSize="12" FontWeight="SemiBold"/>
+                        </Border>
+                      </WrapPanel>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1"
@@ -842,6 +922,12 @@
                                 HorizontalAlignment="Right">
                       <Border Classes="modrinthChip" HorizontalAlignment="Right">
                         <TextBlock Text="Source: Modrinth" FontSize="12" FontWeight="SemiBold"/>
+                      </Border>
+                      <Border Classes="modpackMetric" HorizontalAlignment="Right" MinWidth="164">
+                        <StackPanel Spacing="4">
+                          <TextBlock Text="Install flow" Classes="epicCaption"/>
+                          <TextBlock Text="Creates a profile" FontSize="15" FontWeight="SemiBold"/>
+                        </StackPanel>
                       </Border>
                     </StackPanel>
                   </Grid>
@@ -857,77 +943,87 @@
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
                       <Border Classes="contentCard"
-                              Width="336">
-                        <Grid RowDefinitions="Auto,Auto,Auto">
-                          <Grid Margin="18,18,18,0" ColumnDefinitions="72,*,Auto">
-                            <Border Width="72"
-                                    Height="72"
-                                    CornerRadius="18"
-                                    BorderBrush="#31313A"
-                                    BorderThickness="1"
-                                    Background="#18181C">
-                              <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"/>
-                            </Border>
+                              Width="356">
+                        <Grid RowDefinitions="118,Auto,*">
+                          <Border Grid.Row="0"
+                                  Classes="modpackCover">
+                            <Grid Margin="18,16,18,14"
+                                  ColumnDefinitions="72,*">
+                              <Border Width="72"
+                                      Height="72"
+                                      CornerRadius="20"
+                                      BorderBrush="#32343C"
+                                      BorderThickness="1"
+                                      Background="#1B1C22"
+                                      BoxShadow="0 12 28 0 #22000000">
+                                <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"/>
+                              </Border>
 
-                            <StackPanel Grid.Column="1"
-                                        Margin="14,0,0,0"
-                                        Spacing="7"
-                                        VerticalAlignment="Center">
-                              <WrapPanel Orientation="Horizontal">
-                                <Border Classes="modrinthChip" Margin="0,0,8,6">
-                                  <TextBlock Text="{Binding DisplaySourceName}" FontSize="11" FontWeight="Bold" Foreground="#F4F4F5"/>
-                                </Border>
-                                <Border Classes="modrinthChip" Margin="0,0,0,6">
-                                  <TextBlock Text="Modpack" FontSize="11" FontWeight="Bold"/>
-                                </Border>
-                              </WrapPanel>
-                              <TextBlock Text="{Binding Title}"
-                                         FontSize="18"
-                                         FontWeight="Bold"
-                                         TextWrapping="Wrap"
-                                         MaxHeight="50"/>
-                              <TextBlock Text="{Binding DisplayAuthor}"
-                                         Foreground="#A1A1AA"
-                                         FontSize="12"
-                                         TextWrapping="Wrap"/>
-                            </StackPanel>
+                              <StackPanel Grid.Column="1"
+                                          Margin="14,0,0,0"
+                                          VerticalAlignment="Center"
+                                          Spacing="8">
+                                <WrapPanel Orientation="Horizontal">
+                                  <Border Classes="modrinthChip" Margin="0,0,8,6">
+                                    <TextBlock Text="{Binding DisplaySourceName}" FontSize="11" FontWeight="Bold" Foreground="#F4F4F5"/>
+                                  </Border>
+                                  <Border Classes="modrinthChip" Margin="0,0,0,6">
+                                    <TextBlock Text="{Binding DisplayVersionSummary}" FontSize="11" FontWeight="Bold"/>
+                                  </Border>
+                                </WrapPanel>
+                                <TextBlock Text="{Binding Title}"
+                                           FontSize="19"
+                                           FontWeight="Bold"
+                                           TextWrapping="Wrap"
+                                           MaxHeight="52"/>
+                                <TextBlock Text="{Binding DisplayAuthor}"
+                                           Foreground="#A1A1AA"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"/>
+                              </StackPanel>
+                            </Grid>
+                          </Border>
 
-                            <Button Grid.Column="2"
-                                    Margin="14,0,0,0"
-                                    Classes="modrinthGhost"
-                                    Content="Open"
-                                    Height="38"
-                                    VerticalAlignment="Top"
-                                    Click="ContentOpenPage_Click"/>
-                          </Grid>
-
-                          <StackPanel Grid.Row="1" Margin="18,16,18,0" Spacing="12">
+                          <StackPanel Grid.Row="1"
+                                      Margin="18,16,18,0"
+                                      Spacing="10">
                             <WrapPanel Orientation="Horizontal">
                               <Border Classes="modrinthChip" Margin="0,0,8,8">
                                 <TextBlock Text="{Binding DisplayPrimaryCategory}" FontSize="11"/>
                               </Border>
-                              <Border Classes="modrinthChip" Margin="0,0,8,8">
-                                <TextBlock Text="{Binding DisplayLoaderSummary}" FontSize="11"/>
-                              </Border>
                               <Border Classes="modrinthChip" Margin="0,0,0,8">
-                                <TextBlock Text="{Binding DisplayUpdated}" FontSize="11"/>
+                                <TextBlock Text="{Binding DisplayLoaderSummary}" FontSize="11"/>
                               </Border>
                             </WrapPanel>
                           </StackPanel>
 
-                          <Grid Grid.Row="2" Margin="18,0,18,18" ColumnDefinitions="*,Auto">
-                            <StackPanel VerticalAlignment="Center" Spacing="3">
+                          <Grid Grid.Row="2"
+                                Margin="18,16,18,18"
+                                ColumnDefinitions="*,Auto">
+                            <StackPanel VerticalAlignment="Center"
+                                        Spacing="4">
                               <TextBlock Text="{Binding DownloadCount, StringFormat='{}{0:N0} downloads'}"
-                                         FontSize="13"
+                                         FontSize="14"
                                          FontWeight="SemiBold"/>
+                              <TextBlock Text="{Binding DisplayUpdated}"
+                                         Classes="epicCaption"/>
                             </StackPanel>
 
-                            <Button Grid.Column="1"
-                                    Margin="10,0,0,0"
-                                    Classes="modrinthPrimary"
-                                    Content="Install pack"
-                                    Height="40"
-                                    Click="InstallMod_Click"/>
+                            <StackPanel Grid.Column="1"
+                                        Margin="12,0,0,0"
+                                        Spacing="8"
+                                        HorizontalAlignment="Right">
+                              <Button Classes="modrinthGhost"
+                                      Content="Open"
+                                      Height="38"
+                                      MinWidth="110"
+                                      Click="ContentOpenPage_Click"/>
+                              <Button Classes="modrinthPrimary"
+                                      Content="Install"
+                                      Height="42"
+                                      MinWidth="110"
+                                      Click="InstallMod_Click"/>
+                            </StackPanel>
                           </Grid>
                         </Grid>
                       </Border>

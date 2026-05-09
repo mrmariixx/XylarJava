@@ -756,12 +756,12 @@ public MainWindow()
         return null;
     }
 
-    private void RefreshPlayProfiles()
+    private void RefreshPlayProfiles(string? preferredId = null)
     {
         if (ProfileTargetCombo == null)
             return;
 
-        var keepId = _activePlayProfile.Id;
+        var keepId = preferredId ?? _activePlayProfile.Id;
         _playProfiles.Clear();
         _playProfiles.Add(PlayProfile.Standard);
 
@@ -1114,7 +1114,7 @@ public MainWindow()
                 }
 
                 pack.MarkInstalled(destFolder);
-                RefreshPlayProfiles();
+                RefreshPlayProfiles(pack.InstancePath ?? destFolder);
                 UpdateStatus($"Installed {pack.Title} (mods + index) under instances\\{Path.GetFileName(destFolder)}");
             }
             finally
@@ -1472,7 +1472,7 @@ public MainWindow()
 
         if (ContentStatusText != null && string.IsNullOrWhiteSpace(ContentStatusText.Text))
         {
-            ContentStatusText.Text = "Browse modpacks and pick a supported Minecraft version before install.";
+            ContentStatusText.Text = "Browse and install.";
         }
     }
 
@@ -1552,9 +1552,9 @@ public MainWindow()
                 }
                 if (ContentStatusText != null)
                     ContentStatusText.Text = _contentItems.Count == 0
-                        ? "No modpacks found yet. Try a different search term."
+                        ? "No modpacks found."
                         : _contentHasMore
-                            ? $"{_contentItems.Count} modpacks shown - load more to keep browsing."
+                            ? $"{_contentItems.Count} shown - load more"
                             : $"{_contentItems.Count} modpacks shown";
                 if (LoadMoreContentButton != null)
                     LoadMoreContentButton.IsVisible = _contentHasMore;
@@ -1723,7 +1723,9 @@ public MainWindow()
 
         if (DetailBodyText != null)
         {
-            DetailBodyText.Text = "Select version and loader.";
+            DetailBodyText.Text = item.ContentType == ContentType.Modpack
+                ? "Create a dedicated play profile for this pack."
+                : "Select version and loader.";
         }
 
         if (DetailInstallStatus != null)
@@ -1834,7 +1836,9 @@ public MainWindow()
             if (DetailRequirementText != null)
             {
                 DetailRequirementText.Text = compatibleVersions.Count > 0
-                    ? "Choose one downloaded version."
+                    ? (_currentDetailsItem.ContentType == ContentType.Modpack
+                        ? "Choose one downloaded version to create the profile."
+                        : "Choose one downloaded version.")
                     : "Download a supported version from Home first.";
             }
         }
@@ -1871,7 +1875,9 @@ public MainWindow()
                 ? "Choose a downloaded version."
                 : selectedFile == null
                     ? "No file is available for that choice."
-                    : "Ready.";
+                    : _currentDetailsItem.ContentType == ContentType.Modpack
+                        ? "Ready to create a play profile."
+                        : "Ready.";
         }
 
         if (DetailInstallButton != null)
@@ -1979,7 +1985,7 @@ public MainWindow()
     private (string, string) ResolveInstallTarget(ContentItem item, string gameVersion, string loader)
     {
         if (item.ContentType == ContentType.Modpack)
-            return (Path.Combine(_instancesFolder, SanitizeFolderName(item.Title)), $"New instance: {item.Title}");
+            return (GetModpackInstallPath(item), $"Play profile: {item.Title}");
 
         if (_activePlayProfile is { IsStandard: false, GameDirectory: not null } profile &&
             string.Equals(profile.MinecraftVersion, gameVersion, StringComparison.OrdinalIgnoreCase))
@@ -1994,6 +2000,36 @@ public MainWindow()
         return (_minecraftPath.BasePath, "Standard profile (.minecraft)");
     }
 
+    private string GetModpackInstallPath(ContentItem item)
+    {
+        var folderKey = GetModpackInstallKey(item);
+        return Path.Combine(_instancesFolder, SanitizeFolderName(folderKey));
+    }
+
+    private static string GetModpackInstallKey(ContentItem item)
+    {
+        var slug = ExtractSlugFromPageUrl(item.PageUrl);
+        if (!string.IsNullOrWhiteSpace(slug))
+            return slug;
+
+        if (!string.IsNullOrWhiteSpace(item.Id))
+            return item.Id;
+
+        return item.Title;
+    }
+
+    private static string? ExtractSlugFromPageUrl(string? pageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(pageUrl))
+            return null;
+
+        if (!Uri.TryCreate(pageUrl, UriKind.Absolute, out var uri))
+            return null;
+
+        var segment = uri.Segments.LastOrDefault()?.Trim('/');
+        return string.IsNullOrWhiteSpace(segment) ? null : segment;
+    }
+
     private ModrinthAPI.ModVersion? GetSelectedProjectVersion(ContentItem item, string gameVersion, string loader)
     {
         var normalizedLoader = NormalizeLoaderKey(loader);
@@ -2003,18 +2039,26 @@ public MainWindow()
             if (!SupportsGameVersion(version, gameVersion))
                 continue;
 
+            if (item.ContentType == ContentType.Modpack)
+            {
+                var versionLoaders = version.Loaders ?? new List<string>();
+                var matchesLoader = versionLoaders.Count == 0 ||
+                                    versionLoaders.Any(l => NormalizeLoaderKey(l) == normalizedLoader);
+
+                if (!matchesLoader)
+                    continue;
+
+                if (PickPrimaryModpackFile(version) != null)
+                    return version;
+
+                continue;
+            }
+
             if (item.ContentType != ContentType.ResourcePack)
             {
                 var versionLoaders = version.Loaders ?? new List<string>();
                 if (!versionLoaders.Any(l => NormalizeLoaderKey(l) == normalizedLoader))
                     continue;
-            }
-
-            if (item.ContentType == ContentType.Modpack)
-            {
-                if (PickPrimaryModpackFile(version) != null)
-                    return version;
-                continue;
             }
 
             if (PickPrimaryFile(version) != null)
@@ -2226,13 +2270,18 @@ public MainWindow()
             LogToOutput($"  Target: {_currentInstallTargetLabel}");
 
             Directory.CreateDirectory(_currentInstallTargetPath);
-            await DownloadContentAsync(_currentDetailsItem, _currentInstallTargetPath, gameVersion, loader, selectedVersion);
+            var installedProfileId = await DownloadContentAsync(_currentDetailsItem, _currentInstallTargetPath, gameVersion, loader, selectedVersion);
 
             if (DetailInstallProgress != null) DetailInstallProgress.Value = 100;
-            if (DetailInstallStatus != null) DetailInstallStatus.Text = $"Installed in {_currentInstallTargetLabel}.";
-            LogToOutput($"Installation complete in {_currentInstallTargetLabel}.");
+            if (DetailInstallStatus != null)
+                DetailInstallStatus.Text = installedProfileId != null
+                    ? "Installed and selected in Play profile."
+                    : $"Installed in {_currentInstallTargetLabel}.";
+            LogToOutput(installedProfileId != null
+                ? "Installation complete and play profile selected."
+                : $"Installation complete in {_currentInstallTargetLabel}.");
 
-            RefreshPlayProfiles();
+            RefreshPlayProfiles(installedProfileId);
         }
         catch (Exception ex)
         {
@@ -2245,29 +2294,35 @@ public MainWindow()
         }
     }
 
-    private async Task DownloadContentAsync(ContentItem item, string targetPath, string gameVersion, string loader, ModrinthAPI.ModVersion selectedVersion)
+    private async Task<string?> DownloadContentAsync(ContentItem item, string targetPath, string gameVersion, string loader, ModrinthAPI.ModVersion selectedVersion)
     {
         if (item.ContentType == ContentType.Modpack)
         {
-            await DownloadModpackAsync(item, selectedVersion);
+            return await DownloadModpackAsync(item, selectedVersion);
         }
-        else if (item.ContentType == ContentType.Mod)
+
+        if (item.ContentType == ContentType.Mod)
         {
             await DownloadModAsync(item, targetPath, selectedVersion);
+            return null;
         }
-        else if (item.ContentType == ContentType.ResourcePack)
+
+        if (item.ContentType == ContentType.ResourcePack)
         {
             await DownloadResourcePackAsync(item, targetPath, selectedVersion);
+            return null;
         }
+
+        return null;
     }
 
-    private async Task DownloadModpackAsync(ContentItem item, ModrinthAPI.ModVersion selectedVersion)
+    private async Task<string?> DownloadModpackAsync(ContentItem item, ModrinthAPI.ModVersion selectedVersion)
     {
         var selectedFile = PickPrimaryModpackFile(selectedVersion);
         if (string.IsNullOrWhiteSpace(selectedFile?.Url))
             throw new Exception("No .mrpack file is available for this modpack version.");
 
-        var instancePath = Path.Combine(_instancesFolder, SanitizeFolderName(item.Title));
+        var instancePath = GetModpackInstallPath(item);
         var tempFile = Path.Combine(Path.GetTempPath(), $"xylar-{Guid.NewGuid():N}.mrpack");
         try
         {
@@ -2298,6 +2353,7 @@ public MainWindow()
 
             await ModrinthModpackInstaller.DownloadPackFilesFromIndexAsync(_httpClient, packRoot, progress, CancellationToken.None);
             LogToOutput($"  Modpack installed: {item.Title}");
+            return packRoot;
         }
         finally
         {
