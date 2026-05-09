@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -67,21 +66,24 @@ public partial class WelcomeWindow : Window
 
     private async void GoOfflineButton_Click(object? sender, RoutedEventArgs e)
     {
+        if (IntroPanel == null || OfflineNamePanel == null || OfflineUsernameBox == null)
+            return;
+
         SetButtonsEnabled(false);
+        await FadeAsync(IntroPanel, 1, 0, 180);
+        IntroPanel.IsVisible = false;
+        OfflineNamePanel.IsVisible = true;
+        await FadeAsync(OfflineNamePanel, 0, 1, 220);
+        OfflineUsernameBox.Text = DefaultOfflineUsername;
+        OfflineUsernameBox.Focus();
+        SetOfflineNameButtonsEnabled(true);
+    }
 
-        string username = DefaultOfflineUsername;
-
-        try
-        {
-            var htmlPath = Path.Combine(AppContext.BaseDirectory, "WelcomePage.html");
-            var htmlUsername = await OfflineWelcomeSequencePlayer.CaptureOfflineUsernameAsync(htmlPath);
-            if (!string.IsNullOrWhiteSpace(htmlUsername))
-                username = htmlUsername.Trim();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Offline welcome fallback: {ex.Message}");
-        }
+    private void ContinueOfflineButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var username = string.IsNullOrWhiteSpace(OfflineUsernameBox?.Text)
+            ? DefaultOfflineUsername
+            : OfflineUsernameBox!.Text!.Trim();
 
         Close(new WelcomeWindowResult
         {
@@ -92,6 +94,19 @@ public partial class WelcomeWindow : Window
         });
     }
 
+    private async void BackToChoiceButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (IntroPanel == null || OfflineNamePanel == null)
+            return;
+
+        SetOfflineNameButtonsEnabled(false);
+        await FadeAsync(OfflineNamePanel, 1, 0, 160);
+        OfflineNamePanel.IsVisible = false;
+        IntroPanel.IsVisible = true;
+        await FadeAsync(IntroPanel, 0, 1, 200);
+        SetButtonsEnabled(true);
+    }
+
     private void SetButtonsEnabled(bool enabled)
     {
         if (MicrosoftSignInButton != null)
@@ -99,6 +114,18 @@ public partial class WelcomeWindow : Window
 
         if (GoOfflineButton != null)
             GoOfflineButton.IsEnabled = enabled;
+    }
+
+    private void SetOfflineNameButtonsEnabled(bool enabled)
+    {
+        if (ContinueOfflineButton != null)
+            ContinueOfflineButton.IsEnabled = enabled;
+
+        if (BackToChoiceButton != null)
+            BackToChoiceButton.IsEnabled = enabled;
+
+        if (OfflineUsernameBox != null)
+            OfflineUsernameBox.IsEnabled = enabled;
     }
 }
 

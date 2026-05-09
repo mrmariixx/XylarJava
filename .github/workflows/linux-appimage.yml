@@ -1,0 +1,60 @@
+name: Build Linux AppImage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/linux-appimage.yml"
+      - "packaging/linux/**"
+      - "packaging/native/**"
+      - "*.cs"
+      - "*.axaml"
+      - "*.csproj"
+
+jobs:
+  appimage:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake desktop-file-utils fuse libfuse2 patchelf
+
+      - name: Publish Linux build
+        run: >
+          dotnet publish XylarJavaLauncher.csproj
+          -c Release
+          -f net8.0
+          -r linux-x64
+          --self-contained true
+          -o publish/linux-x64
+
+      - name: Download appimagetool
+        run: |
+          mkdir -p tools/appimage
+          curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o tools/appimage/appimagetool.AppImage
+          chmod +x tools/appimage/appimagetool.AppImage
+
+      - name: Build AppImage
+        env:
+          APPIMAGETOOL: ${{ github.workspace }}/tools/appimage/appimagetool.AppImage
+        run: |
+          chmod +x packaging/linux/build-appimage.sh
+          packaging/linux/build-appimage.sh publish/linux-x64
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: XylarJava-linux-appimage
+          path: dist/XylarJava-x86_64.AppImage

@@ -1,17 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0-windows;net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>0.0.0.3</AssemblyVersion>
-    <FileVersion>0.0.0.3</FileVersion>
-    <Version>0.0.0.3</Version>
+    <AssemblyVersion>0.0.0.4</AssemblyVersion>
+    <FileVersion>0.0.0.4</FileVersion>
+    <Version>0.0.0.4-ALPHA</Version>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <OutputType>WinExe</OutputType>
     <ApplicationIcon>minecraft.ico</ApplicationIcon>
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -20,6 +21,12 @@
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=XylarJava
+Comment=Minecraft Java launcher with Modrinth modpack support
+Exec=XylarJava
+Icon=XylarJava
+Categories=Game;
+Terminal=false
+StartupNotify=true

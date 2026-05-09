@@ -148,7 +148,7 @@ public class ModpackContentItem : ContentItem
 public class ContentFilter
 {
     public string SearchQuery { get; set; } = string.Empty;
-    public ContentType ContentType { get; set; } = ContentType.Mod;
+    public ContentType ContentType { get; set; } = ContentType.Modpack;
     public List<ContentSource> SelectedSources { get; set; } = new();
     public List<ModLoader> SelectedLoaders { get; set; } = new();
     public List<string> SelectedVersions { get; set; } = new();

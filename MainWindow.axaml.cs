@@ -47,7 +47,7 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<ContentItem> _contentItems = new();
     private ContentFilter _contentFilter = new()
     {
-        ContentType = ContentType.Mod,
+        ContentType = ContentType.Modpack,
         SelectedSources = new() { ContentSource.Modrinth }
     };
     private CancellationTokenSource? _contentLoadCts;
@@ -104,10 +104,10 @@ public MainWindow()
         OptionsSection.IsVisible = false;
         ModSection.IsVisible = false;
         CreditsSection.IsVisible = false;
-        SetHeader("Home", "Profile, version, loader — then launch");
+        SetHeader("Home", "Version, loader, modpacks.");
 
         _isInitialized = true;
-        SetHeader("Home", "Pick a version, choose a loader, and launch");
+        SetHeader("Home", "Version, loader, modpacks.");
         
         // Register event handlers AFTER initialization
         LoaderCombo.SelectionChanged += LoaderCombo_SelectionChanged;
@@ -164,7 +164,6 @@ public MainWindow()
         if (CurrentVersionLabel != null) CurrentVersionLabel.Text = $"Version: {versionText}";
         if (CurrentLoaderLabel != null) CurrentLoaderLabel.Text = $"Loader: {loader}";
         if (CurrentPlayerLabel != null) CurrentPlayerLabel.Text = $"Launch name: {player}";
-        if (SelectionSummaryText != null) SelectionSummaryText.Text = $"{loader} profile • {versionText} • {player}";
         if (SettingsLaunchNameText != null) SettingsLaunchNameText.Text = $"Launch name: {player}";
         if (SelectionSummaryText != null) SelectionSummaryText.Text = $"{loader} profile - {versionText} - {player}";
         if (SelectionSummaryLabel != null)
@@ -1436,7 +1435,7 @@ public MainWindow()
         {
             "Home"     => MainSection,
             "Skins"    => SkinSection,
-            "Mods"     => ModSection,
+            "Modspack" => ModSection,
             "About"    => CreditsSection,
             _          => null
         };
@@ -1444,14 +1443,14 @@ public MainWindow()
         switch (content)
         {
             case "Home":
-                SetHeader("Home", "Profile, version, loader — then launch");
+                SetHeader("Home", "Version, loader, modpacks.");
                 RefreshPlayProfiles();
                 break;
             case "Skins":
                 SetHeader("Settings", "Accounts, folders and launcher controls");
                 break;
-            case "Mods":
-                SetHeader("Mods & Content", "Choose a supported version and install");
+            case "Modspack":
+                SetHeader("Modspack", "Browse and install supported modpacks.");
                 UpdateContentBrowserCopy();
                 _ = LoadContentBrowserAsync();
                 break;
@@ -1462,11 +1461,11 @@ public MainWindow()
 
         NavMain.IsChecked    = content == "Home";
         NavSkins.IsChecked   = content == "Skins";
-        NavMods.IsChecked    = content == "Mods";
+        NavMods.IsChecked    = content == "Modspack";
         NavCredits.IsChecked = content == "About";
 
         if (content == "Home")
-            SetHeader("Home", "Pick a version, choose a loader, and launch");
+            SetHeader("Home", "Version, loader, modpacks.");
 
         await AnimateSectionSwitchAsync(target);
     }
@@ -1489,9 +1488,20 @@ public MainWindow()
 
         target.Opacity   = 0;
         target.IsVisible = true;
+        target.RenderTransform = new TranslateTransform(0, 18);
         target.InvalidateMeasure();
-        await Task.Delay(16);
-        await Dispatcher.UIThread.InvokeAsync(() => { target.Opacity = 1; }, DispatcherPriority.Render);
+        const int steps = 12;
+        for (var i = 1; i <= steps; i++)
+        {
+            var progress = i / (double)steps;
+            target.Opacity = progress;
+            if (target.RenderTransform is TranslateTransform translate)
+                translate.Y = 18 * (1d - progress);
+            await Task.Delay(12);
+        }
+        target.Opacity = 1;
+        if (target.RenderTransform is TranslateTransform settled)
+            settled.Y = 0;
     }
 
     private void SetHeader(string title, string subtitle)
@@ -1522,13 +1532,7 @@ public MainWindow()
 
     private void ContentTab_Click(object? sender, RoutedEventArgs e)
     {
-        if (TabModpacks != null) TabModpacks.IsChecked = sender == TabModpacks;
-        if (TabMods != null) TabMods.IsChecked = sender == TabMods;
-        if (TabResourcePacks != null) TabResourcePacks.IsChecked = sender == TabResourcePacks;
-
-        _contentFilter.ContentType = sender == TabModpacks ? ContentType.Modpack :
-                                     sender == TabMods ? ContentType.Mod :
-                                     ContentType.ResourcePack;
+        _contentFilter.ContentType = ContentType.Modpack;
         _contentPage = 1;
         UpdateContentBrowserCopy();
         _ = LoadContentBrowserAsync(resetList: true);
@@ -1538,22 +1542,12 @@ public MainWindow()
     {
         if (ContentSearchBox != null)
         {
-            ContentSearchBox.Watermark = _contentFilter.ContentType switch
-            {
-                ContentType.Modpack => "Search modpacks, e.g. Better MC",
-                ContentType.ResourcePack => "Search resource packs, e.g. Faithful",
-                _ => "Search mods, e.g. Sodium"
-            };
+            ContentSearchBox.Watermark = "Search modpacks, e.g. Better MC";
         }
 
         if (ContentStatusText != null && string.IsNullOrWhiteSpace(ContentStatusText.Text))
         {
-            ContentStatusText.Text = _contentFilter.ContentType switch
-            {
-                ContentType.Modpack => "Browse modpacks and pick a supported Minecraft version before install.",
-                ContentType.ResourcePack => "Browse resource packs and install them into a valid target.",
-                _ => "Browse mods and pick a supported loader before install."
-            };
+            ContentStatusText.Text = "Browse modpacks and pick a supported Minecraft version before install.";
         }
     }
 
@@ -1594,12 +1588,7 @@ public MainWindow()
             ContentLoadingBar.Value = 0;
             UpdateStatus("Loading content browser...");
             if (ContentStatusText != null)
-                ContentStatusText.Text = _contentFilter.ContentType switch
-                {
-                    ContentType.Modpack => "Loading modpacks from Modrinth...",
-                    ContentType.ResourcePack => "Loading resource packs from Modrinth...",
-                    _ => "Loading mods from Modrinth..."
-                };
+                ContentStatusText.Text = "Loading modpacks from Modrinth...";
 
             var filter = _contentFilter;
             var result = await _contentService!.SearchAsync(filter, _contentPage, ContentPageSize, token);
@@ -1638,10 +1627,10 @@ public MainWindow()
                 }
                 if (ContentStatusText != null)
                     ContentStatusText.Text = _contentItems.Count == 0
-                        ? "No results yet. Try a different search term or switch category."
+                        ? "No modpacks found yet. Try a different search term."
                         : _contentHasMore
-                            ? $"{_contentItems.Count} items shown - load more to keep browsing."
-                            : $"{_contentItems.Count} items shown";
+                            ? $"{_contentItems.Count} modpacks shown - load more to keep browsing."
+                            : $"{_contentItems.Count} modpacks shown";
                 if (LoadMoreContentButton != null)
                     LoadMoreContentButton.IsVisible = _contentHasMore;
                 ContentLoadingBar.IsVisible = false;

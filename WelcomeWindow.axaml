@@ -25,6 +25,17 @@
       <Setter Property="Foreground" Value="#B9C9DA"/>
     </Style>
 
+    <Style Selector="TextBox.welcomeInput">
+      <Setter Property="Background" Value="#101A25"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="BorderBrush" Value="#2D445D"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="Height" Value="46"/>
+      <Setter Property="Padding" Value="16,0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+
     <Style Selector="Button.microsoftPrimary">
       <Setter Property="Background" Value="#F7FBFF"/>
       <Setter Property="Foreground" Value="#06111B"/>
@@ -62,6 +73,19 @@
 
     <Style Selector="Button.welcomeSecondary:pointerover">
       <Setter Property="Background" Value="#1A2634"/>
+    </Style>
+
+    <Style Selector="Button.welcomePrimary">
+      <Setter Property="Background" Value="#37C7F4"/>
+      <Setter Property="Foreground" Value="#06111B"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="Height" Value="48"/>
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="BorderBrush" Value="#6CE2FF"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="18,0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
     </Style>
   </Window.Styles>
 
@@ -109,8 +133,8 @@
     </Ellipse>
 
     <Border x:Name="StagePanel"
-            Width="440"
-            Padding="36"
+            Width="500"
+            Padding="44,40"
             CornerRadius="28"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
@@ -118,54 +142,101 @@
             BorderBrush="#D9F7FF"
             BorderThickness="1.5"
             Opacity="0">
-      <StackPanel x:Name="IntroPanel"
-                  Spacing="18">
-        <TextBlock Text="Hi! Welcome to XylarJava!"
-                   FontSize="40"
-                   FontWeight="SemiBold"
-                   TextAlignment="Center"
-                   TextWrapping="Wrap"/>
-
-        <TextBlock Text="Choose how you want to continue."
-                    Classes="muted"
-                   FontSize="15"
-                   TextAlignment="Center"
-                   TextWrapping="Wrap"/>
-
-        <StackPanel Spacing="12"
+      <Grid>
+        <StackPanel x:Name="IntroPanel"
+                    Spacing="18"
                     HorizontalAlignment="Center">
-          <Button x:Name="MicrosoftSignInButton"
-                  Classes="microsoftPrimary"
-                  Width="290"
-                  Click="MicrosoftSignInButton_Click">
-            <StackPanel Orientation="Horizontal"
-                        Spacing="12"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center">
-              <Grid Width="18"
-                    Height="18"
-                    ColumnDefinitions="*,*"
-                    RowDefinitions="*,*">
-                <Border Grid.Row="0" Grid.Column="0" Background="#F35325" Margin="0,0,1,1"/>
-                <Border Grid.Row="0" Grid.Column="1" Background="#81BC06" Margin="1,0,0,1"/>
-                <Border Grid.Row="1" Grid.Column="0" Background="#05A6F0" Margin="0,1,1,0"/>
-                <Border Grid.Row="1" Grid.Column="1" Background="#FFBA08" Margin="1,1,0,0"/>
-              </Grid>
-              <TextBlock Text="Sign in with Microsoft"
-                         Foreground="#06111B"
-                         FontSize="15"
-                         FontWeight="SemiBold"
-                         VerticalAlignment="Center"/>
-            </StackPanel>
-          </Button>
+          <TextBlock Text="Hi! Welcome to XylarJava!"
+                     MaxWidth="380"
+                     FontSize="42"
+                     FontWeight="SemiBold"
+                     TextAlignment="Center"
+                     TextWrapping="Wrap"/>
 
-          <Button x:Name="GoOfflineButton"
-                  Classes="welcomeSecondary"
-                  Width="290"
-                  Content="Go offline"
-                  Click="GoOfflineButton_Click"/>
+          <TextBlock Text="Choose how you want to continue."
+                      Classes="muted"
+                     MaxWidth="360"
+                     FontSize="15"
+                     TextAlignment="Center"
+                     TextWrapping="Wrap"/>
+
+          <StackPanel Spacing="12"
+                      Width="310"
+                      HorizontalAlignment="Center">
+            <Button x:Name="MicrosoftSignInButton"
+                    Classes="microsoftPrimary"
+                    Width="290"
+                    Click="MicrosoftSignInButton_Click">
+              <StackPanel Orientation="Horizontal"
+                          Spacing="12"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center">
+                <Grid Width="18"
+                      Height="18"
+                      ColumnDefinitions="*,*"
+                      RowDefinitions="*,*">
+                  <Border Grid.Row="0" Grid.Column="0" Background="#F35325" Margin="0,0,1,1"/>
+                  <Border Grid.Row="0" Grid.Column="1" Background="#81BC06" Margin="1,0,0,1"/>
+                  <Border Grid.Row="1" Grid.Column="0" Background="#05A6F0" Margin="0,1,1,0"/>
+                  <Border Grid.Row="1" Grid.Column="1" Background="#FFBA08" Margin="1,1,0,0"/>
+                </Grid>
+                <TextBlock Text="Sign in with Microsoft"
+                           Foreground="#06111B"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+
+            <Button x:Name="GoOfflineButton"
+                    Classes="welcomeSecondary"
+                    Width="290"
+                    Content="Go offline"
+                    Click="GoOfflineButton_Click"/>
+          </StackPanel>
         </StackPanel>
-      </StackPanel>
+
+        <StackPanel x:Name="OfflineNamePanel"
+                    IsVisible="False"
+                    Opacity="0"
+                    Spacing="18"
+                    HorizontalAlignment="Center">
+          <TextBlock Text="Choose a launch name"
+                     MaxWidth="380"
+                     FontSize="34"
+                     FontWeight="SemiBold"
+                     TextAlignment="Center"
+                     TextWrapping="Wrap"/>
+
+          <TextBlock Text="This local name is used for offline play."
+                     Classes="muted"
+                     MaxWidth="340"
+                     FontSize="14"
+                     TextAlignment="Center"
+                     TextWrapping="Wrap"/>
+
+          <TextBox x:Name="OfflineUsernameBox"
+                   Classes="welcomeInput"
+                   Width="290"
+                   Watermark="Launch name"/>
+
+          <StackPanel Spacing="12"
+                      Width="310"
+                      HorizontalAlignment="Center">
+            <Button x:Name="ContinueOfflineButton"
+                    Classes="welcomePrimary"
+                    Width="290"
+                    Content="Continue offline"
+                    Click="ContinueOfflineButton_Click"/>
+
+            <Button x:Name="BackToChoiceButton"
+                    Classes="welcomeSecondary"
+                    Width="290"
+                    Content="Back"
+                    Click="BackToChoiceButton_Click"/>
+          </StackPanel>
+        </StackPanel>
+      </Grid>
     </Border>
   </Grid>
 </Window>
