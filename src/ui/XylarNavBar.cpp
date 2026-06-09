@@ -30,11 +30,11 @@ XylarNavBar::XylarNavBar(QWidget *parent)
     setMinimumWidth(430);
 
     m_bubbleAnimation = new QPropertyAnimation(this, "bubbleRect", this);
-    m_bubbleAnimation->setDuration(470);
-    m_bubbleAnimation->setEasingCurve(QEasingCurve::OutBack);
+    m_bubbleAnimation->setDuration(520);
+    m_bubbleAnimation->setEasingCurve(QEasingCurve::OutQuart);
 
     m_pulseAnimation = new QPropertyAnimation(this, "pulse", this);
-    m_pulseAnimation->setDuration(1400);
+    m_pulseAnimation->setDuration(1850);
     m_pulseAnimation->setStartValue(0.0);
     m_pulseAnimation->setEndValue(1.0);
     m_pulseAnimation->setEasingCurve(QEasingCurve::InOutSine);
@@ -204,56 +204,71 @@ void XylarNavBar::paintShell(QPainter &painter, const QRectF &rect)
     const qreal radius = rect.height() / 2.0;
 
     QPainterPath shadow;
-    shadow.addRoundedRect(rect.adjusted(1, 8, -1, 12), radius, radius);
-    painter.fillPath(shadow, QColor(0, 0, 0, 78));
+    shadow.addRoundedRect(rect.adjusted(0, 9, 0, 15), radius + 3, radius + 3);
+    painter.fillPath(shadow, QColor(0, 0, 0, 128));
 
     QPainterPath shell;
     shell.addRoundedRect(rect, radius, radius);
 
     QLinearGradient base(rect.topLeft(), rect.bottomRight());
-    base.setColorAt(0.0, QColor(255, 255, 255, 48));
-    base.setColorAt(0.45, QColor(255, 255, 255, 22));
-    base.setColorAt(1.0, QColor(255, 255, 255, 14));
+    base.setColorAt(0.0, QColor(255, 255, 255, 58));
+    base.setColorAt(0.35, QColor(255, 255, 255, 26));
+    base.setColorAt(0.70, QColor(255, 255, 255, 14));
+    base.setColorAt(1.0, QColor(255, 255, 255, 8));
     painter.fillPath(shell, base);
 
     QLinearGradient rim(rect.left(), rect.top(), rect.left(), rect.bottom());
-    rim.setColorAt(0.0, QColor(255, 255, 255, 126));
-    rim.setColorAt(0.45, QColor(255, 255, 255, 20));
-    rim.setColorAt(1.0, QColor(0, 0, 0, 30));
+    rim.setColorAt(0.0, QColor(255, 255, 255, 152));
+    rim.setColorAt(0.32, QColor(255, 255, 255, 24));
+    rim.setColorAt(0.78, QColor(0, 0, 0, 18));
+    rim.setColorAt(1.0, QColor(0, 0, 0, 55));
     painter.fillPath(shell, rim);
 
-    painter.setPen(QPen(QColor(255, 255, 255, 86), 1.15));
+    QPainterPath topSheen;
+    const QRectF sheenRect = rect.adjusted(18, 9, -18, -rect.height() * 0.60);
+    topSheen.addRoundedRect(sheenRect, sheenRect.height() / 2.0, sheenRect.height() / 2.0);
+    QLinearGradient sheen(sheenRect.topLeft(), sheenRect.topRight());
+    sheen.setColorAt(0.0, QColor(255, 255, 255, 12));
+    sheen.setColorAt(0.45, QColor(255, 255, 255, 82));
+    sheen.setColorAt(1.0, QColor(255, 255, 255, 10));
+    painter.fillPath(topSheen, sheen);
+
+    painter.setPen(QPen(QColor(255, 255, 255, 92), 1.15));
     painter.drawPath(shell);
-    painter.setPen(QPen(QColor(255, 255, 255, 24), 1.0));
+    painter.setPen(QPen(QColor(255, 255, 255, 26), 1.0));
     painter.drawRoundedRect(rect.adjusted(5, 5, -5, -5), radius - 5, radius - 5);
 }
 
 void XylarNavBar::paintBubble(QPainter &painter, const QRectF &rect)
 {
     const qreal wave = (qSin(m_phase) + 1.0) * 0.5;
-    const qreal stretch = m_hoverIndex >= 0 ? 7.0 + wave * 4.0 : 4.0;
-    const QRectF bubble = rect.adjusted(-stretch, -4 - wave * 2.0, stretch, 5 + wave * 2.0);
+    const qreal stretch = m_hoverIndex >= 0 ? 8.0 + wave * 3.0 : 4.0;
+    const QRectF bubble = rect.adjusted(-stretch, -5 - wave * 1.5, stretch, 6 + wave * 1.5);
     const qreal radius = bubble.height() / 2.0;
     const QPointF focus = m_hoverIndex >= 0 ? m_mousePosition : bubble.center();
 
+    QPainterPath contactShadow;
+    contactShadow.addRoundedRect(bubble.adjusted(8, bubble.height() * 0.58, -8, 11), radius, radius);
+    painter.fillPath(contactShadow, QColor(0, 0, 0, 55));
+
     QPainterPath aura;
-    aura.addRoundedRect(bubble.adjusted(-10, -8, 10, 10), radius + 12, radius + 12);
-    painter.fillPath(aura, QColor(255, 255, 255, 14 + static_cast<int>(m_pulse * 12)));
+    aura.addRoundedRect(bubble.adjusted(-14, -10, 14, 13), radius + 15, radius + 15);
+    painter.fillPath(aura, QColor(255, 255, 255, 15 + static_cast<int>(m_pulse * 15)));
 
     QPainterPath bubblePath;
     bubblePath.addRoundedRect(bubble, radius, radius);
 
-    QRadialGradient fill(focus, bubble.width() * 0.72, focus);
-    fill.setColorAt(0.0, QColor(255, 255, 255, 170));
-    fill.setColorAt(0.35, QColor(255, 255, 255, 92));
-    fill.setColorAt(0.76, QColor(255, 255, 255, 44));
-    fill.setColorAt(1.0, QColor(255, 255, 255, 22));
+    QRadialGradient fill(focus, bubble.width() * 0.78, focus);
+    fill.setColorAt(0.0, QColor(255, 255, 255, 188));
+    fill.setColorAt(0.30, QColor(255, 255, 255, 118));
+    fill.setColorAt(0.68, QColor(255, 255, 255, 48));
+    fill.setColorAt(1.0, QColor(255, 255, 255, 20));
     painter.fillPath(bubblePath, fill);
 
     QLinearGradient shade(bubble.topLeft(), bubble.bottomLeft());
-    shade.setColorAt(0.0, QColor(255, 255, 255, 145));
-    shade.setColorAt(0.52, QColor(255, 255, 255, 22));
-    shade.setColorAt(1.0, QColor(0, 0, 0, 32));
+    shade.setColorAt(0.0, QColor(255, 255, 255, 150));
+    shade.setColorAt(0.42, QColor(255, 255, 255, 22));
+    shade.setColorAt(1.0, QColor(0, 0, 0, 50));
     painter.fillPath(bubblePath, shade);
 
     const QRectF highlight = bubble.adjusted(18, 8, -18, -bubble.height() * 0.6);
@@ -261,9 +276,14 @@ void XylarNavBar::paintBubble(QPainter &painter, const QRectF &rect)
     shine.addRoundedRect(highlight, highlight.height() / 2.0, highlight.height() / 2.0);
     painter.fillPath(shine, QColor(255, 255, 255, 94));
 
-    painter.setPen(QPen(alpha(QColor(255, 255, 255), 184), 1.25));
+    const QRectF glint = QRectF(bubble.right() - bubble.width() * 0.28, bubble.top() + 11, bubble.width() * 0.13, bubble.height() * 0.24);
+    QPainterPath glintPath;
+    glintPath.addEllipse(glint);
+    painter.fillPath(glintPath, QColor(255, 255, 255, 78));
+
+    painter.setPen(QPen(alpha(QColor(255, 255, 255), 196), 1.35));
     painter.drawPath(bubblePath);
-    painter.setPen(QPen(QColor(255, 255, 255, 80), 1.0));
+    painter.setPen(QPen(QColor(255, 255, 255, 92), 1.0));
     painter.drawRoundedRect(bubble.adjusted(3, 3, -3, -3), radius - 3, radius - 3);
 }
 
