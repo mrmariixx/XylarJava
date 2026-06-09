@@ -21,8 +21,6 @@ set(XYLARJAVA_SOURCES
     src/app/main.cpp
     src/ui/MainWindow.cpp
     src/ui/MainWindow.h
-    src/ui/XylarNavBar.cpp
-    src/ui/XylarNavBar.h
     src/launcher/LauncherController.cpp
     src/launcher/LauncherController.h
     src/launcher/LaunchPlan.cpp

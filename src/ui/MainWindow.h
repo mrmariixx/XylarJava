@@ -18,8 +18,6 @@ class QSpinBox;
 
 namespace xylar {
 
-class XylarNavBar;
-
 class MainWindow final : public QMainWindow
 {
     Q_OBJECT
@@ -47,7 +45,6 @@ private:
 
     LauncherController m_controller;
     QStackedWidget *m_pages = nullptr;
-    XylarNavBar *m_navBar = nullptr;
     QComboBox *m_versionCombo = nullptr;
     QComboBox *m_versionFilterCombo = nullptr;
     QComboBox *m_loaderCombo = nullptr;

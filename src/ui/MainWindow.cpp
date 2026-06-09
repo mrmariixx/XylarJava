@@ -1,5 +1,6 @@
 #include "ui/MainWindow.h"
 
+#include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateTime>
@@ -29,8 +30,6 @@
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
-
-#include "ui/XylarNavBar.h"
 
 namespace xylar {
 namespace {
@@ -106,61 +105,84 @@ MainWindow::MainWindow(QWidget *parent)
 {
     resize(1220, 820);
     setMinimumSize(kWindowMinWidth, kWindowMinHeight);
-    setWindowTitle(QStringLiteral("XylarJava"));
+    setWindowTitle(QStringLiteral("Launcher"));
     setWindowIcon(QIcon(QStringLiteral(":/icons/app-icon.png")));
 
     auto *central = new AppShell(this);
     central->setObjectName(QStringLiteral("Shell"));
     setCentralWidget(central);
 
-    auto *root = new QVBoxLayout(central);
-    root->setContentsMargins(30, 24, 30, 20);
-    root->setSpacing(14);
-
-    auto *topChrome = new QFrame;
-    topChrome->setObjectName(QStringLiteral("TopChrome"));
-    auto *topBar = new QHBoxLayout(topChrome);
-    topBar->setContentsMargins(16, 10, 16, 10);
-    topBar->setSpacing(14);
-    topBar->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 48));
-
-    auto *titleBlock = new QVBoxLayout;
-    titleBlock->setSpacing(2);
-    auto *title = new QLabel(QStringLiteral("XylarJava"));
-    title->setObjectName(QStringLiteral("AppTitle"));
-    titleBlock->addWidget(title);
-    titleBlock->addWidget(createMutedText(QStringLiteral("Minecraft Java launcher")));
-    topBar->addLayout(titleBlock);
-    topBar->addStretch(1);
-
-    auto *statusBadge = new QLabel(QStringLiteral("Ready"));
-    statusBadge->setObjectName(QStringLiteral("StatusBadge"));
-    statusBadge->setAlignment(Qt::AlignCenter);
-    topBar->addWidget(statusBadge);
-    root->addWidget(topChrome);
+    auto *root = new QHBoxLayout(central);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(0);
 
     m_pages = new QStackedWidget;
     m_pages->setObjectName(QStringLiteral("Pages"));
     m_pages->addWidget(createHomePage());
     m_pages->addWidget(createModpacksPage());
     m_pages->addWidget(createSettingsPage());
-    root->addWidget(m_pages, 1);
 
-    auto *navRow = new QHBoxLayout;
-    navRow->addStretch(1);
-    m_navBar = new XylarNavBar;
-    m_navBar->setFixedWidth(560);
-    m_navBar->setItems({
-        {QStringLiteral("home"), QStringLiteral("Home"), QIcon(QStringLiteral(":/icons/home.svg"))},
-        {QStringLiteral("modpacks"), QStringLiteral("Modpacks"), QIcon(QStringLiteral(":/icons/package.svg"))},
-        {QStringLiteral("settings"), QStringLiteral("Settings"), QIcon(QStringLiteral(":/icons/settings.svg"))},
-    });
-    connect(m_navBar, &XylarNavBar::currentChanged, this, [this](const QString &, int index) {
+    auto *sideBar = new QFrame;
+    sideBar->setObjectName(QStringLiteral("SideBar"));
+    sideBar->setFixedWidth(86);
+    auto *sideLayout = new QVBoxLayout(sideBar);
+    sideLayout->setContentsMargins(15, 18, 15, 18);
+    sideLayout->setSpacing(12);
+
+    auto *logoSlot = new QFrame;
+    logoSlot->setObjectName(QStringLiteral("LogoSlot"));
+    logoSlot->setFixedSize(56, 56);
+    auto *logoLayout = new QVBoxLayout(logoSlot);
+    logoLayout->setContentsMargins(8, 8, 8, 8);
+    logoLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 40), 0, Qt::AlignCenter);
+    sideLayout->addWidget(logoSlot, 0, Qt::AlignHCenter);
+    sideLayout->addSpacing(16);
+
+    auto *navGroup = new QButtonGroup(this);
+    navGroup->setExclusive(true);
+    auto makeNavButton = [navGroup](const QString &icon, const QString &tooltip, int index) {
+        auto *button = new QPushButton(QIcon(icon), QString());
+        button->setObjectName(QStringLiteral("SideNavButton"));
+        button->setCheckable(true);
+        button->setToolTip(tooltip);
+        button->setFixedSize(56, 52);
+        button->setIconSize(QSize(23, 23));
+        button->setCursor(Qt::PointingHandCursor);
+        navGroup->addButton(button, index);
+        return button;
+    };
+
+    auto *homeNav = makeNavButton(QStringLiteral(":/icons/home.svg"), QStringLiteral("Home"), 0);
+    auto *modpacksNav = makeNavButton(QStringLiteral(":/icons/package.svg"), QStringLiteral("Modpacks"), 1);
+    auto *settingsNav = makeNavButton(QStringLiteral(":/icons/settings.svg"), QStringLiteral("Settings"), 2);
+    homeNav->setChecked(true);
+    sideLayout->addWidget(homeNav, 0, Qt::AlignHCenter);
+    sideLayout->addWidget(modpacksNav, 0, Qt::AlignHCenter);
+    sideLayout->addWidget(settingsNav, 0, Qt::AlignHCenter);
+    sideLayout->addStretch(1);
+
+    connect(navGroup, &QButtonGroup::idClicked, this, [this](int index) {
         m_pages->setCurrentIndex(index);
     });
-    navRow->addWidget(m_navBar);
-    navRow->addStretch(1);
-    root->addLayout(navRow);
+
+    auto *content = new QWidget;
+    content->setObjectName(QStringLiteral("Content"));
+    auto *contentLayout = new QVBoxLayout(content);
+    contentLayout->setContentsMargins(26, 24, 28, 22);
+    contentLayout->setSpacing(14);
+
+    auto *topBar = new QHBoxLayout;
+    topBar->setContentsMargins(0, 0, 0, 0);
+    topBar->addStretch(1);
+    auto *statusBadge = new QLabel(QStringLiteral("Ready"));
+    statusBadge->setObjectName(QStringLiteral("StatusBadge"));
+    statusBadge->setAlignment(Qt::AlignCenter);
+    topBar->addWidget(statusBadge);
+    contentLayout->addLayout(topBar);
+    contentLayout->addWidget(m_pages, 1);
+
+    root->addWidget(sideBar);
+    root->addWidget(content, 1);
 
     connect(&m_controller, &LauncherController::logLine, this, &MainWindow::appendLog);
     connect(&m_controller, &LauncherController::versionsChanged, this, [this](const QList<MinecraftVersion> &) {
@@ -182,13 +204,12 @@ MainWindow::MainWindow(QWidget *parent)
             background: transparent;
             font-family: "Segoe UI";
         }
-        #TopChrome {
-            border-radius: 24px;
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(255,255,255,28),
-                stop:0.42 rgba(255,255,255,10),
-                stop:1 rgba(255,255,255,6));
-            border: 1px solid rgba(255,255,255,34);
+        #SideBar {
+            background: #111113;
+            border-right: 1px solid rgba(255,255,255,18);
+        }
+        #Content {
+            background: transparent;
         }
         #Pages {
             background: transparent;
@@ -229,38 +250,38 @@ MainWindow::MainWindow(QWidget *parent)
             min-width: 104px;
             min-height: 34px;
             padding: 0 16px;
-            border-radius: 17px;
+            border-radius: 6px;
             color: #f5f5f7;
-            background: rgba(255, 255, 255, 18);
-            border: 1px solid rgba(255, 255, 255, 42);
+            background: rgba(255, 255, 255, 9);
+            border: 1px solid rgba(255, 255, 255, 20);
         }
         #Panel, #HeroPanel {
-            border-radius: 22px;
+            border-radius: 8px;
             background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(255,255,255,30),
-                stop:0.36 rgba(255,255,255,13),
-                stop:1 rgba(255,255,255,7));
-            border: 1px solid rgba(255, 255, 255, 38);
+                stop:0 rgba(255,255,255,18),
+                stop:0.36 rgba(255,255,255,10),
+                stop:1 rgba(255,255,255,6));
+            border: 1px solid rgba(255, 255, 255, 20);
         }
         #InsetPanel {
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 10);
-            border: 1px solid rgba(255, 255, 255, 26);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 7);
+            border: 1px solid rgba(255, 255, 255, 16);
         }
         #MetricPill {
             min-height: 58px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 11);
-            border: 1px solid rgba(255, 255, 255, 28);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 7);
+            border: 1px solid rgba(255, 255, 255, 16);
         }
         #MetricPill:hover, #InsetPanel:hover {
-            background: rgba(255, 255, 255, 15);
-            border: 1px solid rgba(255, 255, 255, 42);
+            background: rgba(255, 255, 255, 11);
+            border: 1px solid rgba(255, 255, 255, 26);
         }
         #InstanceRow {
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 9);
-            border: 1px solid rgba(255, 255, 255, 18);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 6);
+            border: 1px solid rgba(255, 255, 255, 12);
         }
         #InstanceTitle {
             color: #f5f5f7;
@@ -271,28 +292,44 @@ MainWindow::MainWindow(QWidget *parent)
             color: rgba(245, 245, 247, 136);
             font-size: 12px;
         }
-        #TinyIconBadge {
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 18);
-            border: 1px solid rgba(255, 255, 255, 32);
+        #TinyIconBadge, #LogoSlot {
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 8);
+            border: 1px solid rgba(255, 255, 255, 16);
         }
         QPushButton {
             min-height: 42px;
             padding: 0 20px;
-            border-radius: 20px;
+            border-radius: 6px;
             color: #050505;
             font-weight: 700;
             background: #f5f5f7;
             border: 1px solid rgba(255,255,255,130);
         }
+        QPushButton#SideNavButton {
+            min-height: 0px;
+            padding: 0px;
+            border-radius: 8px;
+            color: #f5f5f7;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        QPushButton#SideNavButton:hover {
+            background: rgba(255, 255, 255, 9);
+            border: 1px solid rgba(255,255,255,16);
+        }
+        QPushButton#SideNavButton:checked {
+            background: rgba(255, 255, 255, 16);
+            border: 1px solid rgba(255,255,255,26);
+        }
         QPushButton#SecondaryButton {
             color: #f5f5f7;
-            background: rgba(255, 255, 255, 12);
-            border: 1px solid rgba(255,255,255,34);
+            background: rgba(255, 255, 255, 9);
+            border: 1px solid rgba(255,255,255,20);
         }
         QPushButton#SecondaryButton:hover {
-            background: rgba(255, 255, 255, 22);
-            border: 1px solid rgba(255,255,255,55);
+            background: rgba(255, 255, 255, 14);
+            border: 1px solid rgba(255,255,255,34);
         }
         QPushButton#PrimaryButton {
             color: #050505;
@@ -405,7 +442,7 @@ MainWindow::MainWindow(QWidget *parent)
     )"));
 
     refreshInstanceList();
-    appendLog(QStringLiteral("XylarJava ready."));
+    appendLog(QStringLiteral("Launcher ready."));
     appendLog(QStringLiteral("Java: %1").arg(m_controller.javaPath().isEmpty() ? QStringLiteral("not found") : m_controller.javaPath()));
     QTimer::singleShot(250, this, [this]() {
         m_controller.refreshVersions();
@@ -438,7 +475,7 @@ QWidget *MainWindow::createHomePage()
 
     auto *headlineBlock = new QVBoxLayout;
     headlineBlock->setSpacing(4);
-    auto *heroTitle = new QLabel(QStringLiteral("XylarJava"));
+    auto *heroTitle = new QLabel(QStringLiteral("Library"));
     heroTitle->setObjectName(QStringLiteral("HeroTitle"));
     headlineBlock->addWidget(heroTitle);
     headlineBlock->addWidget(createMutedText(QStringLiteral("Create profiles, install real Minecraft versions, attach loaders, and launch from one clean surface.")));
@@ -501,7 +538,7 @@ QWidget *MainWindow::createHomePage()
     playerLabel->setObjectName(QStringLiteral("MicroLabel"));
     m_playerNameEdit = new QLineEdit;
     m_playerNameEdit->setPlaceholderText(QStringLiteral("Offline player name"));
-    m_playerNameEdit->setText(QStringLiteral("XylarPlayer"));
+    m_playerNameEdit->setText(QStringLiteral("Player"));
 
     builderLayout->addWidget(versionLabel, 0, 0);
     builderLayout->addWidget(m_versionFilterCombo, 1, 0);
@@ -540,7 +577,7 @@ QWidget *MainWindow::createHomePage()
     connect(install, &QPushButton::clicked, this, [this]() {
         const QString versionId = selectedVersionId();
         if (versionId.isEmpty()) {
-            QMessageBox::warning(this, QStringLiteral("XylarJava"), QStringLiteral("Refresh versions first."));
+            QMessageBox::warning(this, QStringLiteral("Launcher"), QStringLiteral("Refresh versions first."));
             return;
         }
         const QString instanceName = m_instanceNameEdit->text().trimmed().isEmpty()
@@ -554,7 +591,7 @@ QWidget *MainWindow::createHomePage()
     connect(launch, &QPushButton::clicked, this, [this]() {
         const QString id = selectedInstanceId();
         if (id.isEmpty()) {
-            QMessageBox::warning(this, QStringLiteral("XylarJava"), QStringLiteral("Install or select an instance first."));
+            QMessageBox::warning(this, QStringLiteral("Launcher"), QStringLiteral("Install or select an instance first."));
             return;
         }
         m_controller.launchInstance(id, m_playerNameEdit->text(), m_minMemorySpin->value(), m_maxMemorySpin->value(), effectiveJavaPath());
@@ -634,7 +671,7 @@ QWidget *MainWindow::createModpacksPage()
     auto *dropTitle = new QLabel(QStringLiteral("Modrinth pack import"));
     dropTitle->setObjectName(QStringLiteral("DropTitle"));
     dropCopy->addWidget(dropTitle);
-    dropCopy->addWidget(createMutedText(QStringLiteral("XylarJava reads modrinth.index.json, resolves Minecraft and loader dependencies, downloads declared files, and copies overrides.")));
+    dropCopy->addWidget(createMutedText(QStringLiteral("Reads modrinth.index.json, resolves Minecraft and loader dependencies, downloads declared files, and copies overrides.")));
     dropLayout->addLayout(dropCopy, 1);
     panelLayout->addWidget(dropZone);
 
@@ -664,7 +701,7 @@ QWidget *MainWindow::createModpacksPage()
     connect(openMods, &QPushButton::clicked, this, [this]() {
         const QString id = selectedInstanceId();
         if (id.isEmpty()) {
-            QMessageBox::warning(this, QStringLiteral("XylarJava"), QStringLiteral("Select an installed instance first."));
+            QMessageBox::warning(this, QStringLiteral("Launcher"), QStringLiteral("Select an installed instance first."));
             return;
         }
         for (const Instance &item : m_controller.instances()) {
@@ -679,7 +716,7 @@ QWidget *MainWindow::createModpacksPage()
     connect(importMods, &QPushButton::clicked, this, [this]() {
         const QString id = selectedInstanceId();
         if (id.isEmpty()) {
-            QMessageBox::warning(this, QStringLiteral("XylarJava"), QStringLiteral("Select an installed instance first."));
+            QMessageBox::warning(this, QStringLiteral("Launcher"), QStringLiteral("Select an installed instance first."));
             return;
         }
 
