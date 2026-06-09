@@ -17,6 +17,8 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QPainter>
+#include <QPainterPath>
 #include <QPlainTextEdit>
 #include <QPixmap>
 #include <QPair>
@@ -58,6 +60,45 @@ QString displayVersion(const MinecraftVersion &version)
     return version.type.isEmpty() ? version.id : QStringLiteral("%1  (%2)").arg(version.id, version.type);
 }
 
+class AppShell final : public QWidget
+{
+public:
+    using QWidget::QWidget;
+
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        Q_UNUSED(event)
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.fillRect(rect(), QColor(2, 2, 2));
+
+        QLinearGradient surface(0, 0, 0, height());
+        surface.setColorAt(0.0, QColor(24, 24, 26));
+        surface.setColorAt(0.28, QColor(8, 8, 9));
+        surface.setColorAt(1.0, QColor(2, 2, 2));
+        painter.fillRect(rect(), surface);
+
+        QLinearGradient sweep(0, 0, width(), height());
+        sweep.setColorAt(0.0, QColor(255, 255, 255, 18));
+        sweep.setColorAt(0.34, QColor(255, 255, 255, 4));
+        sweep.setColorAt(0.72, QColor(0, 0, 0, 0));
+        sweep.setColorAt(1.0, QColor(255, 255, 255, 10));
+        painter.fillRect(rect(), sweep);
+
+        painter.setPen(QPen(QColor(255, 255, 255, 8), 1));
+        for (int y = 118; y < height(); y += 68) {
+            painter.drawLine(36, y, width() - 36, y);
+        }
+
+        QLinearGradient bottomFade(0, height() - 210, 0, height());
+        bottomFade.setColorAt(0.0, QColor(0, 0, 0, 0));
+        bottomFade.setColorAt(1.0, QColor(0, 0, 0, 155));
+        painter.fillRect(QRect(0, height() - 210, width(), 210), bottomFade);
+    }
+};
+
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -68,17 +109,20 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle(QStringLiteral("XylarJava"));
     setWindowIcon(QIcon(QStringLiteral(":/icons/app-icon.png")));
 
-    auto *central = new QWidget(this);
+    auto *central = new AppShell(this);
     central->setObjectName(QStringLiteral("Shell"));
     setCentralWidget(central);
 
     auto *root = new QVBoxLayout(central);
-    root->setContentsMargins(32, 26, 32, 22);
-    root->setSpacing(16);
+    root->setContentsMargins(30, 24, 30, 20);
+    root->setSpacing(14);
 
-    auto *topBar = new QHBoxLayout;
+    auto *topChrome = new QFrame;
+    topChrome->setObjectName(QStringLiteral("TopChrome"));
+    auto *topBar = new QHBoxLayout(topChrome);
+    topBar->setContentsMargins(16, 10, 16, 10);
     topBar->setSpacing(14);
-    topBar->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 52));
+    topBar->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 48));
 
     auto *titleBlock = new QVBoxLayout;
     titleBlock->setSpacing(2);
@@ -93,9 +137,10 @@ MainWindow::MainWindow(QWidget *parent)
     statusBadge->setObjectName(QStringLiteral("StatusBadge"));
     statusBadge->setAlignment(Qt::AlignCenter);
     topBar->addWidget(statusBadge);
-    root->addLayout(topBar);
+    root->addWidget(topChrome);
 
     m_pages = new QStackedWidget;
+    m_pages->setObjectName(QStringLiteral("Pages"));
     m_pages->addWidget(createHomePage());
     m_pages->addWidget(createModpacksPage());
     m_pages->addWidget(createSettingsPage());
@@ -104,7 +149,7 @@ MainWindow::MainWindow(QWidget *parent)
     auto *navRow = new QHBoxLayout;
     navRow->addStretch(1);
     m_navBar = new XylarNavBar;
-    m_navBar->setFixedWidth(520);
+    m_navBar->setFixedWidth(560);
     m_navBar->setItems({
         {QStringLiteral("home"), QStringLiteral("Home"), QIcon(QStringLiteral(":/icons/home.svg"))},
         {QStringLiteral("modpacks"), QStringLiteral("Modpacks"), QIcon(QStringLiteral(":/icons/package.svg"))},
@@ -134,34 +179,50 @@ MainWindow::MainWindow(QWidget *parent)
 
     setStyleSheet(QStringLiteral(R"(
         #Shell {
-            background: #030303;
+            background: transparent;
             font-family: "Segoe UI";
+        }
+        #TopChrome {
+            border-radius: 24px;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(255,255,255,28),
+                stop:0.42 rgba(255,255,255,10),
+                stop:1 rgba(255,255,255,6));
+            border: 1px solid rgba(255,255,255,34);
+        }
+        #Pages {
+            background: transparent;
         }
         QLabel {
             color: #f5f5f7;
             letter-spacing: 0px;
         }
         #AppTitle {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
         }
         #SectionTitle {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
         }
         #HeroTitle {
             color: #f5f5f7;
-            font-size: 34px;
+            font-size: 38px;
+            font-weight: 750;
+        }
+        #DropTitle {
+            color: #f5f5f7;
+            font-size: 28px;
             font-weight: 750;
         }
         #MicroLabel {
-            color: rgba(245, 245, 247, 118);
+            color: rgba(245, 245, 247, 132);
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
         }
         #MutedText {
-            color: rgba(245, 245, 247, 145);
+            color: rgba(245, 245, 247, 154);
             font-size: 13px;
         }
         #StatusBadge {
@@ -170,32 +231,55 @@ MainWindow::MainWindow(QWidget *parent)
             padding: 0 16px;
             border-radius: 17px;
             color: #f5f5f7;
-            background: rgba(255, 255, 255, 22);
-            border: 1px solid rgba(255, 255, 255, 34);
+            background: rgba(255, 255, 255, 18);
+            border: 1px solid rgba(255, 255, 255, 42);
         }
         #Panel, #HeroPanel {
-            border-radius: 24px;
+            border-radius: 22px;
             background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(255,255,255,22),
-                stop:0.48 rgba(255,255,255,13),
-                stop:1 rgba(255,255,255,8));
-            border: 1px solid rgba(255, 255, 255, 32);
+                stop:0 rgba(255,255,255,30),
+                stop:0.36 rgba(255,255,255,13),
+                stop:1 rgba(255,255,255,7));
+            border: 1px solid rgba(255, 255, 255, 38);
         }
         #InsetPanel {
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 12);
-            border: 1px solid rgba(255, 255, 255, 22);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 10);
+            border: 1px solid rgba(255, 255, 255, 26);
         }
         #MetricPill {
             min-height: 58px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 12);
-            border: 1px solid rgba(255, 255, 255, 24);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 11);
+            border: 1px solid rgba(255, 255, 255, 28);
+        }
+        #MetricPill:hover, #InsetPanel:hover {
+            background: rgba(255, 255, 255, 15);
+            border: 1px solid rgba(255, 255, 255, 42);
+        }
+        #InstanceRow {
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 9);
+            border: 1px solid rgba(255, 255, 255, 18);
+        }
+        #InstanceTitle {
+            color: #f5f5f7;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        #InstanceMeta {
+            color: rgba(245, 245, 247, 136);
+            font-size: 12px;
+        }
+        #TinyIconBadge {
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 18);
+            border: 1px solid rgba(255, 255, 255, 32);
         }
         QPushButton {
             min-height: 42px;
-            padding: 0 18px;
-            border-radius: 21px;
+            padding: 0 20px;
+            border-radius: 20px;
             color: #050505;
             font-weight: 700;
             background: #f5f5f7;
@@ -203,11 +287,12 @@ MainWindow::MainWindow(QWidget *parent)
         }
         QPushButton#SecondaryButton {
             color: #f5f5f7;
-            background: rgba(255, 255, 255, 14);
-            border: 1px solid rgba(255,255,255,30);
+            background: rgba(255, 255, 255, 12);
+            border: 1px solid rgba(255,255,255,34);
         }
         QPushButton#SecondaryButton:hover {
-            background: rgba(255, 255, 255, 24);
+            background: rgba(255, 255, 255, 22);
+            border: 1px solid rgba(255,255,255,55);
         }
         QPushButton#PrimaryButton {
             color: #050505;
@@ -216,28 +301,56 @@ MainWindow::MainWindow(QWidget *parent)
         QPushButton:hover {
             background: #ffffff;
         }
+        QPushButton:pressed {
+            padding-top: 1px;
+            background: rgba(226, 226, 230, 255);
+        }
         QLineEdit, QListWidget, QComboBox, QSpinBox, QPlainTextEdit {
             color: #f5f5f7;
-            background: rgba(255, 255, 255, 10);
-            border: 1px solid rgba(255, 255, 255, 24);
+            background: rgba(255, 255, 255, 9);
+            border: 1px solid rgba(255, 255, 255, 26);
             border-radius: 12px;
             padding: 9px;
             selection-background-color: rgba(255, 255, 255, 72);
         }
+        QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QPlainTextEdit:focus {
+            background: rgba(255, 255, 255, 13);
+            border: 1px solid rgba(255, 255, 255, 62);
+        }
         QComboBox, QLineEdit, QSpinBox {
             min-height: 28px;
+        }
+        QComboBox::drop-down {
+            width: 30px;
+            border: 0px;
+        }
+        QComboBox::down-arrow {
+            image: none;
+            width: 0px;
+            height: 0px;
+        }
+        QComboBox QAbstractItemView {
+            color: #f5f5f7;
+            background: #151516;
+            border: 1px solid rgba(255,255,255,45);
+            selection-background-color: rgba(255,255,255,42);
+            outline: 0px;
         }
         QPlainTextEdit {
             font-family: "Cascadia Mono", "Consolas";
             font-size: 12px;
         }
+        QListWidget {
+            outline: 0px;
+        }
         QListWidget::item {
-            min-height: 42px;
-            border-radius: 10px;
-            padding: 6px 10px;
+            min-height: 62px;
+            border-radius: 14px;
+            padding: 4px;
+            margin: 4px 0px;
         }
         QListWidget::item:selected, QListWidget::item:hover {
-            background: rgba(255, 255, 255, 42);
+            background: rgba(255, 255, 255, 28);
             color: #f5f5f7;
         }
         QProgressBar {
@@ -255,6 +368,39 @@ MainWindow::MainWindow(QWidget *parent)
         QCheckBox {
             color: #f5f5f7;
             spacing: 8px;
+        }
+        QCheckBox::indicator {
+            width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            background: rgba(255,255,255,12);
+            border: 1px solid rgba(255,255,255,36);
+        }
+        QCheckBox::indicator:checked {
+            background: #f5f5f7;
+        }
+        QScrollBar:vertical {
+            background: transparent;
+            width: 8px;
+            margin: 8px 0px 8px 0px;
+        }
+        QScrollBar::handle:vertical {
+            min-height: 36px;
+            border-radius: 4px;
+            background: rgba(255,255,255,38);
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: transparent;
+            border: 0px;
+            height: 0px;
+        }
+        QToolTip {
+            color: #f5f5f7;
+            background: #18181a;
+            border: 1px solid rgba(255,255,255,44);
+            border-radius: 8px;
+            padding: 8px;
         }
     )"));
 
@@ -277,28 +423,34 @@ QWidget *MainWindow::createHomePage()
     auto *hero = createPanel(QStringLiteral("HeroPanel"));
     addDropShadow(hero, QColor(0, 0, 0, 92), 42, QPointF(0, 20));
     auto *heroLayout = new QVBoxLayout(hero);
-    heroLayout->setContentsMargins(30, 28, 30, 28);
-    heroLayout->setSpacing(18);
+    heroLayout->setContentsMargins(32, 30, 32, 28);
+    heroLayout->setSpacing(20);
 
     auto *heroTop = new QHBoxLayout;
     heroTop->setSpacing(18);
-    heroTop->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 88));
+    auto *heroIconBadge = new QFrame;
+    heroIconBadge->setObjectName(QStringLiteral("TinyIconBadge"));
+    heroIconBadge->setFixedSize(104, 104);
+    auto *heroIconLayout = new QVBoxLayout(heroIconBadge);
+    heroIconLayout->setContentsMargins(12, 12, 12, 12);
+    heroIconLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 80), 0, Qt::AlignCenter);
+    heroTop->addWidget(heroIconBadge);
 
     auto *headlineBlock = new QVBoxLayout;
     headlineBlock->setSpacing(4);
-    auto *heroTitle = new QLabel(QStringLiteral("Ready to launch."));
+    auto *heroTitle = new QLabel(QStringLiteral("XylarJava"));
     heroTitle->setObjectName(QStringLiteral("HeroTitle"));
     headlineBlock->addWidget(heroTitle);
-    headlineBlock->addWidget(createMutedText(QStringLiteral("Choose a Minecraft version, attach a loader, install an instance, then launch.")));
+    headlineBlock->addWidget(createMutedText(QStringLiteral("Create profiles, install real Minecraft versions, attach loaders, and launch from one clean surface.")));
     heroTop->addLayout(headlineBlock, 1);
     heroLayout->addLayout(heroTop);
 
     auto *metrics = new QHBoxLayout;
     metrics->setSpacing(12);
     const QList<QPair<QString, QString>> metricItems = {
-        {QStringLiteral("Versions"), QStringLiteral("Mojang index")},
+        {QStringLiteral("Versions"), QStringLiteral("Live Mojang index")},
         {QStringLiteral("Loaders"), QStringLiteral("Vanilla / Fabric / Forge")},
-        {QStringLiteral("Mode"), QStringLiteral("Offline launch")}
+        {QStringLiteral("Runtime"), QStringLiteral("Oracle Java 21")}
     };
     for (const auto &item : metricItems) {
         auto *metric = new QFrame;
@@ -365,7 +517,7 @@ QWidget *MainWindow::createHomePage()
     auto *actions = new QHBoxLayout;
     actions->setSpacing(10);
     auto *refresh = createActionButton(QStringLiteral("Refresh"), QStringLiteral(":/icons/refresh-cw.svg"));
-    auto *install = createActionButton(QStringLiteral("Install"), QStringLiteral(":/icons/download.svg"));
+    auto *install = createActionButton(QStringLiteral("Install Instance"), QStringLiteral(":/icons/download.svg"));
     auto *launch = createActionButton(QStringLiteral("Launch"), QStringLiteral(":/icons/play.svg"));
     refresh->setObjectName(QStringLiteral("SecondaryButton"));
     install->setObjectName(QStringLiteral("SecondaryButton"));
@@ -423,8 +575,9 @@ QWidget *MainWindow::createHomePage()
     sideLayout->setContentsMargins(22, 22, 22, 22);
     sideLayout->setSpacing(14);
     sideLayout->addWidget(createSectionTitle(QStringLiteral("Instances")));
-    sideLayout->addWidget(createMutedText(QStringLiteral("Installed profiles are stored locally and can be launched offline.")));
+    sideLayout->addWidget(createMutedText(QStringLiteral("Installed profiles, versions and loaders.")));
     m_instanceList = new QListWidget;
+    m_instanceList->setSpacing(6);
     sideLayout->addWidget(m_instanceList, 1);
 
     auto *quickPanel = createPanel(QStringLiteral("Panel"));
@@ -466,19 +619,31 @@ QWidget *MainWindow::createModpacksPage()
 
     auto *dropZone = new QFrame;
     dropZone->setObjectName(QStringLiteral("InsetPanel"));
-    auto *dropLayout = new QVBoxLayout(dropZone);
+    auto *dropLayout = new QHBoxLayout(dropZone);
     dropLayout->setContentsMargins(22, 22, 22, 22);
-    dropLayout->setSpacing(8);
+    dropLayout->setSpacing(18);
+    auto *dropIcon = new QFrame;
+    dropIcon->setObjectName(QStringLiteral("TinyIconBadge"));
+    dropIcon->setFixedSize(74, 74);
+    auto *dropIconLayout = new QVBoxLayout(dropIcon);
+    dropIconLayout->setContentsMargins(15, 15, 15, 15);
+    dropIconLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/package.svg"), 44), 0, Qt::AlignCenter);
+    dropLayout->addWidget(dropIcon);
+    auto *dropCopy = new QVBoxLayout;
+    dropCopy->setSpacing(6);
     auto *dropTitle = new QLabel(QStringLiteral("Modrinth pack import"));
-    dropTitle->setObjectName(QStringLiteral("SectionTitle"));
-    dropLayout->addWidget(dropTitle);
-    dropLayout->addWidget(createMutedText(QStringLiteral("XylarJava reads modrinth.index.json, resolves Minecraft and loader dependencies, downloads declared files, and copies overrides.")));
+    dropTitle->setObjectName(QStringLiteral("DropTitle"));
+    dropCopy->addWidget(dropTitle);
+    dropCopy->addWidget(createMutedText(QStringLiteral("XylarJava reads modrinth.index.json, resolves Minecraft and loader dependencies, downloads declared files, and copies overrides.")));
+    dropLayout->addLayout(dropCopy, 1);
     panelLayout->addWidget(dropZone);
 
     auto *importPack = createActionButton(QStringLiteral("Import .mrpack"), QStringLiteral(":/icons/import.svg"));
     auto *openMods = createActionButton(QStringLiteral("Open mods folder"), QStringLiteral(":/icons/folder-open.svg"));
     auto *importMods = createActionButton(QStringLiteral("Import jar mods"), QStringLiteral(":/icons/download.svg"));
     importPack->setObjectName(QStringLiteral("PrimaryButton"));
+    openMods->setObjectName(QStringLiteral("SecondaryButton"));
+    importMods->setObjectName(QStringLiteral("SecondaryButton"));
 
     auto *buttons = new QHBoxLayout;
     buttons->setSpacing(10);
@@ -583,7 +748,7 @@ QWidget *MainWindow::createSettingsPage()
     runtimeLayout->setContentsMargins(26, 24, 26, 24);
     runtimeLayout->setSpacing(14);
     runtimeLayout->addWidget(createSectionTitle(QStringLiteral("Runtime")));
-    runtimeLayout->addWidget(createMutedText(QStringLiteral("Java path and memory used for launch plans. Oracle JDK 21 can be installed automatically.")));
+    runtimeLayout->addWidget(createMutedText(QStringLiteral("Java path and memory used for launch plans. Oracle JDK 21 installs automatically when needed.")));
 
     auto *javaBox = new QFrame;
     javaBox->setObjectName(QStringLiteral("InsetPanel"));
@@ -599,6 +764,7 @@ QWidget *MainWindow::createSettingsPage()
     m_javaPathEdit->setText(m_controller.javaPath());
     auto *browseJava = createActionButton(QStringLiteral("Browse"), QStringLiteral(":/icons/folder-open.svg"));
     auto *installJava = createActionButton(QStringLiteral("Install Oracle JDK 21"), QStringLiteral(":/icons/download.svg"));
+    installJava->setObjectName(QStringLiteral("PrimaryButton"));
     javaRow->addWidget(m_javaPathEdit, 1);
     javaRow->addWidget(browseJava);
     javaBoxLayout->addLayout(javaRow);
@@ -700,6 +866,7 @@ QPushButton *MainWindow::createActionButton(const QString &text, const QString &
     auto *button = new QPushButton(QIcon(iconResource), text);
     button->setObjectName(QStringLiteral("SecondaryButton"));
     button->setIconSize(QSize(18, 18));
+    button->setCursor(Qt::PointingHandCursor);
     return button;
 }
 
@@ -727,9 +894,55 @@ void MainWindow::refreshInstanceList()
     m_instanceList->clear();
     const QList<Instance> items = m_controller.instances();
     for (const Instance &instance : items) {
-        auto *item = new QListWidgetItem(QStringLiteral("%1  -  %2  -  %3").arg(instance.name, instance.loader, instance.minecraftVersion.id));
+        auto *item = new QListWidgetItem;
         item->setData(Qt::UserRole, instance.id);
+        item->setSizeHint(QSize(0, 74));
         m_instanceList->addItem(item);
+
+        auto *row = new QFrame;
+        row->setObjectName(QStringLiteral("InstanceRow"));
+        auto *rowLayout = new QHBoxLayout(row);
+        rowLayout->setContentsMargins(12, 10, 12, 10);
+        rowLayout->setSpacing(12);
+
+        auto *iconBadge = new QFrame;
+        iconBadge->setObjectName(QStringLiteral("TinyIconBadge"));
+        iconBadge->setFixedSize(42, 42);
+        auto *iconLayout = new QVBoxLayout(iconBadge);
+        iconLayout->setContentsMargins(9, 9, 9, 9);
+        iconLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/play.svg"), 24), 0, Qt::AlignCenter);
+        rowLayout->addWidget(iconBadge);
+
+        auto *textLayout = new QVBoxLayout;
+        textLayout->setSpacing(2);
+        auto *title = new QLabel(instance.name);
+        title->setObjectName(QStringLiteral("InstanceTitle"));
+        auto *meta = new QLabel(QStringLiteral("%1  /  %2").arg(instance.loader, instance.minecraftVersion.id));
+        meta->setObjectName(QStringLiteral("InstanceMeta"));
+        textLayout->addWidget(title);
+        textLayout->addWidget(meta);
+        rowLayout->addLayout(textLayout, 1);
+
+        m_instanceList->setItemWidget(item, row);
+    }
+    if (m_instanceList->count() == 0) {
+        auto *item = new QListWidgetItem;
+        item->setData(Qt::UserRole, QString());
+        item->setSizeHint(QSize(0, 74));
+        m_instanceList->addItem(item);
+
+        auto *row = new QFrame;
+        row->setObjectName(QStringLiteral("InstanceRow"));
+        auto *rowLayout = new QVBoxLayout(row);
+        rowLayout->setContentsMargins(14, 12, 14, 12);
+        rowLayout->setSpacing(2);
+        auto *title = new QLabel(QStringLiteral("No instances yet"));
+        title->setObjectName(QStringLiteral("InstanceTitle"));
+        auto *meta = new QLabel(QStringLiteral("Install a version from Home."));
+        meta->setObjectName(QStringLiteral("InstanceMeta"));
+        rowLayout->addWidget(title);
+        rowLayout->addWidget(meta);
+        m_instanceList->setItemWidget(item, row);
     }
     if (m_instanceList->count() > 0) {
         m_instanceList->setCurrentRow(0);
