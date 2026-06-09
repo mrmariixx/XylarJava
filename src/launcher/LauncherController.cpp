@@ -128,9 +128,15 @@ bool LauncherController::installInstance(const QString &versionId, const QString
             emit instancesChanged(instances());
             return false;
         }
-        emit logLine(QStringLiteral("Installing %1 loader for %2...").arg(loaderName, version.id));
-        result = m_metadata.installVersion(loaderVersion, instance, m_downloadManager);
-        emit logLine(result.message);
+        if (loaderName.compare(QStringLiteral("Forge"), Qt::CaseInsensitive) == 0) {
+            emit logLine(QStringLiteral("Installed Forge profile %1.").arg(loaderVersion.id));
+            result.ok = true;
+            result.message = QStringLiteral("Installed Forge for %1.").arg(version.id);
+        } else {
+            emit logLine(QStringLiteral("Installing %1 loader for %2...").arg(loaderName, version.id));
+            result = m_metadata.installVersion(loaderVersion, instance, m_downloadManager);
+            emit logLine(result.message);
+        }
     }
 
     emit instancesChanged(instances());

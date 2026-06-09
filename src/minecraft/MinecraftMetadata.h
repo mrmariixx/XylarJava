@@ -39,6 +39,8 @@ private:
     [[nodiscard]] QJsonObject resolvedVersionJson(const QString &versionId, QString *errorMessage = nullptr) const;
     [[nodiscard]] QJsonObject mergeInheritedVersion(const QJsonObject &parent, const QJsonObject &child) const;
     [[nodiscard]] QString clientVersionId(const QJsonObject &root) const;
+    [[nodiscard]] QString latestForgeBuild(const QString &minecraftVersion, DownloadManager &downloads, QString *errorMessage = nullptr);
+    [[nodiscard]] MinecraftVersion installForgeVersion(const MinecraftVersion &minecraftVersion, DownloadManager &downloads, QString *errorMessage = nullptr);
     [[nodiscard]] QString offlineUuid(const QString &playerName) const;
     [[nodiscard]] bool rulesAllow(const QJsonArray &rules) const;
     [[nodiscard]] bool ruleMatches(const QJsonObject &rule) const;

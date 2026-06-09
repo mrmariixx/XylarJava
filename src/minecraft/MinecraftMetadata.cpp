@@ -13,6 +13,7 @@
 #include <QStandardPaths>
 #include <QSysInfo>
 #include <QtGlobal>
+#include <QXmlStreamReader>
 #include <QUuid>
 
 #include "fs/Paths.h"
@@ -23,8 +24,8 @@ namespace {
 const QUrl kManifestUrl(QStringLiteral("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"));
 const QString kFabricMeta = QStringLiteral("https://meta.fabricmc.net/v2/versions/loader/%1");
 const QString kFabricProfile = QStringLiteral("https://meta.fabricmc.net/v2/versions/loader/%1/%2/profile/json");
-const QString kQuiltMeta = QStringLiteral("https://meta.quiltmc.org/v3/versions/loader/%1");
-const QString kQuiltProfile = QStringLiteral("https://meta.quiltmc.org/v3/versions/loader/%1/%2/profile/json");
+const QUrl kForgePromos(QStringLiteral("https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json"));
+const QUrl kForgeMavenMetadata(QStringLiteral("https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml"));
 
 QString osName()
 {
@@ -108,9 +109,12 @@ MinecraftVersion MinecraftMetadata::createLoaderVersion(const MinecraftVersion &
         return minecraftVersion;
     }
 
+    if (normalized == QStringLiteral("forge")) {
+        return installForgeVersion(minecraftVersion, downloads, errorMessage);
+    }
+
     const bool fabric = normalized == QStringLiteral("fabric");
-    const bool quilt = normalized == QStringLiteral("quilt");
-    if (!fabric && !quilt) {
+    if (!fabric) {
         if (errorMessage) {
             *errorMessage = QStringLiteral("%1 loader install is not wired yet.").arg(loaderName);
         }
@@ -119,7 +123,7 @@ MinecraftVersion MinecraftMetadata::createLoaderVersion(const MinecraftVersion &
 
     const QString listPath = Paths::metadataDir().filePath(QStringLiteral("%1-%2-loaders.json").arg(normalized, minecraftVersion.id));
     DownloadRequest listRequest;
-    listRequest.url = QUrl((fabric ? kFabricMeta : kQuiltMeta).arg(minecraftVersion.id));
+    listRequest.url = QUrl(kFabricMeta.arg(minecraftVersion.id));
     listRequest.targetPath = listPath;
     listRequest.label = QStringLiteral("%1 loader list for %2").arg(loaderName, minecraftVersion.id);
     listRequest.force = true;
@@ -164,7 +168,7 @@ MinecraftVersion MinecraftMetadata::createLoaderVersion(const MinecraftVersion &
     MinecraftVersion loaderVersionInfo;
     loaderVersionInfo.id = QStringLiteral("%1-%2-%3").arg(normalized, loaderVersion, minecraftVersion.id);
     loaderVersionInfo.type = QStringLiteral("loader");
-    loaderVersionInfo.url = (fabric ? kFabricProfile : kQuiltProfile).arg(minecraftVersion.id, loaderVersion);
+    loaderVersionInfo.url = kFabricProfile.arg(minecraftVersion.id, loaderVersion);
     loaderVersionInfo.releaseTime = minecraftVersion.releaseTime;
     return loaderVersionInfo;
 }
@@ -256,6 +260,8 @@ LaunchPlan MinecraftMetadata::buildLaunchPlan(const Instance &instance, const QS
     variables.insert(QStringLiteral("natives_directory"), QDir::toNativeSeparators(nativeDir));
     variables.insert(QStringLiteral("launcher_name"), QStringLiteral("XylarJava"));
     variables.insert(QStringLiteral("launcher_version"), QStringLiteral(XYLARJAVA_VERSION));
+    variables.insert(QStringLiteral("library_directory"), QDir::toNativeSeparators(Paths::librariesDir().absolutePath()));
+    variables.insert(QStringLiteral("classpath_separator"), classpathSeparator());
     variables.insert(QStringLiteral("classpath"), QDir::toNativeSeparators(classpath.join(classpathSeparator())));
     variables.insert(QStringLiteral("auth_player_name"), player);
     variables.insert(QStringLiteral("version_name"), instance.minecraftVersion.id);
@@ -412,6 +418,133 @@ QString MinecraftMetadata::clientVersionId(const QJsonObject &root) const
 {
     const QString parent = root.value(QStringLiteral("inheritsFrom")).toString();
     return parent.isEmpty() ? root.value(QStringLiteral("id")).toString() : parent;
+}
+
+QString MinecraftMetadata::latestForgeBuild(const QString &minecraftVersion, DownloadManager &downloads, QString *errorMessage)
+{
+    QString error;
+    DownloadRequest promos;
+    promos.url = kForgePromos;
+    promos.targetPath = Paths::metadataDir().filePath(QStringLiteral("forge-promotions_slim.json"));
+    promos.label = QStringLiteral("Forge promotions");
+    promos.force = true;
+    downloads.beginBatch(1);
+    if (downloads.downloadToFile(promos, &error)) {
+        const QJsonObject root = readObject(promos.targetPath, &error);
+        const QJsonObject values = root.value(QStringLiteral("promos")).toObject();
+        const QString recommended = values.value(minecraftVersion + QStringLiteral("-recommended")).toString();
+        if (!recommended.isEmpty()) {
+            return recommended;
+        }
+        const QString latest = values.value(minecraftVersion + QStringLiteral("-latest")).toString();
+        if (!latest.isEmpty()) {
+            return latest;
+        }
+    }
+
+    DownloadRequest metadata;
+    metadata.url = kForgeMavenMetadata;
+    metadata.targetPath = Paths::metadataDir().filePath(QStringLiteral("forge-maven-metadata.xml"));
+    metadata.label = QStringLiteral("Forge Maven metadata");
+    metadata.force = true;
+    downloads.beginBatch(1);
+    if (!downloads.downloadToFile(metadata, &error)) {
+        if (errorMessage) {
+            *errorMessage = error;
+        }
+        return {};
+    }
+
+    QFile file(metadata.targetPath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("Cannot read Forge Maven metadata.");
+        }
+        return {};
+    }
+
+    QString best;
+    QXmlStreamReader xml(&file);
+    while (!xml.atEnd()) {
+        xml.readNext();
+        if (xml.isStartElement() && xml.name() == QStringLiteral("version")) {
+            const QString full = xml.readElementText();
+            const QString prefix = minecraftVersion + QStringLiteral("-");
+            if (full.startsWith(prefix)) {
+                best = full.mid(prefix.size());
+            }
+        }
+    }
+    if (best.isEmpty() && errorMessage) {
+        *errorMessage = QStringLiteral("No Forge build found for Minecraft %1.").arg(minecraftVersion);
+    }
+    return best;
+}
+
+MinecraftVersion MinecraftMetadata::installForgeVersion(const MinecraftVersion &minecraftVersion, DownloadManager &downloads, QString *errorMessage)
+{
+    const QString forgeBuild = latestForgeBuild(minecraftVersion.id, downloads, errorMessage);
+    if (forgeBuild.isEmpty()) {
+        return {};
+    }
+
+    const QString artifactVersion = minecraftVersion.id + QStringLiteral("-") + forgeBuild;
+    const QString profileId = minecraftVersion.id + QStringLiteral("-forge-") + forgeBuild;
+    const QString installerName = QStringLiteral("forge-%1-installer.jar").arg(artifactVersion);
+    const QString installerPath = Paths::metadataDir().filePath(QStringLiteral("forge-installers/%1").arg(installerName));
+
+    DownloadRequest installer;
+    installer.url = QUrl(QStringLiteral("https://maven.minecraftforge.net/net/minecraftforge/forge/%1/%2").arg(artifactVersion, installerName));
+    installer.targetPath = installerPath;
+    installer.label = QStringLiteral("Forge installer %1").arg(artifactVersion);
+    downloads.beginBatch(1);
+
+    QString error;
+    if (!downloads.downloadToFile(installer, &error)) {
+        if (errorMessage) {
+            *errorMessage = error;
+        }
+        return {};
+    }
+
+    const QString java = QStandardPaths::findExecutable(QStringLiteral("java.exe")).isEmpty()
+        ? QStandardPaths::findExecutable(QStringLiteral("java"))
+        : QStandardPaths::findExecutable(QStringLiteral("java.exe"));
+    if (java.isEmpty()) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("Java is required to run the Forge installer.");
+        }
+        return {};
+    }
+
+    QProcess process;
+    process.start(java, {
+        QStringLiteral("-jar"),
+        installerPath,
+        QStringLiteral("--installClient"),
+        Paths::appDataDir().absolutePath(),
+    });
+    if (!process.waitForFinished(300000) || process.exitCode() != 0) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("Forge installer failed: %1 %2")
+                .arg(QString::fromLocal8Bit(process.readAllStandardOutput()), QString::fromLocal8Bit(process.readAllStandardError()));
+        }
+        return {};
+    }
+
+    const QString versionPath = QDir(Paths::versionsDir().filePath(profileId)).filePath(profileId + QStringLiteral(".json"));
+    if (!QFileInfo::exists(versionPath)) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("Forge did not create %1").arg(versionPath);
+        }
+        return {};
+    }
+
+    MinecraftVersion forge;
+    forge.id = profileId;
+    forge.type = QStringLiteral("loader");
+    forge.releaseTime = minecraftVersion.releaseTime;
+    return forge;
 }
 
 QString MinecraftMetadata::offlineUuid(const QString &playerName) const

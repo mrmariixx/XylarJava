@@ -22,6 +22,7 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QSpinBox>
+#include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
 
@@ -218,6 +219,9 @@ MainWindow::MainWindow(QWidget *parent)
     refreshInstanceList();
     appendLog(QStringLiteral("XylarJava ready."));
     appendLog(QStringLiteral("Java: %1").arg(m_controller.javaPath().isEmpty() ? QStringLiteral("not found") : m_controller.javaPath()));
+    QTimer::singleShot(250, this, [this]() {
+        m_controller.refreshVersions();
+    });
 }
 
 QWidget *MainWindow::createHomePage()
@@ -257,7 +261,7 @@ QWidget *MainWindow::createHomePage()
     heroLayout->addLayout(versionRow);
 
     m_loaderCombo = new QComboBox;
-    m_loaderCombo->addItems({QStringLiteral("Vanilla"), QStringLiteral("Fabric"), QStringLiteral("Quilt")});
+    m_loaderCombo->addItems({QStringLiteral("Vanilla"), QStringLiteral("Fabric"), QStringLiteral("Forge")});
     heroLayout->addWidget(m_loaderCombo);
 
     m_instanceNameEdit = new QLineEdit;
