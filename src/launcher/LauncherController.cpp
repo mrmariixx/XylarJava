@@ -115,7 +115,15 @@ bool LauncherController::installInstance(const QString &versionId, const QString
     }
 
     if (loaderName.compare(QStringLiteral("Vanilla"), Qt::CaseInsensitive) != 0) {
-        MinecraftVersion loaderVersion = m_metadata.createLoaderVersion(version, loaderName, m_downloadManager, &error);
+        QString installerJava;
+        if (loaderName.compare(QStringLiteral("Forge"), Qt::CaseInsensitive) == 0) {
+            installerJava = ensureJavaRuntime();
+            if (installerJava.isEmpty()) {
+                emit instancesChanged(instances());
+                return false;
+            }
+        }
+        MinecraftVersion loaderVersion = m_metadata.createLoaderVersion(version, loaderName, m_downloadManager, installerJava, &error);
         if (loaderVersion.id.isEmpty()) {
             emit logLine(error);
             emit instancesChanged(instances());
@@ -153,7 +161,10 @@ bool LauncherController::launchInstance(const QString &instanceId, const QString
 
     QString java = customJavaPath.trimmed();
     if (java.isEmpty()) {
-        java = m_javaRuntimeManager.preferredJavaExecutable();
+        java = ensureJavaRuntime();
+        if (java.isEmpty()) {
+            return false;
+        }
     }
 
     QString error;
@@ -233,6 +244,30 @@ bool LauncherController::importModrinthPack(const QString &packPath)
 LaunchPlan LauncherController::lastLaunchPlan() const
 {
     return m_lastLaunchPlan;
+}
+
+QString LauncherController::ensureJavaRuntime()
+{
+    QString java = m_javaRuntimeManager.bundledOracleJavaExecutable();
+    if (!java.isEmpty()) {
+        return java;
+    }
+
+    emit logLine(QStringLiteral("Downloading Oracle JDK 21 runtime..."));
+    QString error;
+    java = m_javaRuntimeManager.ensureOracleJdk21(m_downloadManager, &error);
+    if (!java.isEmpty()) {
+        emit logLine(QStringLiteral("Oracle JDK 21 ready: %1").arg(java));
+        return java;
+    }
+
+    emit logLine(error.isEmpty() ? QStringLiteral("Oracle JDK 21 could not be installed.") : error);
+    java = m_javaRuntimeManager.preferredJavaExecutable();
+    if (!java.isEmpty()) {
+        emit logLine(QStringLiteral("Falling back to system Java: %1").arg(java));
+        return java;
+    }
+    return {};
 }
 
 MinecraftVersion LauncherController::versionById(const QString &versionId) const

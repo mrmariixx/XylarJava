@@ -53,6 +53,7 @@ bool DownloadManager::downloadToFile(const DownloadRequest &request, QString *er
 
     QNetworkRequest networkRequest(request.url);
     networkRequest.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("XylarJava/%1").arg(QStringLiteral(XYLARJAVA_VERSION)));
+    networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     QNetworkReply *reply = m_network.get(networkRequest);
 
     QEventLoop loop;

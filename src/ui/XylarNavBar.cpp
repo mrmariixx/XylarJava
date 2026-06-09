@@ -211,10 +211,10 @@ void XylarNavBar::paintShell(QPainter &painter, const QRectF &rect)
     shell.addRoundedRect(rect, radius, radius);
 
     QLinearGradient base(rect.topLeft(), rect.bottomRight());
-    base.setColorAt(0.0, QColor(255, 255, 255, 58));
-    base.setColorAt(0.35, QColor(255, 255, 255, 26));
-    base.setColorAt(0.70, QColor(255, 255, 255, 14));
-    base.setColorAt(1.0, QColor(255, 255, 255, 8));
+    base.setColorAt(0.0, QColor(255, 255, 255, 72));
+    base.setColorAt(0.34, QColor(255, 255, 255, 28));
+    base.setColorAt(0.62, QColor(255, 255, 255, 12));
+    base.setColorAt(1.0, QColor(255, 255, 255, 6));
     painter.fillPath(shell, base);
 
     QLinearGradient rim(rect.left(), rect.top(), rect.left(), rect.bottom());
@@ -233,6 +233,24 @@ void XylarNavBar::paintShell(QPainter &painter, const QRectF &rect)
     sheen.setColorAt(1.0, QColor(255, 255, 255, 10));
     painter.fillPath(topSheen, sheen);
 
+    painter.save();
+    painter.setClipPath(shell);
+    const qreal wave = qSin(m_phase) * 4.0;
+    for (int i = 0; i < 3; ++i) {
+        const qreal y = rect.top() + rect.height() * (0.26 + i * 0.16);
+        QPainterPath lensLine;
+        lensLine.moveTo(rect.left() + 30, y + wave * (i + 1) * 0.22);
+        lensLine.cubicTo(rect.left() + rect.width() * 0.32,
+                         y - 10 + wave,
+                         rect.left() + rect.width() * 0.66,
+                         y + 12 - wave,
+                         rect.right() - 30,
+                         y + wave * 0.4);
+        painter.setPen(QPen(QColor(255, 255, 255, 14 - i * 3), 1.0));
+        painter.drawPath(lensLine);
+    }
+    painter.restore();
+
     painter.setPen(QPen(QColor(255, 255, 255, 92), 1.15));
     painter.drawPath(shell);
     painter.setPen(QPen(QColor(255, 255, 255, 26), 1.0));
@@ -242,8 +260,12 @@ void XylarNavBar::paintShell(QPainter &painter, const QRectF &rect)
 void XylarNavBar::paintBubble(QPainter &painter, const QRectF &rect)
 {
     const qreal wave = (qSin(m_phase) + 1.0) * 0.5;
-    const qreal stretch = m_hoverIndex >= 0 ? 8.0 + wave * 3.0 : 4.0;
-    const QRectF bubble = rect.adjusted(-stretch, -5 - wave * 1.5, stretch, 6 + wave * 1.5);
+    const qreal pull = m_hoverIndex >= 0 ? qBound(-1.0, (m_mousePosition.x() - rect.center().x()) / qMax(1.0, rect.width()), 1.0) : 0.0;
+    const qreal stretch = m_hoverIndex >= 0 ? 10.0 + wave * 4.0 : 4.0;
+    const QRectF bubble = rect.adjusted(-stretch + qMin<qreal>(0.0, pull) * 10.0,
+                                        -6 - wave * 2.0,
+                                        stretch + qMax<qreal>(0.0, pull) * 10.0,
+                                        7 + wave * 2.0);
     const qreal radius = bubble.height() / 2.0;
     const QPointF focus = m_hoverIndex >= 0 ? m_mousePosition : bubble.center();
 
@@ -256,7 +278,26 @@ void XylarNavBar::paintBubble(QPainter &painter, const QRectF &rect)
     painter.fillPath(aura, QColor(255, 255, 255, 15 + static_cast<int>(m_pulse * 15)));
 
     QPainterPath bubblePath;
-    bubblePath.addRoundedRect(bubble, radius, radius);
+    const qreal left = bubble.left();
+    const qreal right = bubble.right();
+    const qreal top = bubble.top();
+    const qreal bottom = bubble.bottom();
+    const qreal centerY = bubble.center().y();
+    const qreal bulge = 4.0 + wave * 2.0;
+    bubblePath.moveTo(left + radius, top);
+    bubblePath.cubicTo(left + bubble.width() * 0.34, top - 2.0 - wave,
+                       right - bubble.width() * 0.30, top + 1.0 + pull * 2.0,
+                       right - radius, top);
+    bubblePath.cubicTo(right + bulge + pull * 4.0, top,
+                       right + bulge + pull * 6.0, bottom,
+                       right - radius, bottom);
+    bubblePath.cubicTo(right - bubble.width() * 0.30, bottom + 2.0 + wave,
+                       left + bubble.width() * 0.34, bottom - 1.0 - pull * 2.0,
+                       left + radius, bottom);
+    bubblePath.cubicTo(left - bulge + pull * 4.0, bottom,
+                       left - bulge + pull * 3.0, top,
+                       left + radius, top);
+    bubblePath.closeSubpath();
 
     QRadialGradient fill(focus, bubble.width() * 0.78, focus);
     fill.setColorAt(0.0, QColor(255, 255, 255, 188));
@@ -271,20 +312,61 @@ void XylarNavBar::paintBubble(QPainter &painter, const QRectF &rect)
     shade.setColorAt(1.0, QColor(0, 0, 0, 50));
     painter.fillPath(bubblePath, shade);
 
+    painter.save();
+    painter.setClipPath(bubblePath);
+    for (int i = 0; i < 5; ++i) {
+        const qreal phaseOffset = m_phase + i * 0.72;
+        const qreal lane = (i + 1) / 6.0;
+        QPainterPath caustic;
+        caustic.moveTo(bubble.left() + bubble.width() * 0.12,
+                       centerY + qSin(phaseOffset) * 9.0 + (lane - 0.5) * bubble.height() * 0.46);
+        caustic.cubicTo(bubble.left() + bubble.width() * 0.34,
+                        centerY - 18.0 + qCos(phaseOffset) * 7.0,
+                        bubble.left() + bubble.width() * 0.66,
+                        centerY + 18.0 - qSin(phaseOffset) * 7.0,
+                        bubble.right() - bubble.width() * 0.12,
+                        centerY + qCos(phaseOffset) * 9.0 + (0.5 - lane) * bubble.height() * 0.38);
+        painter.setPen(QPen(QColor(255, 255, 255, 38 - i * 4), 1.15));
+        painter.drawPath(caustic);
+    }
+
+    QLinearGradient prism(bubble.topLeft(), bubble.topRight());
+    prism.setColorAt(0.00, QColor(255, 255, 255, 0));
+    prism.setColorAt(0.28, QColor(160, 220, 255, 26));
+    prism.setColorAt(0.50, QColor(255, 255, 255, 0));
+    prism.setColorAt(0.72, QColor(255, 238, 170, 24));
+    prism.setColorAt(1.00, QColor(255, 255, 255, 0));
+    painter.fillRect(bubble.adjusted(8, 10, -8, -10), prism);
+    painter.restore();
+
     const QRectF highlight = bubble.adjusted(18, 8, -18, -bubble.height() * 0.6);
     QPainterPath shine;
     shine.addRoundedRect(highlight, highlight.height() / 2.0, highlight.height() / 2.0);
-    painter.fillPath(shine, QColor(255, 255, 255, 94));
+    painter.fillPath(shine, QColor(255, 255, 255, 118));
 
-    const QRectF glint = QRectF(bubble.right() - bubble.width() * 0.28, bubble.top() + 11, bubble.width() * 0.13, bubble.height() * 0.24);
+    const QRectF glint = QRectF(bubble.right() - bubble.width() * 0.28 + pull * 8.0,
+                                bubble.top() + 11,
+                                bubble.width() * 0.13,
+                                bubble.height() * 0.24);
     QPainterPath glintPath;
     glintPath.addEllipse(glint);
-    painter.fillPath(glintPath, QColor(255, 255, 255, 78));
+    painter.fillPath(glintPath, QColor(255, 255, 255, 92));
+
+    QPainterPath bottomLens;
+    bottomLens.moveTo(bubble.left() + bubble.width() * 0.20, bubble.bottom() - 12);
+    bottomLens.cubicTo(bubble.left() + bubble.width() * 0.44,
+                       bubble.bottom() - 3,
+                       bubble.left() + bubble.width() * 0.66,
+                       bubble.bottom() - 3,
+                       bubble.right() - bubble.width() * 0.20,
+                       bubble.bottom() - 13);
+    painter.setPen(QPen(QColor(0, 0, 0, 46), 1.2));
+    painter.drawPath(bottomLens);
 
     painter.setPen(QPen(alpha(QColor(255, 255, 255), 196), 1.35));
     painter.drawPath(bubblePath);
     painter.setPen(QPen(QColor(255, 255, 255, 92), 1.0));
-    painter.drawRoundedRect(bubble.adjusted(3, 3, -3, -3), radius - 3, radius - 3);
+    painter.drawPath(bubblePath.translated(0.0, 1.0));
 }
 
 void XylarNavBar::paintItems(QPainter &painter)

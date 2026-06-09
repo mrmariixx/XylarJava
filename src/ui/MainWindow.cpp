@@ -432,7 +432,7 @@ QWidget *MainWindow::createHomePage()
     quickLayout->setContentsMargins(22, 20, 22, 20);
     quickLayout->setSpacing(10);
     quickLayout->addWidget(createSectionTitle(QStringLiteral("Runtime")));
-    quickLayout->addWidget(createMutedText(QStringLiteral("Java and memory are configured in Settings. Forge may run its installer during setup.")));
+    quickLayout->addWidget(createMutedText(QStringLiteral("Java 21 is downloaded automatically when a launch or Forge setup needs it.")));
     quickLayout->addStretch(1);
 
     layout->addWidget(hero, 0, 0, 2, 2);
@@ -583,7 +583,7 @@ QWidget *MainWindow::createSettingsPage()
     runtimeLayout->setContentsMargins(26, 24, 26, 24);
     runtimeLayout->setSpacing(14);
     runtimeLayout->addWidget(createSectionTitle(QStringLiteral("Runtime")));
-    runtimeLayout->addWidget(createMutedText(QStringLiteral("Java path and memory used for launch plans.")));
+    runtimeLayout->addWidget(createMutedText(QStringLiteral("Java path and memory used for launch plans. Oracle JDK 21 can be installed automatically.")));
 
     auto *javaBox = new QFrame;
     javaBox->setObjectName(QStringLiteral("InsetPanel"));
@@ -598,9 +598,11 @@ QWidget *MainWindow::createSettingsPage()
     m_javaPathEdit->setPlaceholderText(QStringLiteral("Auto detect Java"));
     m_javaPathEdit->setText(m_controller.javaPath());
     auto *browseJava = createActionButton(QStringLiteral("Browse"), QStringLiteral(":/icons/folder-open.svg"));
+    auto *installJava = createActionButton(QStringLiteral("Install Oracle JDK 21"), QStringLiteral(":/icons/download.svg"));
     javaRow->addWidget(m_javaPathEdit, 1);
     javaRow->addWidget(browseJava);
     javaBoxLayout->addLayout(javaRow);
+    javaBoxLayout->addWidget(installJava);
     runtimeLayout->addWidget(javaBox);
 
     auto *memoryBox = new QFrame;
@@ -631,6 +633,12 @@ QWidget *MainWindow::createSettingsPage()
         const QString file = QFileDialog::getOpenFileName(this, QStringLiteral("Select Java executable"), QString(), QStringLiteral("Java executable (java.exe javaw.exe);;All files (*.*)"));
         if (!file.isEmpty()) {
             m_javaPathEdit->setText(file);
+        }
+    });
+    connect(installJava, &QPushButton::clicked, this, [this]() {
+        const QString java = m_controller.ensureJavaRuntime();
+        if (!java.isEmpty()) {
+            m_javaPathEdit->setText(java);
         }
     });
 

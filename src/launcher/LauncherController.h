@@ -36,6 +36,7 @@ public:
     bool importModrinthPack(const QString &packPath);
     bool launchInstance(const QString &instanceId, const QString &playerName, int minMemoryMb, int maxMemoryMb, const QString &customJavaPath);
     [[nodiscard]] LaunchPlan lastLaunchPlan() const;
+    [[nodiscard]] QString ensureJavaRuntime();
 
 signals:
     void logLine(const QString &line);

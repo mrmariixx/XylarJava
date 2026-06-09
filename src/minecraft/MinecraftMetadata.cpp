@@ -102,7 +102,7 @@ QList<MinecraftVersion> MinecraftMetadata::refreshVersions(DownloadManager &down
     return result;
 }
 
-MinecraftVersion MinecraftMetadata::createLoaderVersion(const MinecraftVersion &minecraftVersion, const QString &loaderName, DownloadManager &downloads, QString *errorMessage)
+MinecraftVersion MinecraftMetadata::createLoaderVersion(const MinecraftVersion &minecraftVersion, const QString &loaderName, DownloadManager &downloads, const QString &javaPath, QString *errorMessage)
 {
     const QString normalized = loaderName.trimmed().toLower();
     if (normalized == QStringLiteral("vanilla") || normalized.isEmpty()) {
@@ -110,7 +110,7 @@ MinecraftVersion MinecraftMetadata::createLoaderVersion(const MinecraftVersion &
     }
 
     if (normalized == QStringLiteral("forge")) {
-        return installForgeVersion(minecraftVersion, downloads, errorMessage);
+        return installForgeVersion(minecraftVersion, downloads, javaPath, errorMessage);
     }
 
     const bool fabric = normalized == QStringLiteral("fabric");
@@ -481,7 +481,7 @@ QString MinecraftMetadata::latestForgeBuild(const QString &minecraftVersion, Dow
     return best;
 }
 
-MinecraftVersion MinecraftMetadata::installForgeVersion(const MinecraftVersion &minecraftVersion, DownloadManager &downloads, QString *errorMessage)
+MinecraftVersion MinecraftMetadata::installForgeVersion(const MinecraftVersion &minecraftVersion, DownloadManager &downloads, const QString &javaPath, QString *errorMessage)
 {
     const QString forgeBuild = latestForgeBuild(minecraftVersion.id, downloads, errorMessage);
     if (forgeBuild.isEmpty()) {
@@ -507,9 +507,11 @@ MinecraftVersion MinecraftMetadata::installForgeVersion(const MinecraftVersion &
         return {};
     }
 
-    const QString java = QStandardPaths::findExecutable(QStringLiteral("java.exe")).isEmpty()
-        ? QStandardPaths::findExecutable(QStringLiteral("java"))
-        : QStandardPaths::findExecutable(QStringLiteral("java.exe"));
+    QString java = javaPath.trimmed();
+    if (java.isEmpty()) {
+        const QString javaExe = QStandardPaths::findExecutable(QStringLiteral("java.exe"));
+        java = javaExe.isEmpty() ? QStandardPaths::findExecutable(QStringLiteral("java")) : javaExe;
+    }
     if (java.isEmpty()) {
         if (errorMessage) {
             *errorMessage = QStringLiteral("Java is required to run the Forge installer.");
