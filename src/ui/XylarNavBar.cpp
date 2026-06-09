@@ -211,10 +211,9 @@ void XylarNavBar::paintShell(QPainter &painter, const QRectF &rect)
     shell.addRoundedRect(rect, radius, radius);
 
     QLinearGradient base(rect.topLeft(), rect.bottomRight());
-    base.setColorAt(0.0, QColor(255, 255, 255, 88));
-    base.setColorAt(0.35, QColor(163, 255, 224, 44));
-    base.setColorAt(0.7, QColor(96, 151, 137, 46));
-    base.setColorAt(1.0, QColor(255, 255, 255, 28));
+    base.setColorAt(0.0, QColor(255, 255, 255, 48));
+    base.setColorAt(0.45, QColor(255, 255, 255, 22));
+    base.setColorAt(1.0, QColor(255, 255, 255, 14));
     painter.fillPath(shell, base);
 
     QLinearGradient rim(rect.left(), rect.top(), rect.left(), rect.bottom());
@@ -223,9 +222,9 @@ void XylarNavBar::paintShell(QPainter &painter, const QRectF &rect)
     rim.setColorAt(1.0, QColor(0, 0, 0, 30));
     painter.fillPath(shell, rim);
 
-    painter.setPen(QPen(QColor(255, 255, 255, 130), 1.15));
+    painter.setPen(QPen(QColor(255, 255, 255, 86), 1.15));
     painter.drawPath(shell);
-    painter.setPen(QPen(QColor(123, 255, 226, 44), 1.0));
+    painter.setPen(QPen(QColor(255, 255, 255, 24), 1.0));
     painter.drawRoundedRect(rect.adjusted(5, 5, -5, -5), radius - 5, radius - 5);
 }
 
@@ -239,16 +238,16 @@ void XylarNavBar::paintBubble(QPainter &painter, const QRectF &rect)
 
     QPainterPath aura;
     aura.addRoundedRect(bubble.adjusted(-10, -8, 10, 10), radius + 12, radius + 12);
-    painter.fillPath(aura, QColor(135, 255, 220, 22 + static_cast<int>(m_pulse * 18)));
+    painter.fillPath(aura, QColor(255, 255, 255, 14 + static_cast<int>(m_pulse * 12)));
 
     QPainterPath bubblePath;
     bubblePath.addRoundedRect(bubble, radius, radius);
 
     QRadialGradient fill(focus, bubble.width() * 0.72, focus);
-    fill.setColorAt(0.0, QColor(255, 255, 246, 186));
-    fill.setColorAt(0.32, QColor(184, 255, 232, 125));
-    fill.setColorAt(0.68, QColor(99, 186, 169, 82));
-    fill.setColorAt(1.0, QColor(255, 255, 255, 34));
+    fill.setColorAt(0.0, QColor(255, 255, 255, 170));
+    fill.setColorAt(0.35, QColor(255, 255, 255, 92));
+    fill.setColorAt(0.76, QColor(255, 255, 255, 44));
+    fill.setColorAt(1.0, QColor(255, 255, 255, 22));
     painter.fillPath(bubblePath, fill);
 
     QLinearGradient shade(bubble.topLeft(), bubble.bottomLeft());
@@ -264,7 +263,7 @@ void XylarNavBar::paintBubble(QPainter &painter, const QRectF &rect)
 
     painter.setPen(QPen(alpha(QColor(255, 255, 255), 184), 1.25));
     painter.drawPath(bubblePath);
-    painter.setPen(QPen(QColor(116, 255, 226, 90), 1.0));
+    painter.setPen(QPen(QColor(255, 255, 255, 80), 1.0));
     painter.drawRoundedRect(bubble.adjusted(3, 3, -3, -3), radius - 3, radius - 3);
 }
 
@@ -277,11 +276,21 @@ void XylarNavBar::paintItems(QPainter &painter)
         const QRectF rect = itemRect(i);
         const bool selected = i == m_currentIndex;
         const bool hovered = i == m_hoverIndex;
-        const QColor textColor = selected || hovered ? QColor(18, 34, 30) : QColor(242, 255, 250, 220);
+        const QColor textColor = selected || hovered ? QColor(5, 5, 5) : QColor(245, 245, 247, 220);
 
         const QRect iconRect(rect.center().x() - 12, rect.top() + 11, 24, 24);
+        QPixmap icon = m_items.at(i).icon.pixmap(QSize(24, 24));
+        QPixmap tinted(icon.size());
+        tinted.fill(Qt::transparent);
+        {
+            QPainter iconPainter(&tinted);
+            iconPainter.setRenderHint(QPainter::Antialiasing, true);
+            iconPainter.drawPixmap(0, 0, icon);
+            iconPainter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            iconPainter.fillRect(tinted.rect(), selected || hovered ? QColor(5, 5, 5) : QColor(245, 245, 247));
+        }
         painter.setOpacity(selected || hovered ? 0.98 : 0.76);
-        painter.drawPixmap(iconRect, m_items.at(i).icon.pixmap(QSize(24, 24)));
+        painter.drawPixmap(iconRect, tinted);
         painter.setOpacity(1.0);
 
         painter.setPen(textColor);

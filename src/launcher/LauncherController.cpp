@@ -1,7 +1,10 @@
 #include "launcher/LauncherController.h"
 
+#include <QCoreApplication>
 #include <QDateTime>
+#include <QDir>
 #include <QProcess>
+#include <QUrl>
 
 namespace xylar {
 
@@ -69,6 +72,11 @@ bool LauncherController::refreshVersions()
 
 bool LauncherController::installVanilla(const QString &versionId, const QString &instanceName)
 {
+    return installInstance(versionId, QStringLiteral("Vanilla"), instanceName);
+}
+
+bool LauncherController::installInstance(const QString &versionId, const QString &loaderName, const QString &instanceName)
+{
     MinecraftVersion version = versionById(versionId);
     if (version.id.isEmpty()) {
         if (!refreshVersions()) {
@@ -82,21 +90,49 @@ bool LauncherController::installVanilla(const QString &versionId, const QString 
     }
 
     QString error;
-    Instance instance = m_instanceStore.ensureInstance(version.id, instanceName, &error);
+    const QString resolvedName = instanceName.trimmed().isEmpty()
+        ? QStringLiteral("%1 %2").arg(loaderName, version.id)
+        : instanceName.trimmed();
+    Instance instance = m_instanceStore.ensureInstance(version.id, resolvedName, &error);
     if (!instance.isValid()) {
         emit logLine(error);
         return false;
     }
     instance.minecraftVersion = version;
+    instance.loader = loaderName;
     instance.lastLaunch = QDateTime::currentMSecsSinceEpoch();
     if (!m_instanceStore.saveInstance(instance, &error)) {
         emit logLine(error);
         return false;
     }
 
-    emit logLine(QStringLiteral("Installing %1...").arg(version.id));
-    const MinecraftInstallResult result = m_metadata.installVersion(version, instance, m_downloadManager);
+    emit logLine(QStringLiteral("Installing Minecraft %1...").arg(version.id));
+    MinecraftInstallResult result = m_metadata.installVersion(version, instance, m_downloadManager);
     emit logLine(result.message);
+    if (!result.ok) {
+        emit instancesChanged(instances());
+        return false;
+    }
+
+    if (loaderName.compare(QStringLiteral("Vanilla"), Qt::CaseInsensitive) != 0) {
+        MinecraftVersion loaderVersion = m_metadata.createLoaderVersion(version, loaderName, m_downloadManager, &error);
+        if (loaderVersion.id.isEmpty()) {
+            emit logLine(error);
+            emit instancesChanged(instances());
+            return false;
+        }
+        instance.minecraftVersion = loaderVersion;
+        instance.loader = loaderName;
+        if (!m_instanceStore.saveInstance(instance, &error)) {
+            emit logLine(error);
+            emit instancesChanged(instances());
+            return false;
+        }
+        emit logLine(QStringLiteral("Installing %1 loader for %2...").arg(loaderName, version.id));
+        result = m_metadata.installVersion(loaderVersion, instance, m_downloadManager);
+        emit logLine(result.message);
+    }
+
     emit instancesChanged(instances());
     return result.ok;
 }
@@ -128,6 +164,63 @@ bool LauncherController::launchInstance(const QString &instanceId, const QString
         emit logLine(QStringLiteral("Java process did not start. Check Java path in Settings."));
         return false;
     }
+    return true;
+}
+
+bool LauncherController::importModrinthPack(const QString &packPath)
+{
+    QString error;
+    const ModpackImportPlan plan = m_modpackManager.readMrpack(packPath, &error);
+    if (plan.minecraftVersion.isEmpty()) {
+        emit logLine(error.isEmpty() ? QStringLiteral("Invalid .mrpack file.") : error);
+        return false;
+    }
+
+    emit logLine(QStringLiteral("Importing %1 (%2, %3).").arg(plan.name, plan.minecraftVersion, plan.loaderName));
+    if (!installInstance(plan.minecraftVersion, plan.loaderName, plan.name)) {
+        return false;
+    }
+
+    Instance instance;
+    for (const Instance &candidate : instances()) {
+        if (candidate.name == plan.name) {
+            instance = candidate;
+            break;
+        }
+    }
+    if (!instance.isValid()) {
+        emit logLine(QStringLiteral("Installed instance was not found after import."));
+        return false;
+    }
+
+    QList<DownloadRequest> requests;
+    for (const ModpackFile &file : plan.files) {
+        DownloadRequest request;
+        request.url = QUrl(file.downloads.first());
+        request.targetPath = QDir(instance.gamePath).filePath(file.path);
+        request.sha1 = file.sha1;
+        request.sha512 = file.sha512;
+        request.expectedSize = file.size;
+        request.label = file.path;
+        requests.append(request);
+    }
+
+    m_downloadManager.beginBatch(requests.size());
+    for (const DownloadRequest &request : requests) {
+        if (!m_downloadManager.downloadToFile(request, &error)) {
+            emit logLine(error);
+            return false;
+        }
+        QCoreApplication::processEvents();
+    }
+
+    if (!m_modpackManager.copyOverrides(plan, instance, &error)) {
+        emit logLine(error);
+        return false;
+    }
+
+    emit logLine(QStringLiteral("Imported %1 with %2 file(s).").arg(plan.name).arg(plan.files.size()));
+    emit instancesChanged(instances());
     return true;
 }
 

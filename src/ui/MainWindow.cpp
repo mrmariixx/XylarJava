@@ -131,28 +131,23 @@ MainWindow::MainWindow(QWidget *parent)
 
     setStyleSheet(QStringLiteral(R"(
         #Shell {
-            background:
-                qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #101817,
-                    stop:0.35 #17231f,
-                    stop:0.72 #263a31,
-                    stop:1 #141311);
+            background: #050505;
             font-family: "Segoe UI";
         }
         QLabel {
-            color: #f4fff8;
+            color: #f5f5f7;
             letter-spacing: 0px;
         }
         #AppTitle {
-            font-size: 28px;
-            font-weight: 800;
+            font-size: 27px;
+            font-weight: 700;
         }
         #SectionTitle {
-            font-size: 23px;
-            font-weight: 800;
+            font-size: 22px;
+            font-weight: 700;
         }
         #MutedText {
-            color: rgba(234, 255, 244, 166);
+            color: rgba(245, 245, 247, 145);
             font-size: 13px;
         }
         #StatusBadge {
@@ -160,44 +155,34 @@ MainWindow::MainWindow(QWidget *parent)
             min-height: 34px;
             padding: 0 16px;
             border-radius: 17px;
-            color: #dcfff1;
-            background: rgba(255, 255, 255, 28);
-            border: 1px solid rgba(255, 255, 255, 54);
+            color: #f5f5f7;
+            background: rgba(255, 255, 255, 22);
+            border: 1px solid rgba(255, 255, 255, 34);
         }
         #Panel, #HeroPanel {
-            border-radius: 24px;
-            background:
-                qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 rgba(255,255,255,40),
-                    stop:0.46 rgba(168,255,226,24),
-                    stop:1 rgba(255,255,255,18));
-            border: 1px solid rgba(255, 255, 255, 58);
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 18);
+            border: 1px solid rgba(255, 255, 255, 30);
         }
         QPushButton {
             min-height: 42px;
             padding: 0 18px;
             border-radius: 21px;
-            color: #07120f;
-            font-weight: 800;
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 #f3ffe1,
-                stop:0.52 #87f6d1,
-                stop:1 #4fc7b2);
-            border: 1px solid rgba(255,255,255,150);
+            color: #050505;
+            font-weight: 700;
+            background: #f5f5f7;
+            border: 1px solid rgba(255,255,255,130);
         }
         QPushButton:hover {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 #ffffff,
-                stop:0.48 #aaffe3,
-                stop:1 #66e3ca);
+            background: #ffffff;
         }
         QLineEdit, QListWidget, QComboBox, QSpinBox, QPlainTextEdit {
-            color: #effff6;
-            background: rgba(255, 255, 255, 22);
-            border: 1px solid rgba(255, 255, 255, 48);
-            border-radius: 14px;
+            color: #f5f5f7;
+            background: rgba(255, 255, 255, 12);
+            border: 1px solid rgba(255, 255, 255, 28);
+            border-radius: 12px;
             padding: 8px;
-            selection-background-color: rgba(142, 255, 211, 120);
+            selection-background-color: rgba(255, 255, 255, 72);
         }
         QPlainTextEdit {
             font-family: "Cascadia Mono", "Consolas";
@@ -209,23 +194,23 @@ MainWindow::MainWindow(QWidget *parent)
             padding: 6px 10px;
         }
         QListWidget::item:selected, QListWidget::item:hover {
-            background: rgba(173, 255, 224, 70);
-            color: #07120f;
+            background: rgba(255, 255, 255, 42);
+            color: #f5f5f7;
         }
         QProgressBar {
             min-height: 15px;
             border-radius: 7px;
-            background: rgba(255, 255, 255, 28);
+            background: rgba(255, 255, 255, 14);
             border: 0px;
-            color: #eafff6;
+            color: #f5f5f7;
             text-align: center;
         }
         QProgressBar::chunk {
             border-radius: 7px;
-            background: #8dffcf;
+            background: #f5f5f7;
         }
         QCheckBox {
-            color: #effff6;
+            color: #f5f5f7;
             spacing: 8px;
         }
     )"));
@@ -252,14 +237,28 @@ QWidget *MainWindow::createHomePage()
     top->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 84));
     auto *headlineBlock = new QVBoxLayout;
     headlineBlock->addWidget(createSectionTitle(QStringLiteral("XylarJava")));
-    headlineBlock->addWidget(createMutedText(QStringLiteral("Install official Minecraft Java files and launch a local instance.")));
+    headlineBlock->addWidget(createMutedText(QStringLiteral("Install versions, loaders and local instances.")));
     top->addLayout(headlineBlock, 1);
     heroLayout->addLayout(top);
 
+    auto *versionRow = new QHBoxLayout;
+    m_versionFilterCombo = new QComboBox;
+    m_versionFilterCombo->addItem(QStringLiteral("Release"), QStringLiteral("release"));
+    m_versionFilterCombo->addItem(QStringLiteral("Snapshot"), QStringLiteral("snapshot"));
+    m_versionFilterCombo->addItem(QStringLiteral("Old beta"), QStringLiteral("old_beta"));
+    m_versionFilterCombo->addItem(QStringLiteral("Old alpha"), QStringLiteral("old_alpha"));
+    m_versionFilterCombo->addItem(QStringLiteral("All"), QStringLiteral("all"));
+    m_versionFilterCombo->setFixedWidth(138);
     m_versionCombo = new QComboBox;
     m_versionCombo->setMinimumHeight(42);
     m_versionCombo->addItem(QStringLiteral("Refresh versions to choose Minecraft"), QString());
-    heroLayout->addWidget(m_versionCombo);
+    versionRow->addWidget(m_versionFilterCombo);
+    versionRow->addWidget(m_versionCombo, 1);
+    heroLayout->addLayout(versionRow);
+
+    m_loaderCombo = new QComboBox;
+    m_loaderCombo->addItems({QStringLiteral("Vanilla"), QStringLiteral("Fabric"), QStringLiteral("Quilt")});
+    heroLayout->addWidget(m_loaderCombo);
 
     m_instanceNameEdit = new QLineEdit;
     m_instanceNameEdit->setPlaceholderText(QStringLiteral("Instance name"));
@@ -304,7 +303,10 @@ QWidget *MainWindow::createHomePage()
         const QString instanceName = m_instanceNameEdit->text().trimmed().isEmpty()
             ? QStringLiteral("Minecraft %1").arg(versionId)
             : m_instanceNameEdit->text().trimmed();
-        m_controller.installVanilla(versionId, instanceName);
+        m_controller.installInstance(versionId, selectedLoader(), instanceName);
+    });
+    connect(m_versionFilterCombo, &QComboBox::currentIndexChanged, this, [this]() {
+        refreshVersionList();
     });
     connect(launch, &QPushButton::clicked, this, [this]() {
         const QString id = selectedInstanceId();
@@ -342,13 +344,22 @@ QWidget *MainWindow::createModpacksPage()
     panelLayout->setContentsMargins(24, 22, 24, 22);
     panelLayout->setSpacing(12);
     panelLayout->addWidget(createSectionTitle(QStringLiteral("Modpacks")));
-    panelLayout->addWidget(createMutedText(QStringLiteral("Use the selected instance mods folder or import mod jars.")));
+    panelLayout->addWidget(createMutedText(QStringLiteral("Import Modrinth packs or manage the selected instance mods.")));
 
+    auto *importPack = createActionButton(QStringLiteral("Import .mrpack"), QStringLiteral(":/icons/import.svg"));
     auto *openMods = createActionButton(QStringLiteral("Open mods folder"), QStringLiteral(":/icons/folder-open.svg"));
-    auto *importMods = createActionButton(QStringLiteral("Import mod jars"), QStringLiteral(":/icons/import.svg"));
+    auto *importMods = createActionButton(QStringLiteral("Import jar mods"), QStringLiteral(":/icons/download.svg"));
+    panelLayout->addWidget(importPack);
     panelLayout->addWidget(openMods);
     panelLayout->addWidget(importMods);
     panelLayout->addStretch(1);
+
+    connect(importPack, &QPushButton::clicked, this, [this]() {
+        const QString file = QFileDialog::getOpenFileName(this, QStringLiteral("Import Modrinth pack"), QString(), QStringLiteral("Modrinth packs (*.mrpack);;All files (*.*)"));
+        if (!file.isEmpty()) {
+            m_controller.importModrinthPack(file);
+        }
+    });
 
     connect(openMods, &QPushButton::clicked, this, [this]() {
         const QString id = selectedInstanceId();
@@ -493,8 +504,9 @@ void MainWindow::refreshVersionList()
 {
     m_versionCombo->clear();
     const QList<MinecraftVersion> versions = m_controller.cachedVersions();
+    const QString filter = m_versionFilterCombo ? m_versionFilterCombo->currentData().toString() : QStringLiteral("release");
     for (const MinecraftVersion &version : versions) {
-        if (version.type == QStringLiteral("release")) {
+        if (filter == QStringLiteral("all") || version.type == filter) {
             m_versionCombo->addItem(displayVersion(version), version.id);
         }
     }
@@ -512,7 +524,7 @@ void MainWindow::refreshInstanceList()
     m_instanceList->clear();
     const QList<Instance> items = m_controller.instances();
     for (const Instance &instance : items) {
-        auto *item = new QListWidgetItem(QStringLiteral("%1  -  %2").arg(instance.name, instance.minecraftVersion.id));
+        auto *item = new QListWidgetItem(QStringLiteral("%1  -  %2  -  %3").arg(instance.name, instance.loader, instance.minecraftVersion.id));
         item->setData(Qt::UserRole, instance.id);
         m_instanceList->addItem(item);
     }
@@ -540,6 +552,11 @@ QString MainWindow::selectedInstanceId() const
         return {};
     }
     return m_instanceList->currentItem()->data(Qt::UserRole).toString();
+}
+
+QString MainWindow::selectedLoader() const
+{
+    return m_loaderCombo ? m_loaderCombo->currentText() : QStringLiteral("Vanilla");
 }
 
 QString MainWindow::effectiveJavaPath() const

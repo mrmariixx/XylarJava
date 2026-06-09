@@ -2,7 +2,7 @@
 
 XylarJava is a modern Minecraft Java launcher built with C++17, CMake and Qt Widgets.
 
-The launcher includes Mojang metadata fetching, local instances, library and asset downloads, native extraction, and offline launch command generation. The app icon is generated from the provided Minecraft WebP image and embedded as PNG/ICO resources.
+The launcher includes Mojang metadata fetching, filtered version selection, local instances, Fabric and Quilt loader profiles, library and asset downloads, native extraction, Modrinth `.mrpack` import, and offline launch command generation. The app icon is generated from the provided Minecraft WebP image and embedded as PNG/ICO resources.
 
 ## Project Layout
 
@@ -50,4 +50,5 @@ The executable is created as `build/XylarJava.exe` on Windows.
 
 - Navbar icons are SVG assets from Lucide Icons.
 - `python-tools/version_indexer.py` can generate a compact Minecraft version index.
-- The core launcher modules are intentionally small now, ready for Microsoft auth, Mojang metadata, Prism-style instances, modpack import/export and threaded downloads.
+- Fabric and Quilt are installed through their official metadata APIs.
+- Modrinth `.mrpack` files are unpacked from `modrinth.index.json`, with declared files downloaded into the target instance.

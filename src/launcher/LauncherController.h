@@ -12,6 +12,7 @@
 #include "launcher/LaunchPlan.h"
 #include "minecraft/MinecraftMetadata.h"
 #include "minecraft/MinecraftVersion.h"
+#include "modpacks/ModpackManager.h"
 
 namespace xylar {
 
@@ -30,7 +31,9 @@ public:
     [[nodiscard]] QString javaPath() const;
 
     bool refreshVersions();
+    bool installInstance(const QString &versionId, const QString &loaderName, const QString &instanceName);
     bool installVanilla(const QString &versionId, const QString &instanceName);
+    bool importModrinthPack(const QString &packPath);
     bool launchInstance(const QString &instanceId, const QString &playerName, int minMemoryMb, int maxMemoryMb, const QString &customJavaPath);
     [[nodiscard]] LaunchPlan lastLaunchPlan() const;
 
@@ -48,6 +51,7 @@ private:
     DownloadManager m_downloadManager;
     InstanceStore m_instanceStore;
     MinecraftMetadata m_metadata;
+    ModpackManager m_modpackManager;
     QList<MinecraftVersion> m_versions;
     MinecraftVersion m_latestVersion;
     LaunchPlan m_lastLaunchPlan;

@@ -42,12 +42,15 @@ private:
     void appendLog(const QString &line);
     [[nodiscard]] QString selectedVersionId() const;
     [[nodiscard]] QString selectedInstanceId() const;
+    [[nodiscard]] QString selectedLoader() const;
     [[nodiscard]] QString effectiveJavaPath() const;
 
     LauncherController m_controller;
     QStackedWidget *m_pages = nullptr;
     XylarNavBar *m_navBar = nullptr;
     QComboBox *m_versionCombo = nullptr;
+    QComboBox *m_versionFilterCombo = nullptr;
+    QComboBox *m_loaderCombo = nullptr;
     QListWidget *m_instanceList = nullptr;
     QLineEdit *m_playerNameEdit = nullptr;
     QLineEdit *m_instanceNameEdit = nullptr;

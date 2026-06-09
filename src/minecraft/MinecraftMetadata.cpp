@@ -7,6 +7,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
 #include <QProcess>
 #include <QRegularExpression>
 #include <QStandardPaths>
@@ -20,6 +21,10 @@ namespace xylar {
 namespace {
 
 const QUrl kManifestUrl(QStringLiteral("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"));
+const QString kFabricMeta = QStringLiteral("https://meta.fabricmc.net/v2/versions/loader/%1");
+const QString kFabricProfile = QStringLiteral("https://meta.fabricmc.net/v2/versions/loader/%1/%2/profile/json");
+const QString kQuiltMeta = QStringLiteral("https://meta.quiltmc.org/v3/versions/loader/%1");
+const QString kQuiltProfile = QStringLiteral("https://meta.quiltmc.org/v3/versions/loader/%1/%2/profile/json");
 
 QString osName()
 {
@@ -96,6 +101,74 @@ QList<MinecraftVersion> MinecraftMetadata::refreshVersions(DownloadManager &down
     return result;
 }
 
+MinecraftVersion MinecraftMetadata::createLoaderVersion(const MinecraftVersion &minecraftVersion, const QString &loaderName, DownloadManager &downloads, QString *errorMessage)
+{
+    const QString normalized = loaderName.trimmed().toLower();
+    if (normalized == QStringLiteral("vanilla") || normalized.isEmpty()) {
+        return minecraftVersion;
+    }
+
+    const bool fabric = normalized == QStringLiteral("fabric");
+    const bool quilt = normalized == QStringLiteral("quilt");
+    if (!fabric && !quilt) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("%1 loader install is not wired yet.").arg(loaderName);
+        }
+        return {};
+    }
+
+    const QString listPath = Paths::metadataDir().filePath(QStringLiteral("%1-%2-loaders.json").arg(normalized, minecraftVersion.id));
+    DownloadRequest listRequest;
+    listRequest.url = QUrl((fabric ? kFabricMeta : kQuiltMeta).arg(minecraftVersion.id));
+    listRequest.targetPath = listPath;
+    listRequest.label = QStringLiteral("%1 loader list for %2").arg(loaderName, minecraftVersion.id);
+    listRequest.force = true;
+
+    QString error;
+    downloads.beginBatch(1);
+    if (!downloads.downloadToFile(listRequest, &error)) {
+        if (errorMessage) {
+            *errorMessage = error;
+        }
+        return {};
+    }
+
+    QFile file(listPath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("Cannot read loader metadata for %1.").arg(loaderName);
+        }
+        return {};
+    }
+
+    const QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+    const QJsonArray loaders = document.array();
+    QString loaderVersion;
+    for (const QJsonValue &value : loaders) {
+        const QJsonObject loader = value.toObject().value(QStringLiteral("loader")).toObject();
+        if (loader.value(QStringLiteral("stable")).toBool(true)) {
+            loaderVersion = loader.value(QStringLiteral("version")).toString();
+            break;
+        }
+    }
+    if (loaderVersion.isEmpty() && !loaders.isEmpty()) {
+        loaderVersion = loaders.first().toObject().value(QStringLiteral("loader")).toObject().value(QStringLiteral("version")).toString();
+    }
+    if (loaderVersion.isEmpty()) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("No %1 loader found for %2.").arg(loaderName, minecraftVersion.id);
+        }
+        return {};
+    }
+
+    MinecraftVersion loaderVersionInfo;
+    loaderVersionInfo.id = QStringLiteral("%1-%2-%3").arg(normalized, loaderVersion, minecraftVersion.id);
+    loaderVersionInfo.type = QStringLiteral("loader");
+    loaderVersionInfo.url = (fabric ? kFabricProfile : kQuiltProfile).arg(minecraftVersion.id, loaderVersion);
+    loaderVersionInfo.releaseTime = minecraftVersion.releaseTime;
+    return loaderVersionInfo;
+}
+
 MinecraftInstallResult MinecraftMetadata::installVersion(const MinecraftVersion &version, const Instance &instance, DownloadManager &downloads)
 {
     MinecraftInstallResult result;
@@ -117,7 +190,7 @@ MinecraftInstallResult MinecraftMetadata::installVersion(const MinecraftVersion 
         return result;
     }
 
-    const QJsonObject root = readObject(versionJsonPath(version.id), &error);
+    const QJsonObject root = resolvedVersionJson(version.id, &error);
     if (root.isEmpty()) {
         result.message = error;
         return result;
@@ -126,7 +199,8 @@ MinecraftInstallResult MinecraftMetadata::installVersion(const MinecraftVersion 
     const QJsonObject downloadsObject = root.value(QStringLiteral("downloads")).toObject();
     const QJsonObject clientDownload = downloadsObject.value(QStringLiteral("client")).toObject();
     if (!clientDownload.isEmpty()) {
-        requests.append(requestFromJson(clientDownload, clientJarPath(version.id), QStringLiteral("Client jar %1").arg(version.id)));
+        const QString clientId = clientVersionId(root);
+        requests.append(requestFromJson(clientDownload, clientJarPath(clientId), QStringLiteral("Client jar %1").arg(clientId)));
     }
 
     QStringList classpath;
@@ -161,7 +235,7 @@ MinecraftInstallResult MinecraftMetadata::installVersion(const MinecraftVersion 
 LaunchPlan MinecraftMetadata::buildLaunchPlan(const Instance &instance, const QString &playerName, int minMemoryMb, int maxMemoryMb, const QString &javaPath, QString *errorMessage) const
 {
     LaunchPlan plan;
-    const QJsonObject root = versionJson(instance.minecraftVersion.id, errorMessage);
+    const QJsonObject root = resolvedVersionJson(instance.minecraftVersion.id, errorMessage);
     if (root.isEmpty()) {
         return plan;
     }
@@ -170,7 +244,7 @@ LaunchPlan MinecraftMetadata::buildLaunchPlan(const Instance &instance, const QS
     QStringList nativeJars;
     QList<DownloadRequest> ignored;
     collectLibraryDownloads(root, ignored, &classpath, &nativeJars);
-    classpath.append(clientJarPath(instance.minecraftVersion.id));
+    classpath.append(clientJarPath(clientVersionId(root)));
 
     const QJsonObject assetIndex = root.value(QStringLiteral("assetIndex")).toObject();
     const QString assetIndexId = assetIndex.value(QStringLiteral("id")).toString(root.value(QStringLiteral("assets")).toString());
@@ -285,6 +359,59 @@ QJsonObject MinecraftMetadata::readObject(const QString &path, QString *errorMes
 QJsonObject MinecraftMetadata::versionJson(const QString &versionId, QString *errorMessage) const
 {
     return readObject(versionJsonPath(versionId), errorMessage);
+}
+
+QJsonObject MinecraftMetadata::resolvedVersionJson(const QString &versionId, QString *errorMessage) const
+{
+    const QJsonObject child = versionJson(versionId, errorMessage);
+    if (child.isEmpty()) {
+        return {};
+    }
+
+    const QString parentId = child.value(QStringLiteral("inheritsFrom")).toString();
+    if (parentId.isEmpty()) {
+        return child;
+    }
+
+    const QJsonObject parent = resolvedVersionJson(parentId, errorMessage);
+    if (parent.isEmpty()) {
+        return child;
+    }
+    return mergeInheritedVersion(parent, child);
+}
+
+QJsonObject MinecraftMetadata::mergeInheritedVersion(const QJsonObject &parent, const QJsonObject &child) const
+{
+    QJsonObject merged = parent;
+    for (auto it = child.constBegin(); it != child.constEnd(); ++it) {
+        if (it.key() == QStringLiteral("libraries")) {
+            QJsonArray libraries = parent.value(QStringLiteral("libraries")).toArray();
+            for (const QJsonValue &value : it.value().toArray()) {
+                libraries.append(value);
+            }
+            merged.insert(it.key(), libraries);
+        } else if (it.key() == QStringLiteral("arguments")) {
+            QJsonObject arguments = parent.value(QStringLiteral("arguments")).toObject();
+            const QJsonObject childArguments = it.value().toObject();
+            for (const QString &key : childArguments.keys()) {
+                QJsonArray list = arguments.value(key).toArray();
+                for (const QJsonValue &value : childArguments.value(key).toArray()) {
+                    list.append(value);
+                }
+                arguments.insert(key, list);
+            }
+            merged.insert(it.key(), arguments);
+        } else {
+            merged.insert(it.key(), it.value());
+        }
+    }
+    return merged;
+}
+
+QString MinecraftMetadata::clientVersionId(const QJsonObject &root) const
+{
+    const QString parent = root.value(QStringLiteral("inheritsFrom")).toString();
+    return parent.isEmpty() ? root.value(QStringLiteral("id")).toString() : parent;
 }
 
 QString MinecraftMetadata::offlineUuid(const QString &playerName) const
@@ -438,6 +565,21 @@ void MinecraftMetadata::collectLibraryDownloads(const QJsonObject &root, QList<D
             const QString path = artifact.value(QStringLiteral("path")).toString(mavenPath(name));
             const QString target = Paths::librariesDir().filePath(path);
             requests.append(requestFromJson(artifact, target, QStringLiteral("Library %1").arg(name)));
+            if (classpath) {
+                classpath->append(target);
+            }
+        } else if (!library.value(QStringLiteral("url")).toString().isEmpty()) {
+            const QString path = mavenPath(name);
+            const QString baseUrl = library.value(QStringLiteral("url")).toString();
+            const QString target = Paths::librariesDir().filePath(path);
+            DownloadRequest request;
+            request.url = QUrl(baseUrl.endsWith(QStringLiteral("/")) ? baseUrl + path : baseUrl + QStringLiteral("/") + path);
+            request.targetPath = target;
+            request.sha1 = library.value(QStringLiteral("sha1")).toString();
+            request.sha512 = library.value(QStringLiteral("sha512")).toString();
+            request.expectedSize = static_cast<qint64>(library.value(QStringLiteral("size")).toDouble(-1));
+            request.label = QStringLiteral("Library %1").arg(name);
+            requests.append(request);
             if (classpath) {
                 classpath->append(target);
             }

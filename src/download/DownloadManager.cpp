@@ -98,6 +98,15 @@ bool DownloadManager::downloadToFile(const DownloadRequest &request, QString *er
             return false;
         }
     }
+    if (!request.sha512.isEmpty()) {
+        const QString hash = QString::fromLatin1(QCryptographicHash::hash(payload, QCryptographicHash::Sha512).toHex());
+        if (hash.compare(request.sha512, Qt::CaseInsensitive) != 0) {
+            if (errorMessage) {
+                *errorMessage = QStringLiteral("%1: SHA512 mismatch").arg(request.label);
+            }
+            return false;
+        }
+    }
 
     QSaveFile file(request.targetPath);
     if (!file.open(QIODevice::WriteOnly)) {
@@ -139,6 +148,9 @@ bool DownloadManager::isFileValid(const DownloadRequest &request) const
     if (!request.sha1.isEmpty() && sha1ForFile(request.targetPath).compare(request.sha1, Qt::CaseInsensitive) != 0) {
         return false;
     }
+    if (!request.sha512.isEmpty() && sha512ForFile(request.targetPath).compare(request.sha512, Qt::CaseInsensitive) != 0) {
+        return false;
+    }
 
     return true;
 }
@@ -151,6 +163,20 @@ QString DownloadManager::sha1ForFile(const QString &path) const
     }
 
     QCryptographicHash hash(QCryptographicHash::Sha1);
+    while (!file.atEnd()) {
+        hash.addData(file.read(1024 * 1024));
+    }
+    return QString::fromLatin1(hash.result().toHex());
+}
+
+QString DownloadManager::sha512ForFile(const QString &path) const
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+
+    QCryptographicHash hash(QCryptographicHash::Sha512);
     while (!file.atEnd()) {
         hash.addData(file.read(1024 * 1024));
     }

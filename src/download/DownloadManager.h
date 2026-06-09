@@ -15,6 +15,7 @@ struct DownloadRequest
     QUrl url;
     QString targetPath;
     QString sha1;
+    QString sha512;
     qint64 expectedSize = -1;
     QString label;
     bool force = false;
@@ -41,6 +42,7 @@ signals:
 private:
     [[nodiscard]] bool isFileValid(const DownloadRequest &request) const;
     [[nodiscard]] QString sha1ForFile(const QString &path) const;
+    [[nodiscard]] QString sha512ForFile(const QString &path) const;
 
     QNetworkAccessManager m_network;
     QList<QUrl> m_queue;

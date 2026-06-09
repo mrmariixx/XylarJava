@@ -21,6 +21,7 @@ public:
     explicit MinecraftMetadata(QObject *parent = nullptr);
 
     [[nodiscard]] QList<MinecraftVersion> refreshVersions(DownloadManager &downloads, QString *errorMessage = nullptr);
+    [[nodiscard]] MinecraftVersion createLoaderVersion(const MinecraftVersion &minecraftVersion, const QString &loaderName, DownloadManager &downloads, QString *errorMessage = nullptr);
     [[nodiscard]] MinecraftInstallResult installVersion(const MinecraftVersion &version, const Instance &instance, DownloadManager &downloads);
     [[nodiscard]] LaunchPlan buildLaunchPlan(const Instance &instance, const QString &playerName, int minMemoryMb, int maxMemoryMb, const QString &javaPath, QString *errorMessage = nullptr) const;
 
@@ -35,6 +36,9 @@ private:
     [[nodiscard]] QString assetIndexPath(const QString &assetIndexId) const;
     [[nodiscard]] QJsonObject readObject(const QString &path, QString *errorMessage = nullptr) const;
     [[nodiscard]] QJsonObject versionJson(const QString &versionId, QString *errorMessage = nullptr) const;
+    [[nodiscard]] QJsonObject resolvedVersionJson(const QString &versionId, QString *errorMessage = nullptr) const;
+    [[nodiscard]] QJsonObject mergeInheritedVersion(const QJsonObject &parent, const QJsonObject &child) const;
+    [[nodiscard]] QString clientVersionId(const QJsonObject &root) const;
     [[nodiscard]] QString offlineUuid(const QString &playerName) const;
     [[nodiscard]] bool rulesAllow(const QJsonArray &rules) const;
     [[nodiscard]] bool ruleMatches(const QJsonObject &rule) const;
