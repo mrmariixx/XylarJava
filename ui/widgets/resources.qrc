@@ -2,6 +2,9 @@
     <qresource prefix="/icons">
         <file alias="app-icon.png">assets/xylarjava.png</file>
         <file alias="home.svg">assets/house.svg</file>
+        <file alias="library.svg">assets/library.svg</file>
+        <file alias="modpacks.svg">assets/modpacks.svg</file>
+        <file alias="preferences.svg">assets/preferences.svg</file>
         <file alias="package.svg">assets/package.svg</file>
         <file alias="settings.svg">assets/settings.svg</file>
         <file alias="play.svg">assets/play.svg</file>

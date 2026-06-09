@@ -71,30 +71,7 @@ protected:
 
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.fillRect(rect(), QColor(2, 2, 2));
-
-        QLinearGradient surface(0, 0, 0, height());
-        surface.setColorAt(0.0, QColor(24, 24, 26));
-        surface.setColorAt(0.28, QColor(8, 8, 9));
-        surface.setColorAt(1.0, QColor(2, 2, 2));
-        painter.fillRect(rect(), surface);
-
-        QLinearGradient sweep(0, 0, width(), height());
-        sweep.setColorAt(0.0, QColor(255, 255, 255, 18));
-        sweep.setColorAt(0.34, QColor(255, 255, 255, 4));
-        sweep.setColorAt(0.72, QColor(0, 0, 0, 0));
-        sweep.setColorAt(1.0, QColor(255, 255, 255, 10));
-        painter.fillRect(rect(), sweep);
-
-        painter.setPen(QPen(QColor(255, 255, 255, 8), 1));
-        for (int y = 118; y < height(); y += 68) {
-            painter.drawLine(36, y, width() - 36, y);
-        }
-
-        QLinearGradient bottomFade(0, height() - 210, 0, height());
-        bottomFade.setColorAt(0.0, QColor(0, 0, 0, 0));
-        bottomFade.setColorAt(1.0, QColor(0, 0, 0, 155));
-        painter.fillRect(QRect(0, height() - 210, width(), 210), bottomFade);
+        painter.fillRect(rect(), QColor(18, 18, 20));
     }
 };
 
@@ -124,41 +101,44 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto *sideBar = new QFrame;
     sideBar->setObjectName(QStringLiteral("SideBar"));
-    sideBar->setFixedWidth(86);
+    sideBar->setFixedWidth(236);
     auto *sideLayout = new QVBoxLayout(sideBar);
-    sideLayout->setContentsMargins(15, 18, 15, 18);
-    sideLayout->setSpacing(12);
+    sideLayout->setContentsMargins(18, 20, 18, 18);
+    sideLayout->setSpacing(10);
 
-    auto *logoSlot = new QFrame;
-    logoSlot->setObjectName(QStringLiteral("LogoSlot"));
-    logoSlot->setFixedSize(56, 56);
-    auto *logoLayout = new QVBoxLayout(logoSlot);
-    logoLayout->setContentsMargins(8, 8, 8, 8);
-    logoLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 40), 0, Qt::AlignCenter);
-    sideLayout->addWidget(logoSlot, 0, Qt::AlignHCenter);
-    sideLayout->addSpacing(16);
+    auto *brandRow = new QFrame;
+    brandRow->setObjectName(QStringLiteral("BrandRow"));
+    auto *brandLayout = new QHBoxLayout(brandRow);
+    brandLayout->setContentsMargins(0, 0, 0, 0);
+    brandLayout->setSpacing(12);
+    brandLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 38));
+    auto *brandName = new QLabel(QStringLiteral("XylarJava"));
+    brandName->setObjectName(QStringLiteral("BrandName"));
+    brandLayout->addWidget(brandName, 1);
+    sideLayout->addWidget(brandRow);
+    sideLayout->addSpacing(18);
 
     auto *navGroup = new QButtonGroup(this);
     navGroup->setExclusive(true);
-    auto makeNavButton = [navGroup](const QString &icon, const QString &tooltip, int index) {
-        auto *button = new QPushButton(QIcon(icon), QString());
+    auto makeNavButton = [navGroup](const QString &icon, const QString &label, int index) {
+        auto *button = new QPushButton(QIcon(icon), label);
         button->setObjectName(QStringLiteral("SideNavButton"));
         button->setCheckable(true);
-        button->setToolTip(tooltip);
-        button->setFixedSize(56, 52);
-        button->setIconSize(QSize(23, 23));
+        button->setToolTip(label);
+        button->setFixedHeight(44);
+        button->setIconSize(QSize(21, 21));
         button->setCursor(Qt::PointingHandCursor);
         navGroup->addButton(button, index);
         return button;
     };
 
-    auto *homeNav = makeNavButton(QStringLiteral(":/icons/home.svg"), QStringLiteral("Home"), 0);
-    auto *modpacksNav = makeNavButton(QStringLiteral(":/icons/package.svg"), QStringLiteral("Modpacks"), 1);
-    auto *settingsNav = makeNavButton(QStringLiteral(":/icons/settings.svg"), QStringLiteral("Settings"), 2);
+    auto *homeNav = makeNavButton(QStringLiteral(":/icons/library.svg"), QStringLiteral("Library"), 0);
+    auto *modpacksNav = makeNavButton(QStringLiteral(":/icons/modpacks.svg"), QStringLiteral("Modpacks"), 1);
+    auto *settingsNav = makeNavButton(QStringLiteral(":/icons/preferences.svg"), QStringLiteral("Settings"), 2);
     homeNav->setChecked(true);
-    sideLayout->addWidget(homeNav, 0, Qt::AlignHCenter);
-    sideLayout->addWidget(modpacksNav, 0, Qt::AlignHCenter);
-    sideLayout->addWidget(settingsNav, 0, Qt::AlignHCenter);
+    sideLayout->addWidget(homeNav);
+    sideLayout->addWidget(modpacksNav);
+    sideLayout->addWidget(settingsNav);
     sideLayout->addStretch(1);
 
     connect(navGroup, &QButtonGroup::idClicked, this, [this](int index) {
@@ -205,8 +185,8 @@ MainWindow::MainWindow(QWidget *parent)
             font-family: "Segoe UI";
         }
         #SideBar {
-            background: #111113;
-            border-right: 1px solid rgba(255,255,255,18);
+            background: #0f0f10;
+            border-right: 1px solid #242427;
         }
         #Content {
             background: transparent;
@@ -221,6 +201,11 @@ MainWindow::MainWindow(QWidget *parent)
         #AppTitle {
             font-size: 26px;
             font-weight: 700;
+        }
+        #BrandName {
+            color: #f5f5f7;
+            font-size: 17px;
+            font-weight: 750;
         }
         #SectionTitle {
             font-size: 20px;
@@ -251,37 +236,34 @@ MainWindow::MainWindow(QWidget *parent)
             min-height: 34px;
             padding: 0 16px;
             border-radius: 6px;
-            color: #f5f5f7;
-            background: rgba(255, 255, 255, 9);
-            border: 1px solid rgba(255, 255, 255, 20);
+            color: #cfcfd4;
+            background: #1a1a1d;
+            border: 1px solid #2a2a2f;
         }
         #Panel, #HeroPanel {
             border-radius: 8px;
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(255,255,255,18),
-                stop:0.36 rgba(255,255,255,10),
-                stop:1 rgba(255,255,255,6));
-            border: 1px solid rgba(255, 255, 255, 20);
+            background: #18181b;
+            border: 1px solid #2a2a2f;
         }
         #InsetPanel {
             border-radius: 6px;
-            background: rgba(255, 255, 255, 7);
-            border: 1px solid rgba(255, 255, 255, 16);
+            background: #202024;
+            border: 1px solid #303036;
         }
         #MetricPill {
             min-height: 58px;
             border-radius: 6px;
-            background: rgba(255, 255, 255, 7);
-            border: 1px solid rgba(255, 255, 255, 16);
+            background: #202024;
+            border: 1px solid #303036;
         }
         #MetricPill:hover, #InsetPanel:hover {
-            background: rgba(255, 255, 255, 11);
-            border: 1px solid rgba(255, 255, 255, 26);
+            background: #242429;
+            border: 1px solid #3a3a41;
         }
         #InstanceRow {
             border-radius: 6px;
-            background: rgba(255, 255, 255, 6);
-            border: 1px solid rgba(255, 255, 255, 12);
+            background: #202024;
+            border: 1px solid #303036;
         }
         #InstanceTitle {
             color: #f5f5f7;
@@ -294,8 +276,8 @@ MainWindow::MainWindow(QWidget *parent)
         }
         #TinyIconBadge, #LogoSlot {
             border-radius: 8px;
-            background: rgba(255, 255, 255, 8);
-            border: 1px solid rgba(255, 255, 255, 16);
+            background: #242429;
+            border: 1px solid #383840;
         }
         QPushButton {
             min-height: 42px;
@@ -308,28 +290,33 @@ MainWindow::MainWindow(QWidget *parent)
         }
         QPushButton#SideNavButton {
             min-height: 0px;
-            padding: 0px;
+            padding: 0 14px;
             border-radius: 8px;
-            color: #f5f5f7;
+            color: #c7c7cc;
             background: transparent;
             border: 1px solid transparent;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: left;
         }
         QPushButton#SideNavButton:hover {
-            background: rgba(255, 255, 255, 9);
-            border: 1px solid rgba(255,255,255,16);
+            color: #ffffff;
+            background: #1d1d21;
+            border: 1px solid #2b2b31;
         }
         QPushButton#SideNavButton:checked {
-            background: rgba(255, 255, 255, 16);
-            border: 1px solid rgba(255,255,255,26);
+            color: #ffffff;
+            background: #2a2a30;
+            border: 1px solid #3a3a43;
         }
         QPushButton#SecondaryButton {
             color: #f5f5f7;
-            background: rgba(255, 255, 255, 9);
-            border: 1px solid rgba(255,255,255,20);
+            background: #222226;
+            border: 1px solid #36363d;
         }
         QPushButton#SecondaryButton:hover {
-            background: rgba(255, 255, 255, 14);
-            border: 1px solid rgba(255,255,255,34);
+            background: #2b2b31;
+            border: 1px solid #464650;
         }
         QPushButton#PrimaryButton {
             color: #050505;
@@ -344,15 +331,15 @@ MainWindow::MainWindow(QWidget *parent)
         }
         QLineEdit, QListWidget, QComboBox, QSpinBox, QPlainTextEdit {
             color: #f5f5f7;
-            background: rgba(255, 255, 255, 9);
-            border: 1px solid rgba(255, 255, 255, 26);
+            background: #202024;
+            border: 1px solid #303036;
             border-radius: 12px;
             padding: 9px;
             selection-background-color: rgba(255, 255, 255, 72);
         }
         QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QPlainTextEdit:focus {
-            background: rgba(255, 255, 255, 13);
-            border: 1px solid rgba(255, 255, 255, 62);
+            background: #242429;
+            border: 1px solid #575762;
         }
         QComboBox, QLineEdit, QSpinBox {
             min-height: 28px;
