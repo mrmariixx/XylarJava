@@ -48,6 +48,7 @@ private:
     QComboBox *m_versionCombo = nullptr;
     QComboBox *m_versionFilterCombo = nullptr;
     QComboBox *m_loaderCombo = nullptr;
+    QLineEdit *m_instanceSearchEdit = nullptr;
     QListWidget *m_instanceList = nullptr;
     QLineEdit *m_playerNameEdit = nullptr;
     QLineEdit *m_instanceNameEdit = nullptr;

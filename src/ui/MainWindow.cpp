@@ -10,7 +10,6 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFrame>
-#include <QGraphicsDropShadowEffect>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QIcon>
@@ -19,13 +18,11 @@
 #include <QListWidget>
 #include <QMessageBox>
 #include <QPainter>
-#include <QPainterPath>
 #include <QPlainTextEdit>
 #include <QPixmap>
 #include <QPair>
 #include <QProgressBar>
 #include <QPushButton>
-#include <QSlider>
 #include <QSpinBox>
 #include <QTimer>
 #include <QUrl>
@@ -36,15 +33,6 @@ namespace {
 
 constexpr int kWindowMinWidth = 1040;
 constexpr int kWindowMinHeight = 700;
-
-void addDropShadow(QWidget *widget, const QColor &color, int blur, const QPointF &offset)
-{
-    auto *shadow = new QGraphicsDropShadowEffect(widget);
-    shadow->setBlurRadius(blur);
-    shadow->setOffset(offset);
-    shadow->setColor(color);
-    widget->setGraphicsEffect(shadow);
-}
 
 QLabel *makeIconLabel(const QString &resource, int size)
 {
@@ -118,6 +106,12 @@ MainWindow::MainWindow(QWidget *parent)
     sideLayout->addWidget(brandRow);
     sideLayout->addSpacing(18);
 
+    m_instanceSearchEdit = new QLineEdit;
+    m_instanceSearchEdit->setObjectName(QStringLiteral("SidebarSearch"));
+    m_instanceSearchEdit->setPlaceholderText(QStringLiteral("Search"));
+    sideLayout->addWidget(m_instanceSearchEdit);
+    sideLayout->addSpacing(12);
+
     auto *navGroup = new QButtonGroup(this);
     navGroup->setExclusive(true);
     auto makeNavButton = [navGroup](const QString &icon, const QString &label, int index) {
@@ -141,8 +135,22 @@ MainWindow::MainWindow(QWidget *parent)
     sideLayout->addWidget(settingsNav);
     sideLayout->addStretch(1);
 
+    auto *accountChip = new QFrame;
+    accountChip->setObjectName(QStringLiteral("AccountChip"));
+    auto *accountLayout = new QHBoxLayout(accountChip);
+    accountLayout->setContentsMargins(10, 8, 10, 8);
+    accountLayout->setSpacing(8);
+    accountLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/user.svg"), 20));
+    auto *accountLabel = new QLabel(QStringLiteral("Offline"));
+    accountLabel->setObjectName(QStringLiteral("AccountLabel"));
+    accountLayout->addWidget(accountLabel, 1);
+    sideLayout->addWidget(accountChip);
+
     connect(navGroup, &QButtonGroup::idClicked, this, [this](int index) {
         m_pages->setCurrentIndex(index);
+    });
+    connect(m_instanceSearchEdit, &QLineEdit::textChanged, this, [this]() {
+        refreshInstanceList();
     });
 
     auto *content = new QWidget;
@@ -198,23 +206,41 @@ MainWindow::MainWindow(QWidget *parent)
             color: #f5f5f7;
             letter-spacing: 0px;
         }
-        #AppTitle {
-            font-size: 26px;
-            font-weight: 700;
-        }
         #BrandName {
             color: #f5f5f7;
             font-size: 17px;
             font-weight: 750;
         }
+        #AccountChip {
+            border-radius: 8px;
+            background: #18181b;
+            border: 1px solid #2a2a2f;
+        }
+        #AccountLabel {
+            color: #d8d8dc;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        #SidebarSearch {
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 8px;
+            color: #eeeeef;
+            background: #202024;
+            border: 1px solid #303036;
+        }
+        #SidebarSearch:focus {
+            background: #242429;
+            border: 1px solid #4a4a52;
+        }
+        #PageTitle {
+            color: #f5f5f7;
+            font-size: 32px;
+            font-weight: 750;
+        }
         #SectionTitle {
             font-size: 20px;
             font-weight: 700;
-        }
-        #HeroTitle {
-            color: #f5f5f7;
-            font-size: 38px;
-            font-weight: 750;
         }
         #DropTitle {
             color: #f5f5f7;
@@ -265,6 +291,20 @@ MainWindow::MainWindow(QWidget *parent)
             background: #202024;
             border: 1px solid #303036;
         }
+        #GameTile {
+            border-radius: 8px;
+            background: #202024;
+            border: 1px solid #303036;
+        }
+        #GameTile:hover {
+            background: #25252a;
+            border: 1px solid #41414a;
+        }
+        #CoverTile {
+            border-radius: 8px;
+            background: #2a2a30;
+            border: 1px solid #3a3a43;
+        }
         #InstanceTitle {
             color: #f5f5f7;
             font-size: 14px;
@@ -274,7 +314,7 @@ MainWindow::MainWindow(QWidget *parent)
             color: rgba(245, 245, 247, 136);
             font-size: 12px;
         }
-        #TinyIconBadge, #LogoSlot {
+        #TinyIconBadge {
             border-radius: 8px;
             background: #242429;
             border: 1px solid #383840;
@@ -439,63 +479,39 @@ MainWindow::MainWindow(QWidget *parent)
 QWidget *MainWindow::createHomePage()
 {
     auto *page = new QWidget;
-    auto *layout = new QGridLayout(page);
-    layout->setContentsMargins(0, 4, 0, 0);
-    layout->setHorizontalSpacing(18);
-    layout->setVerticalSpacing(18);
+    auto *layout = new QVBoxLayout(page);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(18);
 
-    auto *hero = createPanel(QStringLiteral("HeroPanel"));
-    addDropShadow(hero, QColor(0, 0, 0, 92), 42, QPointF(0, 20));
-    auto *heroLayout = new QVBoxLayout(hero);
-    heroLayout->setContentsMargins(32, 30, 32, 28);
-    heroLayout->setSpacing(20);
+    auto *header = new QHBoxLayout;
+    header->setContentsMargins(0, 0, 0, 0);
+    auto *titleBlock = new QVBoxLayout;
+    titleBlock->setSpacing(4);
+    auto *pageTitle = new QLabel(QStringLiteral("Library"));
+    pageTitle->setObjectName(QStringLiteral("PageTitle"));
+    titleBlock->addWidget(pageTitle);
+    titleBlock->addWidget(createMutedText(QStringLiteral("Pick a profile and play. If files are missing, I will download them.")));
+    header->addLayout(titleBlock, 1);
+    auto *refresh = createActionButton(QStringLiteral("Refresh"), QStringLiteral(":/icons/refresh-cw.svg"));
+    refresh->setObjectName(QStringLiteral("SecondaryButton"));
+    header->addWidget(refresh, 0, Qt::AlignTop);
+    layout->addLayout(header);
 
-    auto *heroTop = new QHBoxLayout;
-    heroTop->setSpacing(18);
-    auto *heroIconBadge = new QFrame;
-    heroIconBadge->setObjectName(QStringLiteral("TinyIconBadge"));
-    heroIconBadge->setFixedSize(104, 104);
-    auto *heroIconLayout = new QVBoxLayout(heroIconBadge);
-    heroIconLayout->setContentsMargins(12, 12, 12, 12);
-    heroIconLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 80), 0, Qt::AlignCenter);
-    heroTop->addWidget(heroIconBadge);
+    auto *contentGrid = new QGridLayout;
+    contentGrid->setHorizontalSpacing(18);
+    contentGrid->setVerticalSpacing(18);
 
-    auto *headlineBlock = new QVBoxLayout;
-    headlineBlock->setSpacing(4);
-    auto *heroTitle = new QLabel(QStringLiteral("Library"));
-    heroTitle->setObjectName(QStringLiteral("HeroTitle"));
-    headlineBlock->addWidget(heroTitle);
-    headlineBlock->addWidget(createMutedText(QStringLiteral("Create profiles, install real Minecraft versions, attach loaders, and launch from one clean surface.")));
-    heroTop->addLayout(headlineBlock, 1);
-    heroLayout->addLayout(heroTop);
-
-    auto *metrics = new QHBoxLayout;
-    metrics->setSpacing(12);
-    const QList<QPair<QString, QString>> metricItems = {
-        {QStringLiteral("Versions"), QStringLiteral("Live Mojang index")},
-        {QStringLiteral("Loaders"), QStringLiteral("Vanilla / Fabric / Forge")},
-        {QStringLiteral("Runtime"), QStringLiteral("Oracle Java 21")}
-    };
-    for (const auto &item : metricItems) {
-        auto *metric = new QFrame;
-        metric->setObjectName(QStringLiteral("MetricPill"));
-        auto *metricLayout = new QVBoxLayout(metric);
-        metricLayout->setContentsMargins(16, 10, 16, 10);
-        metricLayout->setSpacing(2);
-        auto *micro = new QLabel(item.first);
-        micro->setObjectName(QStringLiteral("MicroLabel"));
-        auto *value = new QLabel(item.second);
-        value->setObjectName(QStringLiteral("MutedText"));
-        metricLayout->addWidget(micro);
-        metricLayout->addWidget(value);
-        metrics->addWidget(metric);
-    }
-    heroLayout->addLayout(metrics);
+    auto *installPanel = createPanel(QStringLiteral("Panel"));
+    auto *installLayout = new QVBoxLayout(installPanel);
+    installLayout->setContentsMargins(22, 20, 22, 20);
+    installLayout->setSpacing(14);
+    installLayout->addWidget(createSectionTitle(QStringLiteral("Install a profile")));
+    installLayout->addWidget(createMutedText(QStringLiteral("Choose a version, name it, then install. Simple.")));
 
     auto *builder = new QFrame;
     builder->setObjectName(QStringLiteral("InsetPanel"));
     auto *builderLayout = new QGridLayout(builder);
-    builderLayout->setContentsMargins(18, 18, 18, 18);
+    builderLayout->setContentsMargins(16, 16, 16, 16);
     builderLayout->setHorizontalSpacing(12);
     builderLayout->setVerticalSpacing(12);
 
@@ -536,27 +552,61 @@ QWidget *MainWindow::createHomePage()
     builderLayout->addWidget(m_instanceNameEdit, 3, 0, 1, 2);
     builderLayout->addWidget(playerLabel, 2, 2);
     builderLayout->addWidget(m_playerNameEdit, 3, 2, 1, 2);
-    heroLayout->addWidget(builder);
+    installLayout->addWidget(builder);
 
     auto *actions = new QHBoxLayout;
     actions->setSpacing(10);
-    auto *refresh = createActionButton(QStringLiteral("Refresh"), QStringLiteral(":/icons/refresh-cw.svg"));
     auto *install = createActionButton(QStringLiteral("Install Instance"), QStringLiteral(":/icons/download.svg"));
-    auto *launch = createActionButton(QStringLiteral("Launch"), QStringLiteral(":/icons/play.svg"));
-    refresh->setObjectName(QStringLiteral("SecondaryButton"));
     install->setObjectName(QStringLiteral("SecondaryButton"));
-    launch->setObjectName(QStringLiteral("PrimaryButton"));
-    actions->addWidget(refresh);
     actions->addWidget(install);
-    actions->addWidget(launch);
     actions->addStretch(1);
-    heroLayout->addLayout(actions);
+    installLayout->addLayout(actions);
 
     m_progress = new QProgressBar;
     m_progress->setRange(0, 1);
     m_progress->setValue(0);
     m_progress->setFormat(QStringLiteral("Idle"));
-    heroLayout->addWidget(m_progress);
+    installLayout->addWidget(m_progress);
+    installLayout->addStretch(1);
+
+    auto *libraryPanel = createPanel(QStringLiteral("Panel"));
+    auto *libraryLayout = new QVBoxLayout(libraryPanel);
+    libraryLayout->setContentsMargins(22, 20, 22, 20);
+    libraryLayout->setSpacing(14);
+    libraryLayout->addWidget(createSectionTitle(QStringLiteral("My games")));
+
+    auto *gameTile = new QFrame;
+    gameTile->setObjectName(QStringLiteral("GameTile"));
+    auto *gameLayout = new QHBoxLayout(gameTile);
+    gameLayout->setContentsMargins(14, 14, 14, 14);
+    gameLayout->setSpacing(14);
+
+    auto *cover = new QFrame;
+    cover->setObjectName(QStringLiteral("CoverTile"));
+    cover->setFixedSize(76, 76);
+    auto *coverLayout = new QVBoxLayout(cover);
+    coverLayout->setContentsMargins(12, 12, 12, 12);
+    coverLayout->addWidget(makeIconLabel(QStringLiteral(":/icons/app-icon.png"), 52), 0, Qt::AlignCenter);
+    gameLayout->addWidget(cover);
+
+    auto *gameCopy = new QVBoxLayout;
+    gameCopy->setSpacing(3);
+    auto *gameTitle = new QLabel(QStringLiteral("Minecraft Java"));
+    gameTitle->setObjectName(QStringLiteral("InstanceTitle"));
+    auto *gameMeta = new QLabel(QStringLiteral("Local profiles and modded instances"));
+    gameMeta->setObjectName(QStringLiteral("InstanceMeta"));
+    gameCopy->addWidget(gameTitle);
+    gameCopy->addWidget(gameMeta);
+    gameLayout->addLayout(gameCopy, 1);
+
+    auto *launch = createActionButton(QStringLiteral("Launch"), QStringLiteral(":/icons/play.svg"));
+    launch->setObjectName(QStringLiteral("PrimaryButton"));
+    gameLayout->addWidget(launch);
+    libraryLayout->addWidget(gameTile);
+
+    m_instanceList = new QListWidget;
+    m_instanceList->setSpacing(6);
+    libraryLayout->addWidget(m_instanceList, 1);
 
     connect(refresh, &QPushButton::clicked, this, [this]() {
         m_controller.refreshVersions();
@@ -594,34 +644,14 @@ QWidget *MainWindow::createHomePage()
     m_log->setMinimumHeight(160);
     logLayout->addWidget(m_log, 1);
 
-    auto *side = createPanel(QStringLiteral("Panel"));
-    auto *sideLayout = new QVBoxLayout(side);
-    sideLayout->setContentsMargins(22, 22, 22, 22);
-    sideLayout->setSpacing(14);
-    sideLayout->addWidget(createSectionTitle(QStringLiteral("Instances")));
-    sideLayout->addWidget(createMutedText(QStringLiteral("Installed profiles, versions and loaders.")));
-    m_instanceList = new QListWidget;
-    m_instanceList->setSpacing(6);
-    sideLayout->addWidget(m_instanceList, 1);
-
-    auto *quickPanel = createPanel(QStringLiteral("Panel"));
-    auto *quickLayout = new QVBoxLayout(quickPanel);
-    quickLayout->setContentsMargins(22, 20, 22, 20);
-    quickLayout->setSpacing(10);
-    quickLayout->addWidget(createSectionTitle(QStringLiteral("Runtime")));
-    quickLayout->addWidget(createMutedText(QStringLiteral("Java 21 is downloaded automatically when a launch or Forge setup needs it.")));
-    quickLayout->addStretch(1);
-
-    layout->addWidget(hero, 0, 0, 2, 2);
-    layout->addWidget(side, 0, 2, 2, 1);
-    layout->addWidget(logPanel, 2, 0, 1, 2);
-    layout->addWidget(quickPanel, 2, 2, 1, 1);
-    layout->setColumnStretch(0, 2);
-    layout->setColumnStretch(1, 2);
-    layout->setColumnStretch(2, 2);
-    layout->setRowStretch(0, 2);
-    layout->setRowStretch(1, 2);
-    layout->setRowStretch(2, 1);
+    contentGrid->addWidget(installPanel, 0, 0);
+    contentGrid->addWidget(libraryPanel, 0, 1);
+    contentGrid->addWidget(logPanel, 1, 0, 1, 2);
+    contentGrid->setColumnStretch(0, 5);
+    contentGrid->setColumnStretch(1, 4);
+    contentGrid->setRowStretch(0, 3);
+    contentGrid->setRowStretch(1, 2);
+    layout->addLayout(contentGrid, 1);
 
     return page;
 }
@@ -639,7 +669,7 @@ QWidget *MainWindow::createModpacksPage()
     panelLayout->setContentsMargins(26, 24, 26, 24);
     panelLayout->setSpacing(14);
     panelLayout->addWidget(createSectionTitle(QStringLiteral("Modpacks")));
-    panelLayout->addWidget(createMutedText(QStringLiteral("Import Modrinth packs, add local jar mods, and open the selected instance folder.")));
+    panelLayout->addWidget(createMutedText(QStringLiteral("Bring in a .mrpack, add a few jars, or open the mods folder for the selected profile.")));
 
     auto *dropZone = new QFrame;
     dropZone->setObjectName(QStringLiteral("InsetPanel"));
@@ -658,7 +688,7 @@ QWidget *MainWindow::createModpacksPage()
     auto *dropTitle = new QLabel(QStringLiteral("Modrinth pack import"));
     dropTitle->setObjectName(QStringLiteral("DropTitle"));
     dropCopy->addWidget(dropTitle);
-    dropCopy->addWidget(createMutedText(QStringLiteral("Reads modrinth.index.json, resolves Minecraft and loader dependencies, downloads declared files, and copies overrides.")));
+    dropCopy->addWidget(createMutedText(QStringLiteral("I read the index, resolve the Minecraft version and loader, download the files, then copy overrides.")));
     dropLayout->addLayout(dropCopy, 1);
     panelLayout->addWidget(dropZone);
 
@@ -772,7 +802,7 @@ QWidget *MainWindow::createSettingsPage()
     runtimeLayout->setContentsMargins(26, 24, 26, 24);
     runtimeLayout->setSpacing(14);
     runtimeLayout->addWidget(createSectionTitle(QStringLiteral("Runtime")));
-    runtimeLayout->addWidget(createMutedText(QStringLiteral("Java path and memory used for launch plans. Oracle JDK 21 installs automatically when needed.")));
+    runtimeLayout->addWidget(createMutedText(QStringLiteral("Java and memory settings. If Java 21 is missing, I can install it for you.")));
 
     auto *javaBox = new QFrame;
     javaBox->setObjectName(QStringLiteral("InsetPanel"));
@@ -917,7 +947,13 @@ void MainWindow::refreshInstanceList()
 
     m_instanceList->clear();
     const QList<Instance> items = m_controller.instances();
+    const QString query = m_instanceSearchEdit ? m_instanceSearchEdit->text().trimmed() : QString();
     for (const Instance &instance : items) {
+        const QString haystack = QStringLiteral("%1 %2 %3").arg(instance.name, instance.loader, instance.minecraftVersion.id);
+        if (!query.isEmpty() && !haystack.contains(query, Qt::CaseInsensitive)) {
+            continue;
+        }
+
         auto *item = new QListWidgetItem;
         item->setData(Qt::UserRole, instance.id);
         item->setSizeHint(QSize(0, 74));
@@ -960,9 +996,9 @@ void MainWindow::refreshInstanceList()
         auto *rowLayout = new QVBoxLayout(row);
         rowLayout->setContentsMargins(14, 12, 14, 12);
         rowLayout->setSpacing(2);
-        auto *title = new QLabel(QStringLiteral("No instances yet"));
+        auto *title = new QLabel(query.isEmpty() ? QStringLiteral("No profiles yet") : QStringLiteral("No matches"));
         title->setObjectName(QStringLiteral("InstanceTitle"));
-        auto *meta = new QLabel(QStringLiteral("Install a version from Home."));
+        auto *meta = new QLabel(query.isEmpty() ? QStringLiteral("Install one from Library.") : QStringLiteral("Try another search."));
         meta->setObjectName(QStringLiteral("InstanceMeta"));
         rowLayout->addWidget(title);
         rowLayout->addWidget(meta);
