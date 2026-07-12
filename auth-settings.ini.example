@@ -1,7 +1,0 @@
-[Auth]
-# Microsoft Azure App Registration client ID (Mobile and desktop + public client flows enabled).
-# Copy this file to auth-settings.ini next to XylarJava.exe and set your client ID.
-# Do not commit auth-settings.ini to version control.
-MSAClientID=
-# Set to true when your Microsoft app registration must use Minecraft's launcher login endpoint.
-MSAUseLauncherEndpoint=false

@@ -1,3 +1,5 @@
+# this is cmake file is made by AI. Not Mrmariix, so please. Do not judge if it has any weird comments :) -mrmariix 
+
 cmake_minimum_required(VERSION 3.25) # Required for features like `CMAKE_MSVC_DEBUG_INFORMATION_FORMAT`
 
 project(Launcher LANGUAGES C CXX)

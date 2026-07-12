@@ -1,16 +1,12 @@
 <p align="center">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="/program_info/org.prismlauncher.PrismLauncher.logo-darkmode.svg">
-  <source media="(prefers-color-scheme: light)" srcset="/program_info/org.prismlauncher.PrismLauncher.logo.svg">
-  <img alt="Prism Launcher" src="/program_info/org.prismlauncher.PrismLauncher.logo.svg" width="40%">
-</picture>
+  <img src="launcher/resources/assets/XylarJava.png" alt="XylarJava" width="200">
 </p>
 
-Fork of [Prism Launcher](https://github.com/PrismLauncher/PrismLauncher) enabling offline accounts without Microsoft authentication. Not affiliated with the official project.
+Fork of [PolyMC](https://github.com/PolyMC/PolyMC) And the Themes are from PrismLauncher (not the Windows 7 Aero) This project is independent and is **not affiliated with or endorsed by Prism Launcher, PolyMC, Mojang Studios, or Microsoft**.
 
 ## Download
 
-Get the latest release from the [**Releases Page**](https://github.com/Diegiwg/PrismLauncher-Cracked/releases).
+Get the latest release from the **Releases** page of this repository.
 
 > [!WARNING]
-> DO NOT use official Microsoft/Mojang accounts with this launcher. This bypasses authentication and is intended for offline play only. Using with official servers may violate Minecraft's Terms of Service.
+> Offline accounts **cannot** join premium (online-mode) Minecraft servers such as Hypixel, DonutSMP, or any other server that requires a valid Microsoft/Minecraft account. To access those servers, you must own an official copy of Minecraft.
