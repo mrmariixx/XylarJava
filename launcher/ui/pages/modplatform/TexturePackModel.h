@@ -1,0 +1,24 @@
+#pragma once
+
+#include "meta/VersionList.h"
+#include "ui/pages/modplatform/ResourcePackModel.h"
+
+namespace ResourceDownload {
+
+class TexturePackResourceModel : public ResourcePackResourceModel {
+    Q_OBJECT
+
+   public:
+    TexturePackResourceModel(const BaseInstance& inst, ResourceAPI* api, const QString& debugName, QString metaEntryBase);
+
+    inline ::Version maximumTexturePackVersion() const { return { "1.6" }; }
+
+    ResourceAPI::SearchArgs createSearchArguments() override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
+
+   protected:
+    Meta::VersionList::Ptr m_version_list;
+    Task::Ptr m_task;
+};
+
+}  // namespace ResourceDownload
