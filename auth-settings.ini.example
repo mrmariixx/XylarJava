@@ -1,0 +1,4 @@
+[Auth]
+MSAClientID=273f0e9f-05a2-4132-9a03-7dd3e69057d4
+; Custom Azure apps must use login_with_xbox (false). launcher/login is for partner apps only.
+MSAUseLauncherEndpoint=false

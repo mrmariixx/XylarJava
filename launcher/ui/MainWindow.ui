@@ -218,20 +218,6 @@
     <string>Open the development blog to read more news about %1.</string>
    </property>
   </action>
-  <action name="actionCAT">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="cat"/>
-   </property>
-   <property name="text">
-    <string>&amp;Meow</string>
-   </property>
-   <property name="toolTip">
-    <string>It's a fluffy kitty :3</string>
-   </property>
-  </action>
   <action name="actionToggleStatusBar">
    <property name="checkable">
     <bool>true</bool>
@@ -709,17 +695,6 @@
    </property>
    <property name="toolTip">
     <string>Open the icon theme folder in a file browser.</string>
-   </property>
-  </action>
-  <action name="actionViewCatPackFolder">
-   <property name="icon">
-    <iconset theme="viewfolder"/>
-   </property>
-   <property name="text">
-    <string>Cat Packs</string>
-   </property>
-   <property name="toolTip">
-    <string>Open the cat packs folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewJavaFolder">

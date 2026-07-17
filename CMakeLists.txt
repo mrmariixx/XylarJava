@@ -264,7 +264,7 @@ endif()
 
 # By using this key in your builds you accept the terms of use laid down in
 # https://docs.microsoft.com/en-us/legal/microsoft-identity-platform/terms-of-use
-set(Launcher_MSA_CLIENT_ID "" CACHE STRING "Client ID for Microsoft Authentication (prefer auth-settings.ini at runtime)")
+set(Launcher_MSA_CLIENT_ID "273f0e9f-05a2-4132-9a03-7dd3e69057d4" CACHE STRING "Client ID for Microsoft Authentication (prefer auth-settings.ini at runtime)")
 
 # By using this key in your builds you accept the terms and conditions laid down in
 # https://support.curseforge.com/en/support/solutions/articles/9000207405-curse-forge-3rd-party-api-terms-and-conditions

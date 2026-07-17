@@ -20,8 +20,13 @@ QString buildIdentityToken(const QString& uhs, const QString& xToken)
 
 QString parseMinecraftAuthError(const QByteArray& response)
 {
+    // Retries can concatenate bodies; take the first JSON object.
+    const int start = response.indexOf('{');
+    const int end = response.indexOf('}', start);
+    const QByteArray slice = (start >= 0 && end > start) ? response.mid(start, end - start + 1) : response;
+
     QJsonParseError jsonError;
-    const QJsonDocument doc = QJsonDocument::fromJson(response, &jsonError);
+    const QJsonDocument doc = QJsonDocument::fromJson(slice, &jsonError);
     if (jsonError.error != QJsonParseError::NoError || !doc.isObject()) {
         return {};
     }
@@ -47,6 +52,7 @@ QString LauncherLoginStep::describe()
 
 void LauncherLoginStep::perform()
 {
+    // Custom Azure apps must use login_with_xbox. /launcher/login is partner-only.
     startRequest(APPLICATION->useMSALauncherLoginEndpoint());
 }
 
@@ -83,7 +89,7 @@ void LauncherLoginStep::startRequest(bool useLauncherEndpoint)
     auto [request, response] = Net::Upload::makeByteArray(url, requestBody);
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
-    m_request->enableAutoRetry(true);
+    m_request->enableAutoRetry(false);  // avoid duplicating 403 bodies
 
     m_task.reset(new NetJob("LauncherLoginStep", APPLICATION->network()));
     m_task->setAskRetry(false);
@@ -103,26 +109,40 @@ void LauncherLoginStep::onRequestDone(QByteArray* response)
         const int status = m_request->replyStatusCode();
         const QString apiError = parseMinecraftAuthError(*response);
 
-        if (status == 403 && !m_useLauncherEndpoint && !m_triedFallback) {
+        if (status == 403 && !m_triedFallback) {
             m_triedFallback = true;
-            qWarning() << "login_with_xbox returned 403, retrying with launcher/login endpoint";
-            startRequest(true);
+            const bool nextUseLauncher = !m_useLauncherEndpoint;
+            qWarning() << "Minecraft login returned 403 via"
+                       << (m_useLauncherEndpoint ? "launcher/login" : "login_with_xbox") << "- retrying with"
+                       << (nextUseLauncher ? "launcher/login" : "login_with_xbox");
+            // Keep the first/more specific API error for the final message if the fallback also fails.
+            m_firstApiError = apiError;
+            startRequest(nextUseLauncher);
             return;
         }
 
         qWarning() << "Reply error:" << m_request->error() << "HTTP" << status << apiError;
 
+        const QString shownError = !m_firstApiError.isEmpty() ? m_firstApiError : apiError;
+
         QString message = tr("Failed to get Minecraft access token");
-        if (!apiError.isEmpty()) {
-            message += QStringLiteral(": %1").arg(apiError);
+        if (!shownError.isEmpty()) {
+            message += QStringLiteral(": %1").arg(shownError);
         } else {
             message += QStringLiteral(": %1").arg(m_request->errorString());
         }
 
-        if (status == 403) {
-            message += QStringLiteral("\n\n%1")
-                            .arg(tr("This usually means the Microsoft account does not own Minecraft Java Edition, "
-                                    "or the Azure client ID in auth-settings.ini is not authorized for Minecraft login."));
+        if (status == 403 || shownError.contains(QStringLiteral("Invalid app registration"), Qt::CaseInsensitive)) {
+            message += QStringLiteral("\n\n%1").arg(
+                tr("This is NOT blocked by XylarJava.\n"
+                   "Microsoft/Mojang rejected your Azure app for Minecraft Services.\n\n"
+                   "Your client ID works for Microsoft/Xbox login, but Minecraft requires a "
+                   "separately approved App ID.\n\n"
+                   "Apply here (can take days/weeks):\n"
+                   "https://aka.ms/mce-reviewappid\n\n"
+                   "Info: https://aka.ms/AppRegInfo\n\n"
+                   "Until Microsoft approves App ID %1, no launcher can make this custom client ID work.")
+                    .arg(APPLICATION->getMSAClientID()));
         }
 
         if (Net::isApplicationError(m_request->error())) {

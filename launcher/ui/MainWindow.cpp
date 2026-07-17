@@ -223,9 +223,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Add the news label to the news toolbar.
     {
         newsLabel = new QToolButton();
-        newsLabel->setIcon(QIcon::fromTheme("news"));
+        newsLabel->setIcon(QIcon());  // no cat/news animal icon
         newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        newsLabel->setToolButtonStyle(Qt::ToolButtonTextOnly);
         newsLabel->setFocusPolicy(Qt::NoFocus);
         ui->newsToolBar->addWidget(newsLabel);
 
@@ -277,8 +277,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
         ui->horizontalLayout->addWidget(view);
     }
-    // Cat easter egg removed — keep instance list background clean.
-    setCatBackground(false);
 
     // Togglable status bar
     {
@@ -719,12 +717,6 @@ QString intListToString(const QList<int>& list)
         slist.append(QString::number(list.at(i)));
     }
     return slist.join(',');
-}
-
-void MainWindow::setCatBackground(bool enabled)
-{
-    view->setPaintCat(enabled);
-    view->viewport()->repaint();
 }
 
 void MainWindow::runModalTask(Task* task)
@@ -1204,11 +1196,6 @@ void MainWindow::on_actionViewWidgetThemeFolder_triggered()
     DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path(), true);
 }
 
-void MainWindow::on_actionViewCatPackFolder_triggered()
-{
-    DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path(), true);
-}
-
 void MainWindow::on_actionViewIconsFolder_triggered()
 {
     DesktopServices::openPath(APPLICATION->icons()->getDirectory(), true);
@@ -1254,7 +1241,7 @@ void MainWindow::globalSettingsClosed()
     updateThemeMenu();
     updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
-    // but Prism Launcher exits abnormally, causing the window state to never be saved:
+    // but PolyMC exits abnormally, causing the window state to never be saved:
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
     update();
 }

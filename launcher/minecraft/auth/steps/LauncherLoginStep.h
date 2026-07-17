@@ -26,4 +26,5 @@ class LauncherLoginStep : public AuthStep {
     NetJob::Ptr m_task;
     bool m_useLauncherEndpoint = false;
     bool m_triedFallback = false;
+    QString m_firstApiError;
 };

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QTimer>
 #include <QtWidgets/QDialog>
 
 #include "minecraft/auth/AuthFlow.h"
@@ -24,13 +23,11 @@ class MSALoginDialog : public QDialog {
 
    protected slots:
     void onTaskFailed(QString reason);
-    void onDeviceFlowStatus(QString status);
-    void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
+    void onFlowStatus(QString status);
+    void authorizeWithBrowser(const QUrl& url);
 
    private:
     Ui::MSALoginDialog* ui;
     MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AuthFlow> m_devicecode_task;
-
-    QUrl m_url;
+    shared_qobject_ptr<AuthFlow> m_login_task;
 };

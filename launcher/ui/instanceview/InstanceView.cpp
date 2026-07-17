@@ -10,11 +10,12 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPersistentModelIndex>
+#include <QPixmap>
 #include <QScrollBar>
 #include <QtMath>
+#include <QMetaObject>
 
 #include "VisualGroup.h"
-#include "ui/themes/CatPainter.h"
 #include "ui/themes/ThemeManager.h"
 
 #include <Application.h>
@@ -37,7 +38,6 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
-    setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
     connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
 }
@@ -46,9 +46,6 @@ InstanceView::~InstanceView()
 {
     qDeleteAll(m_groups);
     m_groups.clear();
-    if (m_cat) {
-        m_cat->deleteLater();
-    }
 }
 
 void InstanceView::setModel(QAbstractItemModel* model)
@@ -405,27 +402,36 @@ void InstanceView::mouseDoubleClickEvent(QMouseEvent* event)
     }
 }
 
-void InstanceView::setPaintCat(bool visible)
-{
-    if (m_cat) {
-        disconnect(m_cat, &CatPainter::updateFrame, this, nullptr);
-        delete m_cat;
-        m_cat = nullptr;
-    }
-    if (visible) {
-        m_cat = new CatPainter(APPLICATION->themeManager()->getCatPack(), this);
-        connect(m_cat, &CatPainter::updateFrame, this, [this] { viewport()->update(); });
-    }
-}
-
 void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 {
     executeDelayedItemsLayout();
 
     QPainter painter(this->viewport());
 
-    if (m_cat) {
-        m_cat->paint(&painter, this->viewport()->rect());
+    // Theme side portrait: bottom-left, large, above the news/status bars
+    // (InstanceView sits above those bars — same placement style as the old cat, left side)
+    const QString sidePath = APPLICATION->themeManager()->getThemeSideImagePath();
+    if (!sidePath.isEmpty()) {
+        QPixmap side(sidePath);
+        if (!side.isNull()) {
+            const QRect vp = viewport()->rect();
+            // Match reference: large bottom-left portrait, sharp (no fade into theme)
+            const int maxHeight = qMax(280, qRound(vp.height() * 0.78));
+            const int maxWidth = qMax(220, qRound(vp.width() * 0.40));
+            QPixmap scaled = side.scaled(maxWidth, maxHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+            QRect dest(scaled.rect());
+            dest.moveBottomLeft(QPoint(4, vp.bottom()));
+
+            painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+            painter.setOpacity(1.0);
+            painter.drawPixmap(dest.topLeft(), scaled);
+        }
+    }
+    // Keep default left margin so instance icons stay top-left and clear of the portrait
+    if (m_leftMargin != 5) {
+        m_leftMargin = 5;
+        QMetaObject::invokeMethod(this, &InstanceView::updateGeometries, Qt::QueuedConnection);
     }
 
     QStyleOptionViewItem option;

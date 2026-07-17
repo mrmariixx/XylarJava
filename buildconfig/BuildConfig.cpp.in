@@ -100,8 +100,9 @@ QString Config::printableVersionString() const
 {
     QString vstr = versionString();
 
-    // If the build is not a main release, append the channel
-    if (VERSION_CHANNEL != "stable" && GIT_TAG != vstr) {
+    // Never append branch names like "main" to the displayed version.
+    // Only keep an explicit release channel when it is not a git branch name.
+    if (VERSION_CHANNEL != "stable" && VERSION_CHANNEL != "main" && VERSION_CHANNEL != "master" && GIT_TAG != vstr) {
         vstr += "-" + VERSION_CHANNEL;
     }
     return vstr;

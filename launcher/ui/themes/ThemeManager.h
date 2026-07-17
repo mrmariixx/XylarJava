@@ -6,13 +6,14 @@
 #include <memory>
 
 #include "IconTheme.h"
-#include "ui/themes/CatPack.h"
 #include "ui/themes/ITheme.h"
 
-inline auto themeDebugLog() {
+inline auto themeDebugLog()
+{
     return qDebug() << "[Theme]";
 }
-inline auto themeWarningLog() {
+inline auto themeWarningLog()
+{
     return qWarning() << "[Theme]";
 }
 
@@ -27,16 +28,12 @@ class ThemeManager {
     bool isValidApplicationTheme(const QString& id);
     QDir getIconThemesFolder();
     QDir getApplicationThemesFolder();
-    QDir getCatPacksFolder();
     void applyCurrentlySelectedTheme(bool initial = false);
     void setIconTheme(const QString& name);
     void setApplicationTheme(const QString& name, bool initial = false);
 
-    /// @brief Returns the background based on selected and with events (Birthday, XMas, etc.)
-    /// @param catName Optional, if you need a specific background.
-    /// @return
-    QString getCatPack(QString catName = "");
-    QList<CatPack*> getValidCatPacks();
+    /// Optional left-side portrait/image for the current theme (themes/<id>/resources/side.png).
+    QString getThemeSideImagePath() const;
 
     const LogColors& getLogColors() { return m_logColors; }
 
@@ -45,22 +42,20 @@ class ThemeManager {
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::map<QString, IconTheme> m_icons;
-    QDir m_iconThemeFolder{"iconthemes"};
-    QDir m_applicationThemeFolder{"themes"};
-    QDir m_catPacksFolder{"catpacks"};
-    std::map<QString, std::unique_ptr<CatPack>> m_catPacks;
+    QDir m_iconThemeFolder{ "iconthemes" };
+    QDir m_applicationThemeFolder{ "themes" };
     QPalette m_defaultPalette;
     QString m_defaultStyle;
     LogColors m_logColors;
 
     void initializeThemes();
-    void initializeCatPacks();
     QString addTheme(std::unique_ptr<ITheme> theme);
     ITheme* getTheme(QString themeId);
     QString addIconTheme(IconTheme theme);
-    QString addCatPack(std::unique_ptr<CatPack> catPack);
     void initializeIcons();
     void initializeWidgets();
+    void installBundledThemes();
+    void loadThemesFromFolder(const QDir& folder, const QString& darkThemeId);
 
     // On non-Mac systems, this is a no-op.
     void setTitlebarColorOnMac(WId windowId, QColor color);
@@ -73,6 +68,6 @@ class ThemeManager {
     NSObject* m_windowTitlebarObserver = nullptr;
 #endif
 
-    const QStringList builtinIcons{"pe_colored", "pe_light", "pe_dark", "pe_blue",    "breeze_light", "breeze_dark",
-                                   "OSX",        "iOS",      "flat",    "flat_white", "multimc"};
+    const QStringList builtinIcons{ "pe_colored", "pe_light", "pe_dark", "pe_blue",    "breeze_light", "breeze_dark",
+                                    "OSX",        "iOS",      "flat",    "flat_white", "multimc" };
 };
