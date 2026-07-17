@@ -1,8 +1,8 @@
-<<<<<<< HEAD
+
 ﻿<p align="center">
 =======
 <p align="center">
->>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
+
   <img src="launcher/resources/assets/XylarJava.png" alt="XylarJava" width="200">
 </p>
 
