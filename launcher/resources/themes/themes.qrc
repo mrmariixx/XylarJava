@@ -1,0 +1,815 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/themes">
+        <file>Amoled/resources/.keep</file>
+        <file>Amoled/theme.json</file>
+        <file>Amoled/themeStyle.css</file>
+        <file>BD-Blue/resources/.keep</file>
+        <file>BD-Blue/theme.json</file>
+        <file>BD-Blue/themeStyle.css</file>
+        <file>Borest/resources/.keep</file>
+        <file>Borest/resources/CheckBox.png</file>
+        <file>Borest/resources/CheckBox.png.license</file>
+        <file>Borest/resources/CheckBoxDisabled.png</file>
+        <file>Borest/resources/CheckBoxDisabled.png.license</file>
+        <file>Borest/resources/CheckBoxInterminate.png</file>
+        <file>Borest/resources/CheckBoxInterminate.png.license</file>
+        <file>Borest/resources/CheckBoxInterminateDisabled.png</file>
+        <file>Borest/resources/CheckBoxInterminateDisabled.png.license</file>
+        <file>Borest/resources/CheckBoxInterminatePressed.png</file>
+        <file>Borest/resources/CheckBoxInterminatePressed.png.license</file>
+        <file>Borest/resources/CheckBoxPressed.png</file>
+        <file>Borest/resources/CheckBoxPressed.png.license</file>
+        <file>Borest/resources/ComboBox.png</file>
+        <file>Borest/resources/ComboBox.png.license</file>
+        <file>Borest/resources/ComboBoxDisabled.png</file>
+        <file>Borest/resources/ComboBoxDisabled.png.license</file>
+        <file>Borest/resources/RadioButton.png</file>
+        <file>Borest/resources/RadioButton.png.license</file>
+        <file>Borest/resources/RadioButtonHover.png</file>
+        <file>Borest/resources/RadioButtonHover.png.license</file>
+        <file>Borest/resources/RadioButtonPressed.png</file>
+        <file>Borest/resources/RadioButtonPressed.png.license</file>
+        <file>Borest/resources/ScrollBottom.png</file>
+        <file>Borest/resources/ScrollBottom.png.license</file>
+        <file>Borest/resources/ScrollBottomHover.png</file>
+        <file>Borest/resources/ScrollBottomHover.png.license</file>
+        <file>Borest/resources/ScrollBottomPressed.png</file>
+        <file>Borest/resources/ScrollBottomPressed.png.license</file>
+        <file>Borest/resources/ScrollLeft.png</file>
+        <file>Borest/resources/ScrollLeft.png.license</file>
+        <file>Borest/resources/ScrollLeftHover.png</file>
+        <file>Borest/resources/ScrollLeftHover.png.license</file>
+        <file>Borest/resources/ScrollLeftPressed.png</file>
+        <file>Borest/resources/ScrollLeftPressed.png.license</file>
+        <file>Borest/resources/ScrollRight.png</file>
+        <file>Borest/resources/ScrollRight.png.license</file>
+        <file>Borest/resources/ScrollRightHover.png</file>
+        <file>Borest/resources/ScrollRightHover.png.license</file>
+        <file>Borest/resources/ScrollRightPressed.png</file>
+        <file>Borest/resources/ScrollRightPressed.png.license</file>
+        <file>Borest/resources/ScrollTop.png</file>
+        <file>Borest/resources/ScrollTop.png.license</file>
+        <file>Borest/resources/ScrollTopHover.png</file>
+        <file>Borest/resources/ScrollTopHover.png.license</file>
+        <file>Borest/resources/ScrollTopPressed.png</file>
+        <file>Borest/resources/ScrollTopPressed.png.license</file>
+        <file>Borest/resources/SpinBoxDown.png</file>
+        <file>Borest/resources/SpinBoxDown.png.license</file>
+        <file>Borest/resources/SpinBoxDownDisabled.png</file>
+        <file>Borest/resources/SpinBoxDownDisabled.png.license</file>
+        <file>Borest/resources/SpinBoxUp.png</file>
+        <file>Borest/resources/SpinBoxUp.png.license</file>
+        <file>Borest/resources/SpinBoxUpDisabled.png</file>
+        <file>Borest/resources/SpinBoxUpDisabled.png.license</file>
+        <file>Borest/resources/TreeViewClose.png</file>
+        <file>Borest/resources/TreeViewClose.png.license</file>
+        <file>Borest/resources/TreeViewOpen.png</file>
+        <file>Borest/resources/TreeViewOpen.png.license</file>
+        <file>Borest/theme.json</file>
+        <file>Borest/themeStyle.css</file>
+        <file>Breeze-Dark/resources/.keep</file>
+        <file>Breeze-Dark/theme.json</file>
+        <file>Breeze-Dark/themeStyle.css</file>
+        <file>Deep-Dark/resources/.keep</file>
+        <file>Deep-Dark/theme.json</file>
+        <file>Deep-Dark/themeStyle.css</file>
+        <file>Dracula/resources/.keep</file>
+        <file>Dracula/theme.json</file>
+        <file>Dracula/themeStyle.css</file>
+        <file>Everforest-Dark-Hard/resources/.keep</file>
+        <file>Everforest-Dark-Hard/theme.json</file>
+        <file>Everforest-Dark-Hard/themeStyle.css</file>
+        <file>Everforest-Medium/resources/.keep</file>
+        <file>Everforest-Medium/theme.json</file>
+        <file>Everforest-Medium/themeStyle.css</file>
+        <file>Fluent-Dark/resources/.keep</file>
+        <file>Fluent-Dark/resources/CheckBox.png</file>
+        <file>Fluent-Dark/resources/CheckBox.png.license</file>
+        <file>Fluent-Dark/resources/CheckBoxDisabled.png</file>
+        <file>Fluent-Dark/resources/CheckBoxDisabled.png.license</file>
+        <file>Fluent-Dark/resources/CheckBoxInterminate.png</file>
+        <file>Fluent-Dark/resources/CheckBoxInterminate.png.license</file>
+        <file>Fluent-Dark/resources/CheckBoxInterminateDisabled.png</file>
+        <file>Fluent-Dark/resources/CheckBoxInterminateDisabled.png.license</file>
+        <file>Fluent-Dark/resources/CheckBoxInterminatePressed.png</file>
+        <file>Fluent-Dark/resources/CheckBoxInterminatePressed.png.license</file>
+        <file>Fluent-Dark/resources/CheckBoxPressed.png</file>
+        <file>Fluent-Dark/resources/CheckBoxPressed.png.license</file>
+        <file>Fluent-Dark/resources/ComboBox.png</file>
+        <file>Fluent-Dark/resources/ComboBox.png.license</file>
+        <file>Fluent-Dark/resources/ComboBoxDisabled.png</file>
+        <file>Fluent-Dark/resources/ComboBoxDisabled.png.license</file>
+        <file>Fluent-Dark/resources/NextMonth.png</file>
+        <file>Fluent-Dark/resources/NextMonth.png.license</file>
+        <file>Fluent-Dark/resources/NextMonthDisabled.png</file>
+        <file>Fluent-Dark/resources/NextMonthDisabled.png.license</file>
+        <file>Fluent-Dark/resources/PrevMonth.png</file>
+        <file>Fluent-Dark/resources/PrevMonth.png.license</file>
+        <file>Fluent-Dark/resources/PrevMonthDisabled.png</file>
+        <file>Fluent-Dark/resources/PrevMonthDisabled.png.license</file>
+        <file>Fluent-Dark/resources/RadioButton.png</file>
+        <file>Fluent-Dark/resources/RadioButton.png.license</file>
+        <file>Fluent-Dark/resources/RadioButtonHover.png</file>
+        <file>Fluent-Dark/resources/RadioButtonHover.png.license</file>
+        <file>Fluent-Dark/resources/RadioButtonPressed.png</file>
+        <file>Fluent-Dark/resources/RadioButtonPressed.png.license</file>
+        <file>Fluent-Dark/resources/ScrollBottom.png</file>
+        <file>Fluent-Dark/resources/ScrollBottom.png.license</file>
+        <file>Fluent-Dark/resources/ScrollBottomHover.png</file>
+        <file>Fluent-Dark/resources/ScrollBottomHover.png.license</file>
+        <file>Fluent-Dark/resources/ScrollBottomPressed.png</file>
+        <file>Fluent-Dark/resources/ScrollBottomPressed.png.license</file>
+        <file>Fluent-Dark/resources/ScrollLeft.png</file>
+        <file>Fluent-Dark/resources/ScrollLeft.png.license</file>
+        <file>Fluent-Dark/resources/ScrollLeftHover.png</file>
+        <file>Fluent-Dark/resources/ScrollLeftHover.png.license</file>
+        <file>Fluent-Dark/resources/ScrollLeftPressed.png</file>
+        <file>Fluent-Dark/resources/ScrollLeftPressed.png.license</file>
+        <file>Fluent-Dark/resources/ScrollRight.png</file>
+        <file>Fluent-Dark/resources/ScrollRight.png.license</file>
+        <file>Fluent-Dark/resources/ScrollRightHover.png</file>
+        <file>Fluent-Dark/resources/ScrollRightHover.png.license</file>
+        <file>Fluent-Dark/resources/ScrollRightPressed.png</file>
+        <file>Fluent-Dark/resources/ScrollRightPressed.png.license</file>
+        <file>Fluent-Dark/resources/ScrollTop.png</file>
+        <file>Fluent-Dark/resources/ScrollTop.png.license</file>
+        <file>Fluent-Dark/resources/ScrollTopHover.png</file>
+        <file>Fluent-Dark/resources/ScrollTopHover.png.license</file>
+        <file>Fluent-Dark/resources/ScrollTopPressed.png</file>
+        <file>Fluent-Dark/resources/ScrollTopPressed.png.license</file>
+        <file>Fluent-Dark/resources/SpinBoxDown.png</file>
+        <file>Fluent-Dark/resources/SpinBoxDown.png.license</file>
+        <file>Fluent-Dark/resources/SpinBoxDownDisabled.png</file>
+        <file>Fluent-Dark/resources/SpinBoxDownDisabled.png.license</file>
+        <file>Fluent-Dark/resources/SpinBoxUp.png</file>
+        <file>Fluent-Dark/resources/SpinBoxUp.png.license</file>
+        <file>Fluent-Dark/resources/SpinBoxUpDisabled.png</file>
+        <file>Fluent-Dark/resources/SpinBoxUpDisabled.png.license</file>
+        <file>Fluent-Dark/resources/ToggleSwitchDisabled.png</file>
+        <file>Fluent-Dark/resources/ToggleSwitchDisabled.png.license</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOff.png</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOff.png.license</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOffHover.png</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOffHover.png.license</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOffPressed.png</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOffPressed.png.license</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOn.png</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOn.png.license</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOnHover.png</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOnHover.png.license</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOnPressed.png</file>
+        <file>Fluent-Dark/resources/ToggleSwitchOnPressed.png.license</file>
+        <file>Fluent-Dark/resources/TreeViewClose.png</file>
+        <file>Fluent-Dark/resources/TreeViewClose.png.license</file>
+        <file>Fluent-Dark/resources/TreeViewOpen.png</file>
+        <file>Fluent-Dark/resources/TreeViewOpen.png.license</file>
+        <file>Fluent-Dark/theme.json</file>
+        <file>Fluent-Dark/themeStyle.css</file>
+        <file>Gruvbox-Dark/resources/.keep</file>
+        <file>Gruvbox-Dark/theme.json</file>
+        <file>Gruvbox-Dark/themeStyle.css</file>
+        <file>Gruvbox-Soft/resources/.keep</file>
+        <file>Gruvbox-Soft/theme.json</file>
+        <file>Gruvbox-Soft/themeStyle.css</file>
+        <file>Hi30-Pink/resources/.keep</file>
+        <file>Hi30-Pink/theme.json</file>
+        <file>Hi30-Pink/themeStyle.css</file>
+        <file>Jvne/resources/.keep</file>
+        <file>Jvne/theme.json</file>
+        <file>Jvne/themeStyle.css</file>
+        <file>Kanagawa/resources/.keep</file>
+        <file>Kanagawa/theme.json</file>
+        <file>Kanagawa/themeStyle.css</file>
+        <file>Mellow/resources/.keep</file>
+        <file>Mellow/theme.json</file>
+        <file>Mellow/themeStyle.css</file>
+        <file>Mod Labyrinth Dark/resources/.keep</file>
+        <file>Mod Labyrinth Dark/theme.json</file>
+        <file>Mod Labyrinth Dark/themeStyle.css</file>
+        <file>Mod Labyrinth Mixed/resources/.keep</file>
+        <file>Mod Labyrinth Mixed/theme.json</file>
+        <file>Mod Labyrinth Mixed/themeStyle.css</file>
+        <file>Mod Labyrinth Pale/resources/.keep</file>
+        <file>Mod Labyrinth Pale/theme.json</file>
+        <file>Mod Labyrinth Pale/themeStyle.css</file>
+        <file>Nord-Polar-Night/resources/.keep</file>
+        <file>Nord-Polar-Night/theme.json</file>
+        <file>Nord-Polar-Night/themeStyle.css</file>
+        <file>Nord-Snow-Storm/resources/.keep</file>
+        <file>Nord-Snow-Storm/theme.json</file>
+        <file>Nord-Snow-Storm/themeStyle.css</file>
+        <file>Nord/resources/.keep</file>
+        <file>Nord/theme.json</file>
+        <file>Nord/themeStyle.css</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-default-menu.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-default-menu.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-hover-menu.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-hover-menu.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-pressed-menu.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-accent-pressed-menu.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-default-menu.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-default-menu.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-hover-menu.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-hover-menu.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-pressed-menu.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-default-pressed-menu.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-warning-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-warning-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-warning-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-warning-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/button-warning-pressed.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/button-warning-pressed.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-checked-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-checked-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-checked-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-checked-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-checked-pressed.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-checked-pressed.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-checked.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-checked.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-disabled.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-disabled.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-indeterminate.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-indeterminate.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-unchecked-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-unchecked-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-unchecked-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/checkbox-unchecked-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/combobox-arrow.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/combobox-arrow.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/combobox-menulist-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/combobox-menulist-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/handle-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/handle-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/handle-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/handle-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/line-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/line-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/line-focus.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/line-focus.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/line-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/line-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-checked-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-checked-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-checked-disabled.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-checked-disabled.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-checked-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-checked-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-checked-pressed.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-checked-pressed.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-unchecked-default.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-unchecked-default.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-unchecked-disabled.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-unchecked-disabled.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-unchecked-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-unchecked-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-unchecked-pressed.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/radiobutton-unchecked-pressed.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/spinbox-down-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/spinbox-down-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/spinbox-down.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/spinbox-down.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/spinbox-up-hover.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/spinbox-up-hover.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/spinbox-up.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/spinbox-up.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/switch-off.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/switch-off.svg.license</file>
+        <file>Ore UI - Dark Amethyst/resources/switch-on.svg</file>
+        <file>Ore UI - Dark Amethyst/resources/switch-on.svg.license</file>
+        <file>Ore UI - Dark Amethyst/theme.json</file>
+        <file>Ore UI - Dark Amethyst/themeStyle.css</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-default-menu.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-default-menu.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-hover-menu.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-hover-menu.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-pressed-menu.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-accent-pressed-menu.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-default-menu.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-default-menu.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-hover-menu.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-hover-menu.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-pressed-menu.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-default-pressed-menu.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-warning-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-warning-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-warning-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-warning-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/button-warning-pressed.svg</file>
+        <file>Ore UI - Dark Diamond/resources/button-warning-pressed.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-checked-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-checked-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-checked-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-checked-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-checked-pressed.svg</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-checked-pressed.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-checked.svg</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-checked.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-disabled.svg</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-disabled.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-indeterminate.svg</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-indeterminate.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-unchecked-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-unchecked-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-unchecked-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/checkbox-unchecked-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/combobox-arrow.svg</file>
+        <file>Ore UI - Dark Diamond/resources/combobox-arrow.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/combobox-menulist-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/combobox-menulist-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/handle-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/handle-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/handle-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/handle-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/line-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/line-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/line-focus.svg</file>
+        <file>Ore UI - Dark Diamond/resources/line-focus.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/line-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/line-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-checked-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-checked-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-checked-disabled.svg</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-checked-disabled.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-checked-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-checked-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-checked-pressed.svg</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-checked-pressed.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-unchecked-default.svg</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-unchecked-default.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-unchecked-disabled.svg</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-unchecked-disabled.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-unchecked-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-unchecked-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-unchecked-pressed.svg</file>
+        <file>Ore UI - Dark Diamond/resources/radiobutton-unchecked-pressed.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/spinbox-down-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/spinbox-down-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/spinbox-down.svg</file>
+        <file>Ore UI - Dark Diamond/resources/spinbox-down.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/spinbox-up-hover.svg</file>
+        <file>Ore UI - Dark Diamond/resources/spinbox-up-hover.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/spinbox-up.svg</file>
+        <file>Ore UI - Dark Diamond/resources/spinbox-up.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/switch-off.svg</file>
+        <file>Ore UI - Dark Diamond/resources/switch-off.svg.license</file>
+        <file>Ore UI - Dark Diamond/resources/switch-on.svg</file>
+        <file>Ore UI - Dark Diamond/resources/switch-on.svg.license</file>
+        <file>Ore UI - Dark Diamond/theme.json</file>
+        <file>Ore UI - Dark Diamond/themeStyle.css</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-default-menu.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-default-menu.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-hover-menu.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-hover-menu.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-pressed-menu.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-accent-pressed-menu.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-default-menu.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-default-menu.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-hover-menu.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-hover-menu.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-pressed-menu.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-default-pressed-menu.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-warning-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-warning-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-warning-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-warning-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/button-warning-pressed.svg</file>
+        <file>Ore UI - Dark Emerald/resources/button-warning-pressed.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-checked-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-checked-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-checked-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-checked-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-checked-pressed.svg</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-checked-pressed.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-checked.svg</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-checked.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-disabled.svg</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-disabled.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-indeterminate.svg</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-indeterminate.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-unchecked-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-unchecked-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-unchecked-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/checkbox-unchecked-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/combobox-arrow.svg</file>
+        <file>Ore UI - Dark Emerald/resources/combobox-arrow.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/combobox-menulist-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/combobox-menulist-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/handle-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/handle-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/handle-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/handle-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/line-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/line-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/line-focus.svg</file>
+        <file>Ore UI - Dark Emerald/resources/line-focus.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/line-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/line-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-checked-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-checked-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-checked-disabled.svg</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-checked-disabled.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-checked-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-checked-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-checked-pressed.svg</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-checked-pressed.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-unchecked-default.svg</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-unchecked-default.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-unchecked-disabled.svg</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-unchecked-disabled.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-unchecked-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-unchecked-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-unchecked-pressed.svg</file>
+        <file>Ore UI - Dark Emerald/resources/radiobutton-unchecked-pressed.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/spinbox-down-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/spinbox-down-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/spinbox-down.svg</file>
+        <file>Ore UI - Dark Emerald/resources/spinbox-down.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/spinbox-up-hover.svg</file>
+        <file>Ore UI - Dark Emerald/resources/spinbox-up-hover.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/spinbox-up.svg</file>
+        <file>Ore UI - Dark Emerald/resources/spinbox-up.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/switch-off.svg</file>
+        <file>Ore UI - Dark Emerald/resources/switch-off.svg.license</file>
+        <file>Ore UI - Dark Emerald/resources/switch-on.svg</file>
+        <file>Ore UI - Dark Emerald/resources/switch-on.svg.license</file>
+        <file>Ore UI - Dark Emerald/theme.json</file>
+        <file>Ore UI - Dark Emerald/themeStyle.css</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-default-menu.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-default-menu.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-hover-menu.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-hover-menu.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-pressed-menu.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-accent-pressed-menu.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-default-menu.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-default-menu.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-disabled-menu.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-disabled-menu.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-disabled.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-disabled.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-hover-menu.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-hover-menu.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-pressed-menu.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-pressed-menu.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-pressed.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-default-pressed.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-warning-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-warning-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-warning-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-warning-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/button-warning-pressed.svg</file>
+        <file>Ore UI - Light Amethyst/resources/button-warning-pressed.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked-disabled.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked-disabled.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked-pressed.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked-pressed.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-checked.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-indeterminate-disabled.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-indeterminate-disabled.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-indeterminate.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-indeterminate.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-unchecked-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-unchecked-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-unchecked-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/checkbox-unchecked-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/combobox-arrow.svg</file>
+        <file>Ore UI - Light Amethyst/resources/combobox-arrow.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/combobox-menulist-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/combobox-menulist-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/combobox-menulist-disabled.svg</file>
+        <file>Ore UI - Light Amethyst/resources/combobox-menulist-disabled.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/combobox-menulist-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/combobox-menulist-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/handle-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/handle-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/handle-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/handle-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/header-down.svg</file>
+        <file>Ore UI - Light Amethyst/resources/header-down.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/header-up.svg</file>
+        <file>Ore UI - Light Amethyst/resources/header-up.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/line-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/line-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/line-focus.svg</file>
+        <file>Ore UI - Light Amethyst/resources/line-focus.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/line-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/line-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-checked-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-checked-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-checked-disabled.svg</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-checked-disabled.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-checked-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-checked-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-checked-pressed.svg</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-checked-pressed.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-unchecked-default.svg</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-unchecked-default.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-unchecked-disabled.svg</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-unchecked-disabled.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-unchecked-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-unchecked-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-unchecked-pressed.svg</file>
+        <file>Ore UI - Light Amethyst/resources/radiobutton-unchecked-pressed.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/spinbox-down-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/spinbox-down-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/spinbox-down.svg</file>
+        <file>Ore UI - Light Amethyst/resources/spinbox-down.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/spinbox-up-hover.svg</file>
+        <file>Ore UI - Light Amethyst/resources/spinbox-up-hover.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/spinbox-up.svg</file>
+        <file>Ore UI - Light Amethyst/resources/spinbox-up.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/switch-off.svg</file>
+        <file>Ore UI - Light Amethyst/resources/switch-off.svg.license</file>
+        <file>Ore UI - Light Amethyst/resources/switch-on.svg</file>
+        <file>Ore UI - Light Amethyst/resources/switch-on.svg.license</file>
+        <file>Ore UI - Light Amethyst/theme.json</file>
+        <file>Ore UI - Light Amethyst/themeStyle.css</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-default-menu.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-default-menu.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-hover-menu.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-hover-menu.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-pressed-menu.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-accent-pressed-menu.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-default-default-menu.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-default-default-menu.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-default-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-default-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-default-disabled-menu.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-default-disabled-menu.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-default-disabled.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-default-disabled.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-default-hover-menu.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-default-hover-menu.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-default-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-default-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-default-pressed-menu.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-default-pressed-menu.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-default-pressed.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-default-pressed.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-warning-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-warning-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-warning-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-warning-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/button-warning-pressed.svg</file>
+        <file>Ore UI - Light Diamond/resources/button-warning-pressed.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked-disabled.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked-disabled.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked-pressed.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked-pressed.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-checked.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-indeterminate-disabled.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-indeterminate-disabled.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-indeterminate.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-indeterminate.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-unchecked-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-unchecked-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-unchecked-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/checkbox-unchecked-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/combobox-arrow.svg</file>
+        <file>Ore UI - Light Diamond/resources/combobox-arrow.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/combobox-menulist-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/combobox-menulist-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/combobox-menulist-disabled.svg</file>
+        <file>Ore UI - Light Diamond/resources/combobox-menulist-disabled.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/combobox-menulist-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/combobox-menulist-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/handle-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/handle-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/handle-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/handle-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/header-down.svg</file>
+        <file>Ore UI - Light Diamond/resources/header-down.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/header-up.svg</file>
+        <file>Ore UI - Light Diamond/resources/header-up.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/line-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/line-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/line-focus.svg</file>
+        <file>Ore UI - Light Diamond/resources/line-focus.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/line-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/line-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-checked-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-checked-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-checked-disabled.svg</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-checked-disabled.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-checked-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-checked-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-checked-pressed.svg</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-checked-pressed.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-unchecked-default.svg</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-unchecked-default.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-unchecked-disabled.svg</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-unchecked-disabled.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-unchecked-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-unchecked-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-unchecked-pressed.svg</file>
+        <file>Ore UI - Light Diamond/resources/radiobutton-unchecked-pressed.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/spinbox-down-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/spinbox-down-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/spinbox-down.svg</file>
+        <file>Ore UI - Light Diamond/resources/spinbox-down.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/spinbox-up-hover.svg</file>
+        <file>Ore UI - Light Diamond/resources/spinbox-up-hover.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/spinbox-up.svg</file>
+        <file>Ore UI - Light Diamond/resources/spinbox-up.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/switch-off.svg</file>
+        <file>Ore UI - Light Diamond/resources/switch-off.svg.license</file>
+        <file>Ore UI - Light Diamond/resources/switch-on.svg</file>
+        <file>Ore UI - Light Diamond/resources/switch-on.svg.license</file>
+        <file>Ore UI - Light Diamond/theme.json</file>
+        <file>Ore UI - Light Diamond/themeStyle.css</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-default-menu.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-default-menu.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-hover-menu.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-hover-menu.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-pressed-menu.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-accent-pressed-menu.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-default-default-menu.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-default-default-menu.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-default-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-default-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-default-disabled-menu.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-default-disabled-menu.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-default-disabled.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-default-disabled.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-default-hover-menu.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-default-hover-menu.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-default-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-default-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-default-pressed-menu.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-default-pressed-menu.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-default-pressed.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-default-pressed.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-warning-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-warning-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-warning-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-warning-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/button-warning-pressed.svg</file>
+        <file>Ore UI - Light Emerald/resources/button-warning-pressed.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked-disabled.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked-disabled.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked-pressed.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked-pressed.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-checked.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-indeterminate-disabled.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-indeterminate-disabled.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-indeterminate.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-indeterminate.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-unchecked-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-unchecked-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-unchecked-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/checkbox-unchecked-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/combobox-arrow.svg</file>
+        <file>Ore UI - Light Emerald/resources/combobox-arrow.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/combobox-menulist-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/combobox-menulist-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/combobox-menulist-disabled.svg</file>
+        <file>Ore UI - Light Emerald/resources/combobox-menulist-disabled.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/combobox-menulist-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/combobox-menulist-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/handle-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/handle-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/handle-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/handle-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/header-down.svg</file>
+        <file>Ore UI - Light Emerald/resources/header-down.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/header-up.svg</file>
+        <file>Ore UI - Light Emerald/resources/header-up.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/line-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/line-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/line-focus.svg</file>
+        <file>Ore UI - Light Emerald/resources/line-focus.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/line-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/line-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-checked-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-checked-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-checked-disabled.svg</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-checked-disabled.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-checked-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-checked-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-checked-pressed.svg</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-checked-pressed.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-unchecked-default.svg</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-unchecked-default.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-unchecked-disabled.svg</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-unchecked-disabled.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-unchecked-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-unchecked-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-unchecked-pressed.svg</file>
+        <file>Ore UI - Light Emerald/resources/radiobutton-unchecked-pressed.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/spinbox-down-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/spinbox-down-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/spinbox-down.svg</file>
+        <file>Ore UI - Light Emerald/resources/spinbox-down.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/spinbox-up-hover.svg</file>
+        <file>Ore UI - Light Emerald/resources/spinbox-up-hover.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/spinbox-up.svg</file>
+        <file>Ore UI - Light Emerald/resources/spinbox-up.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/switch-off.svg</file>
+        <file>Ore UI - Light Emerald/resources/switch-off.svg.license</file>
+        <file>Ore UI - Light Emerald/resources/switch-on.svg</file>
+        <file>Ore UI - Light Emerald/resources/switch-on.svg.license</file>
+        <file>Ore UI - Light Emerald/theme.json</file>
+        <file>Ore UI - Light Emerald/themeStyle.css</file>
+        <file>Rangoon-Lightning/resources/.keep</file>
+        <file>Rangoon-Lightning/theme.json</file>
+        <file>Rangoon-Lightning/themeStyle.css</file>
+        <file>Renoise/resources/.keep</file>
+        <file>Renoise/resources/checked-alt-disabled.png</file>
+        <file>Renoise/resources/checked-alt-disabled.png.license</file>
+        <file>Renoise/resources/checked-alt.png</file>
+        <file>Renoise/resources/checked-alt.png.license</file>
+        <file>Renoise/resources/checked-disabled.png</file>
+        <file>Renoise/resources/checked-disabled.png.license</file>
+        <file>Renoise/resources/checked.png</file>
+        <file>Renoise/resources/checked.png.license</file>
+        <file>Renoise/resources/downarrow-alt.png</file>
+        <file>Renoise/resources/downarrow-alt.png.license</file>
+        <file>Renoise/resources/downarrow-disabled.png</file>
+        <file>Renoise/resources/downarrow-disabled.png.license</file>
+        <file>Renoise/resources/downarrow-hover.png</file>
+        <file>Renoise/resources/downarrow-hover.png.license</file>
+        <file>Renoise/resources/downarrow.png</file>
+        <file>Renoise/resources/downarrow.png.license</file>
+        <file>Renoise/resources/unchecked-alt-disabled.png</file>
+        <file>Renoise/resources/unchecked-alt-disabled.png.license</file>
+        <file>Renoise/resources/unchecked-alt-hover.png</file>
+        <file>Renoise/resources/unchecked-alt-hover.png.license</file>
+        <file>Renoise/resources/unchecked-alt.png</file>
+        <file>Renoise/resources/unchecked-alt.png.license</file>
+        <file>Renoise/resources/uparrow-disabled.png</file>
+        <file>Renoise/resources/uparrow-disabled.png.license</file>
+        <file>Renoise/resources/uparrow-hover.png</file>
+        <file>Renoise/resources/uparrow-hover.png.license</file>
+        <file>Renoise/resources/uparrow.png</file>
+        <file>Renoise/resources/uparrow.png.license</file>
+        <file>Renoise/theme.json</file>
+        <file>Renoise/themeStyle.css</file>
+        <file>Scarlett-Pink/theme.json</file>
+        <file>Scarlett-Pink/themeStyle.css</file>
+        <file>Solarized-Dark/resources/.keep</file>
+        <file>Solarized-Dark/theme.json</file>
+        <file>Solarized-Dark/themeStyle.css</file>
+        <file>Steam-Classic/resources/.keep</file>
+        <file>Steam-Classic/theme.json</file>
+        <file>Steam-Classic/themeStyle.css</file>
+        <file>Tokyo-Night/resources/.keep</file>
+        <file>Tokyo-Night/theme.json</file>
+        <file>Tokyo-Night/themeStyle.css</file>
+    </qresource>
+</RCC>

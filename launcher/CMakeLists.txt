@@ -886,6 +886,13 @@ SET(LAUNCHER_SOURCES
     ui/themes/IconTheme.h
     ui/themes/ThemeManager.cpp
     ui/themes/ThemeManager.h
+<<<<<<< HEAD
+=======
+    ui/themes/CatPack.cpp
+    ui/themes/CatPack.h
+    ui/themes/CatPainter.cpp
+    ui/themes/CatPainter.h
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 
     # Processes
     LaunchMode.h
@@ -1281,6 +1288,10 @@ if (NOT Apple)
 endif()
 
 qt_add_resources(LAUNCHER_RESOURCES
+<<<<<<< HEAD
+=======
+    resources/backgrounds/backgrounds.qrc
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
     resources/multimc/multimc.qrc
     resources/pe_dark/pe_dark.qrc
     resources/pe_light/pe_light.qrc
@@ -1294,6 +1305,10 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc
     resources/shaders/shaders.qrc
+<<<<<<< HEAD
+=======
+    resources/themes/themes.qrc
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
     "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
 )
 
@@ -1435,6 +1450,7 @@ install(TARGETS ${Launcher_Name}
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
 
+<<<<<<< HEAD
 # Ship community + custom application themes next to the executable
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/community_themes/"
     DESTINATION "themes"
@@ -1442,6 +1458,8 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/community_themes/"
     PATTERN "Cat" EXCLUDE
 )
 
+=======
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 # Deploy PDBs
 if(CMAKE_CXX_LINKER_SUPPORTS_PDB)
     install(FILES $<TARGET_PDB_FILE:${Launcher_Name}> DESTINATION ${BINARY_DEST_DIR} OPTIONAL)

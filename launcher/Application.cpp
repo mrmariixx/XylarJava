@@ -1,6 +1,10 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DataMigrationTask.h"
+<<<<<<< HEAD
+=======
+#include "EmbeddedSecrets.h"
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 #include "java/JavaInstallList.h"
 #include "net/PasteUpload.h"
 #include "tasks/Task.h"
@@ -397,7 +401,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_dataPath = dataPath;
 
     /*
+<<<<<<< HEAD
      * Establish the mechanism for communication with an already running PolyMC that uses the same data path.
+=======
+     * Establish the mechanism for communication with an already running PrismLauncher that uses the same data path.
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
      * If there is one, tell it what the user actually wanted to do and exit.
      * We want to initialize this before logging to avoid messing with the log of a potential already running copy.
      */
@@ -599,6 +607,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Theming
         m_settings->registerSetting("IconTheme", QString());
         m_settings->registerSetting("ApplicationTheme", QString());
+<<<<<<< HEAD
+=======
+        m_settings->registerSetting("BackgroundCat", QString("kitteh"));
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
@@ -700,7 +712,15 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("JavaVersion", "");
         m_settings->registerSetting("JavaVendor", "");
         m_settings->registerSetting("LastHostname", "");
+<<<<<<< HEAD
         m_settings->registerSetting("JvmArgs", "");
+=======
+        // Sensible low-pause GC defaults for new installs (users can still override per-instance).
+        // These reduce GC-related stutter/frame-time spikes without needing a huge heap.
+        m_settings->registerSetting("JvmArgs",
+                                     "-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 "
+                                     "-XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M");
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
         auto defaultEnableAutoJava = m_settings->get("JavaPath").toString().isEmpty();
@@ -745,6 +765,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting({ "PreLaunchCommand", "PreLaunchCmd" }, "");
         m_settings->registerSetting({ "PostExitCommand", "PostExitCmd" }, "");
 
+<<<<<<< HEAD
+=======
+        // The cat
+        m_settings->registerSetting("TheCat", false);
+        m_settings->registerSetting("CatOpacity", 100);
+        m_settings->registerSetting("CatFit", "fit");
+
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
         m_settings->registerSetting("StatusBarVisible", true);
 
         m_settings->registerSetting("ToolbarsLocked", false);
@@ -1871,7 +1899,17 @@ QString Application::getMSAClientID()
         }
     }
 
+<<<<<<< HEAD
     return BuildConfig.MSA_CLIENT_ID;
+=======
+    if (!BuildConfig.MSA_CLIENT_ID.isEmpty()) {
+        return BuildConfig.MSA_CLIENT_ID;
+    }
+
+    // Built-in fallback so Microsoft sign-in works out of the box even when no
+    // MSA_CLIENT_ID was supplied at build time and no auth-settings.ini override exists.
+    return EmbeddedSecrets::msaClientId();
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 }
 
 bool Application::useMSALauncherLoginEndpoint()

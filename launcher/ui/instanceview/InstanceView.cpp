@@ -10,12 +10,20 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPersistentModelIndex>
+<<<<<<< HEAD
 #include <QPixmap>
 #include <QScrollBar>
 #include <QtMath>
 #include <QMetaObject>
 
 #include "VisualGroup.h"
+=======
+#include <QScrollBar>
+#include <QtMath>
+
+#include "VisualGroup.h"
+#include "ui/themes/CatPainter.h"
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 #include "ui/themes/ThemeManager.h"
 
 #include <Application.h>
@@ -38,6 +46,10 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
+<<<<<<< HEAD
+=======
+    setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
     connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
 }
@@ -46,6 +58,12 @@ InstanceView::~InstanceView()
 {
     qDeleteAll(m_groups);
     m_groups.clear();
+<<<<<<< HEAD
+=======
+    if (m_cat) {
+        m_cat->deleteLater();
+    }
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 }
 
 void InstanceView::setModel(QAbstractItemModel* model)
@@ -402,12 +420,29 @@ void InstanceView::mouseDoubleClickEvent(QMouseEvent* event)
     }
 }
 
+<<<<<<< HEAD
+=======
+void InstanceView::setPaintCat(bool visible)
+{
+    if (m_cat) {
+        disconnect(m_cat, &CatPainter::updateFrame, this, nullptr);
+        delete m_cat;
+        m_cat = nullptr;
+    }
+    if (visible) {
+        m_cat = new CatPainter(APPLICATION->themeManager()->getCatPack(), this);
+        connect(m_cat, &CatPainter::updateFrame, this, [this] { viewport()->update(); });
+    }
+}
+
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 {
     executeDelayedItemsLayout();
 
     QPainter painter(this->viewport());
 
+<<<<<<< HEAD
     // Theme side portrait: bottom-left, large, above the news/status bars
     // (InstanceView sits above those bars — same placement style as the old cat, left side)
     const QString sidePath = APPLICATION->themeManager()->getThemeSideImagePath();
@@ -432,6 +467,10 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     if (m_leftMargin != 5) {
         m_leftMargin = 5;
         QMetaObject::invokeMethod(this, &InstanceView::updateGeometries, Qt::QueuedConnection);
+=======
+    if (m_cat) {
+        m_cat->paint(&painter, this->viewport()->rect());
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
     }
 
     QStyleOptionViewItem option;

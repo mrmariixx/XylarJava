@@ -169,6 +169,10 @@ class Application : public QApplication {
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
     void globalSettingsApplied();
+<<<<<<< HEAD
+=======
+    int currentCatChanged(int index);
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 
     void oauthReplyRecieved(QVariantMap);
 

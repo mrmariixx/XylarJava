@@ -426,7 +426,11 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDir("/usr/lib", gentooFilter);
     scanJavaDir("/opt", gentooFilter);
     scanJavaDir("/usr/lib", aoscFilter);
+<<<<<<< HEAD
     // javas stored in PolyMC's folder
+=======
+    // javas stored in Prism Launcher's folder
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
     scanJavaDirs("java");
     // manually installed JDKs in /opt
     scanJavaDirs("/opt/jdk");

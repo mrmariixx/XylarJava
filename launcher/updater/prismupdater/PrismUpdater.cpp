@@ -61,7 +61,11 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     // Command line parsing
     QCommandLineParser parser;
+<<<<<<< HEAD
     parser.setApplicationDescription(QObject::tr("An auto-updater for PolyMC"));
+=======
+    parser.setApplicationDescription(QObject::tr("An auto-updater for Prism Launcher"));
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 
     parser.addOptions(
         { { { "d", "dir" }, tr("Use a custom path as application root (use '.' for current directory)."), tr("directory") },
@@ -426,7 +430,11 @@ void PrismUpdaterApp::run()
 
     if (m_isFlatpak) {
         showFatalErrorMessage(tr("Updating flatpack not supported"), tr("Actions outside of checking if an update is available are not "
+<<<<<<< HEAD
                                                                         "supported when running the flatpak version of PolyMC."));
+=======
+                                                                        "supported when running the flatpak version of Prism Launcher."));
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
         return;
     }
     if (m_isAppimage) {
@@ -844,7 +852,11 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
                "\n"
                "This likely means that a previous update attempt failed. Please ensure your installation is in working order before "
                "proceeding.\n"
+<<<<<<< HEAD
                "Check the PolyMC updater log at: \n"
+=======
+               "Check the Prism Launcher updater log at: \n"
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
                "%7\n"
                "for details on the last update attempt.\n"
                "\n"

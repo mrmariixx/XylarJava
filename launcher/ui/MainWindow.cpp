@@ -223,9 +223,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Add the news label to the news toolbar.
     {
         newsLabel = new QToolButton();
+<<<<<<< HEAD
         newsLabel->setIcon(QIcon());  // no cat/news animal icon
         newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         newsLabel->setToolButtonStyle(Qt::ToolButtonTextOnly);
+=======
+        newsLabel->setIcon(QIcon::fromTheme("news"));
+        newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
         newsLabel->setFocusPolicy(Qt::NoFocus);
         ui->newsToolBar->addWidget(newsLabel);
 
@@ -277,6 +283,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
         ui->horizontalLayout->addWidget(view);
     }
+<<<<<<< HEAD
+=======
+    // Cat easter egg removed — keep instance list background clean.
+    setCatBackground(false);
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 
     // Togglable status bar
     {
@@ -719,6 +730,15 @@ QString intListToString(const QList<int>& list)
     return slist.join(',');
 }
 
+<<<<<<< HEAD
+=======
+void MainWindow::setCatBackground(bool enabled)
+{
+    view->setPaintCat(enabled);
+    view->viewport()->repaint();
+}
+
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
 void MainWindow::runModalTask(Task* task)
 {
     connect(task, &Task::failed,
@@ -1241,7 +1261,11 @@ void MainWindow::globalSettingsClosed()
     updateThemeMenu();
     updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
+<<<<<<< HEAD
     // but PolyMC exits abnormally, causing the window state to never be saved:
+=======
+    // but Prism Launcher exits abnormally, causing the window state to never be saved:
+>>>>>>> bbd42f92ed29e2e874cb4182999b18155dd83efe
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
     update();
 }
