@@ -6,7 +6,7 @@
   <img src="launcher/resources/assets/XylarJava.png" alt="XylarJava" width="200">
 </p>
 
-Fork of [PolyMC](https://github.com/PolyMC/PolyMC) And the Themes are from PrismLauncher (not the Windows 7 Aero) This project is independent and is **not affiliated with or endorsed by Prism Launcher, PolyMC, Mojang Studios, or Microsoft**.
+Fork of [PolyMC](https://github.com/PolyMC/PolyMC) And the Themes are from PrismLauncher (not the Windows 7 Aero and Tommy Simpson) This project is independent and is **not affiliated with or endorsed by Prism Launcher, PolyMC, Mojang Studios, or Microsoft**.
 
 ## Download
 
